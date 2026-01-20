@@ -1,15 +1,15 @@
 [submodule "Recoup-Chat"]
 	path = Recoup-Chat
-	url = git@github.com:Recoupable-com/Recoup-Chat.git
+	url = https://github.com/Recoupable-com/Recoup-Chat.git
 [submodule "Recoup-API"]
 	path = Recoup-API
-	url = git@github.com:Recoupable-com/Recoup-API.git
+	url = https://github.com/Recoupable-com/Recoup-API.git
 [submodule "Recoup-Docs"]
 	path = Recoup-Docs
-	url = git@github.com:Recoupable-com/docs.git
+	url = https://github.com/Recoupable-com/docs.git
 [submodule "Recoup-Tasks"]
 	path = Recoup-Tasks
-	url = git@github.com:Recoupable-com/Recoup-Tasks.git
+	url = https://github.com/Recoupable-com/Recoup-Tasks.git
 [submodule "Recoup-Supabase"]
 	path = Recoup-Supabase
-	url = git@github.com:Recoupable-com/Recoup-Supabase.git
+	url = https://github.com/Recoupable-com/Recoup-Supabase.git
