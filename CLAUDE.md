@@ -62,6 +62,7 @@ npx mintlify@latest dev          # Preview docs locally
 ### API Endpoints
 - **Recoup Chat**: `https://chat.recoupable.com/api`
 - **Recoup API**: `https://recoup-api.vercel.app/api`
+- **API Docs**: `https://developers.recoupable.com` (LLM-readable)
 
 ### Shared Patterns
 
