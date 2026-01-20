@@ -29,7 +29,6 @@ This monorepo is designed for LLM-assisted development. Each submodule contains 
 ### Key Files for LLM Context
 
 - **`CLAUDE.md`** (root): Monorepo-wide guidance, git workflow, cross-project architecture
-- **`CONTRIBUTING.md`**: How to make changes to submodules
 - **Each submodule's `CLAUDE.md`**: Project-specific build commands, patterns, and conventions
 
 ### Tips for LLM Sessions
