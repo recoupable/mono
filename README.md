@@ -40,7 +40,7 @@ This monorepo is designed for LLM-assisted development. Each submodule contains 
 
 ## Data Flow
 
-```
+```text
 Recoup-Chat (frontend) → Recoup-API (backend) → Supabase (database)
                               ↓
                         Recoup-Tasks (async jobs)
