@@ -30,6 +30,7 @@ This monorepo is designed for LLM-assisted development. Each submodule contains 
 
 - **`CLAUDE.md`** (root): Monorepo-wide guidance, git workflow, cross-project architecture
 - **Each submodule's `CLAUDE.md`**: Project-specific build commands, patterns, and conventions
+- **API Docs**: https://developers.recoupable.com (LLM-readable)
 
 ### Tips for LLM Sessions
 
@@ -62,4 +63,5 @@ pnpm format    # Run prettier
 
 - **App**: https://chat.recoupable.com
 - **API**: https://recoup-api.vercel.app/api
+- **Docs**: https://developers.recoupable.com
 - **Website**: https://recoupable.com
