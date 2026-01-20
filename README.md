@@ -6,7 +6,7 @@ A git submodule-based monorepo for the Recoup platform.
 
 ```bash
 # Clone with submodules
-git clone --recurse-submodules git@github.com:Recoupable-com/recoup-monorepo.git
+git clone --recurse-submodules git@github.com:Recoupable-com/Recoup-Monorepo.git
 
 # Or if already cloned, initialize submodules
 git submodule update --init --recursive
