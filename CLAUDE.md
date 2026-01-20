@@ -25,6 +25,10 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 - PRs should target `test`, not `main`
 - Before starting work, sync test with main: `git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test`
 
+**Recoup-Chat has an additional `test` branch:**
+- PRs should target `test`, not `main`
+- Before starting work, sync test with main: `git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test`
+
 ## Build Commands by Project
 
 **Recoup-Chat & Recoup-API:**
