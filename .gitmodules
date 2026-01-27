@@ -13,3 +13,6 @@
 [submodule "Recoup-Supabase"]
 	path = Recoup-Supabase
 	url = https://github.com/Recoupable-com/Recoup-Supabase.git
+[submodule "Recoup-Remotion"]
+	path = Recoup-Remotion
+	url = https://github.com/Recoupable-com/Recoup-Remotion.git
