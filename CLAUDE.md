@@ -81,6 +81,7 @@ npx mintlify@latest dev          # Preview docs locally
 - DRY: Extract shared logic into utilities
 - KISS: Simple solutions over clever ones
 - YAGNI: Don't build for hypothetical future needs
+- TDD: API changes should include unit tests
 
 ## Working Across Submodules
 
