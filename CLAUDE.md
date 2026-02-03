@@ -21,6 +21,7 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 2. After code changes, commit with descriptive messages and push to feature branches
 3. Each submodule is an independent git repository
 4. **Always open a PR** after pushing changes - check each repo's rules for which branch to target (e.g., `test` vs `main`)
+5. **NEVER use `--admin` flag with `gh pr merge`** - branch protections must always be followed
 
 **Recoup-API has an additional `test` branch:**
 - PRs should target `test`, not `main`
