@@ -22,6 +22,36 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 3. Each submodule is an independent git repository
 4. **Always open a PR** after pushing changes - check each repo's rules for which branch to target (e.g., `test` vs `main`)
 
+### Worktree Workflow
+
+Use git worktrees to work on features in isolation without affecting your main working directory.
+
+**Creating a worktree for a new feature:**
+```bash
+# From the monorepo root, create a worktree for a submodule
+git worktree add <submodule>-worktree -b <branch-name> <submodule>
+
+# Example: Create a worktree for Recoup-API
+git worktree add Recoup-API-worktree -b feature/my-feature Recoup-API
+```
+
+**Removing the worktree after PR is merged:**
+```bash
+# Remove the worktree directory and prune
+git worktree remove <submodule>-worktree
+git worktree prune
+
+# Example: Remove Recoup-API worktree
+git worktree remove Recoup-API-worktree
+git worktree prune
+```
+
+**Benefits of worktrees:**
+- Work on multiple features simultaneously without stashing
+- Keep your main working directory clean
+- Isolated environment for each feature branch
+- Easy cleanup after PR merge
+
 **Recoup-API has an additional `test` branch:**
 - PRs should target `test`, not `main`
 - Before starting work, sync test with main: `git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test`
