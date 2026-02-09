@@ -16,3 +16,6 @@
 [submodule "Recoup-Remotion"]
 	path = Recoup-Remotion
 	url = https://github.com/Recoupable-com/Recoup-Remotion.git
+[submodule "Recoup-Bash"]
+	path = Recoup-Bash
+	url = git@github.com:Recoupable-com/Recoup-Bash.git
