@@ -1,21 +1,21 @@
-[submodule "Recoup-Chat"]
-	path = Recoup-Chat
-	url = https://github.com/Recoupable-com/Recoup-Chat.git
-[submodule "Recoup-API"]
-	path = Recoup-API
-	url = https://github.com/Recoupable-com/Recoup-API.git
-[submodule "Recoup-Docs"]
-	path = Recoup-Docs
-	url = https://github.com/Recoupable-com/docs.git
-[submodule "Recoup-Tasks"]
-	path = Recoup-Tasks
-	url = https://github.com/Recoupable-com/Recoup-Tasks.git
-[submodule "Recoup-Supabase"]
-	path = Recoup-Supabase
-	url = https://github.com/Recoupable-com/Recoup-Supabase.git
-[submodule "Recoup-Remotion"]
-	path = Recoup-Remotion
-	url = https://github.com/Recoupable-com/Recoup-Remotion.git
-[submodule "Recoup-Bash"]
-	path = Recoup-Bash
-	url = git@github.com:Recoupable-com/Recoup-Bash.git
+[submodule "chat"]
+	path = chat
+	url = https://github.com/recoupable/chat.git
+[submodule "api"]
+	path = api
+	url = https://github.com/recoupable/api.git
+[submodule "tasks"]
+	path = tasks
+	url = https://github.com/recoupable/tasks.git
+[submodule "docs"]
+	path = docs
+	url = https://github.com/recoupable/docs.git
+[submodule "database"]
+	path = database
+	url = https://github.com/recoupable/database.git
+[submodule "remotion"]
+	path = remotion
+	url = https://github.com/recoupable/remotion.git
+[submodule "bash"]
+	path = bash
+	url = https://github.com/recoupable/bash.git
