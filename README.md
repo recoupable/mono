@@ -6,7 +6,7 @@ A git submodule-based monorepo for the Recoup platform.
 
 ```bash
 # Clone with submodules
-git clone --recurse-submodules git@github.com:Recoupable-com/Recoup-Monorepo.git
+git clone --recurse-submodules git@github.com:recoupable/mono.git
 
 # Or if already cloned, initialize submodules
 git submodule update --init --recursive
@@ -16,11 +16,13 @@ git submodule update --init --recursive
 
 | Submodule | Description | Tech Stack |
 |-----------|-------------|------------|
-| `Recoup-Chat` | Main chat application | Next.js 16, React 19, Vercel AI SDK, Stagehand |
-| `Recoup-API` | API service with payment middleware | Next.js 16, x402-next, Supabase |
-| `Recoup-Tasks` | Background job workers | Trigger.dev v4 |
-| `Recoup-Docs` | API documentation | Mintlify |
-| `Recoup-Supabase` | Database migrations | Supabase CLI |
+| `chat` | Main chat application | Next.js 16, React 19, Vercel AI SDK, Stagehand |
+| `api` | API service with payment middleware | Next.js 16, x402-next, Supabase |
+| `tasks` | Background job workers | Trigger.dev v4 |
+| `docs` | API documentation | Mintlify |
+| `database` | Database migrations | Supabase CLI |
+| `remotion` | Video generation | Remotion |
+| `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 
 ## Using This Repo with an LLM
 
@@ -37,14 +39,14 @@ This monorepo is designed for LLM-assisted development. Each submodule contains 
 1. **Start with context**: Point your LLM to `CLAUDE.md` at the root for overall guidance
 2. **Work in submodules**: Each submodule is an independent git repo - cd into the relevant folder
 3. **Branch workflow**: Never push directly to `main`. Use feature branches and PRs
-4. **Special branches**: `Recoup-API` and `Recoup-Chat` have a `test` branch - PRs should target `test`, not `main`
+4. **Special branches**: `api` and `chat` have a `test` branch - PRs should target `test`, not `main`
 
 ## Data Flow
 
 ```text
-Recoup-Chat (frontend) → Recoup-API (backend) → Supabase (database)
-                              ↓
-                        Recoup-Tasks (async jobs)
+chat (frontend) → api (backend) → Supabase (database)
+                       ↓
+                 tasks (async jobs)
 ```
 
 ## Build Commands

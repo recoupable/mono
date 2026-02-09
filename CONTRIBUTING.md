@@ -4,9 +4,9 @@ This repository is a container using Git Submodules for managing multiple servic
 
 ## Making Changes to Sub-repos
 
-When you need to modify code in a sub-folder (e.g., Recoup-API/), treat that folder as its own independent Git repository.
+When you need to modify code in a sub-folder (e.g., api/), treat that folder as its own independent Git repository.
 
-1. Change your working directory to the specific sub-repo: `cd Recoup-API`
+1. Change your working directory to the specific sub-repo: `cd api`
 
 2. Create a new branch: `git checkout -b feature-branch`
 

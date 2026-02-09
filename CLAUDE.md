@@ -8,12 +8,13 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 
 | Submodule | Description | Key Tech |
 |-----------|-------------|----------|
-| `Recoup-Chat` | Main chat application | Next.js 16, React 19, Vercel AI SDK, Stagehand |
-| `Recoup-API` | API service with payment middleware | Next.js 16, x402-next, Supabase |
-| `Recoup-Tasks` | Background job workers | Trigger.dev v4 |
-| `Recoup-Docs` | API documentation | Mintlify |
-| `Recoup-Supabase` | Database migrations | Supabase CLI |
-| `Recoup-Bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
+| `chat` | Main chat application | Next.js 16, React 19, Vercel AI SDK, Stagehand |
+| `api` | API service with payment middleware | Next.js 16, x402-next, Supabase |
+| `tasks` | Background job workers | Trigger.dev v4 |
+| `docs` | API documentation | Mintlify |
+| `database` | Database migrations | Supabase CLI |
+| `remotion` | Video generation | Remotion |
+| `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 
 ## Git Workflow
 
@@ -32,8 +33,8 @@ Use git worktrees to work on features in isolation without affecting your main w
 # From the monorepo root, create a worktree for a submodule
 git worktree add <submodule>-worktree -b <branch-name> <submodule>
 
-# Example: Create a worktree for Recoup-API
-git worktree add Recoup-API-worktree -b feature/my-feature Recoup-API
+# Example: Create a worktree for api
+git worktree add api-worktree -b feature/my-feature api
 ```
 
 **Removing the worktree after PR is merged:**
@@ -42,8 +43,8 @@ git worktree add Recoup-API-worktree -b feature/my-feature Recoup-API
 git worktree remove <submodule>-worktree
 git worktree prune
 
-# Example: Remove Recoup-API worktree
-git worktree remove Recoup-API-worktree
+# Example: Remove api worktree
+git worktree remove api-worktree
 git worktree prune
 ```
 
@@ -53,17 +54,17 @@ git worktree prune
 - Isolated environment for each feature branch
 - Easy cleanup after PR merge
 
-**Recoup-API has an additional `test` branch:**
+**api has an additional `test` branch:**
 - PRs should target `test`, not `main`
 - Before starting work, sync test with main: `git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test`
 
-**Recoup-Chat has an additional `test` branch:**
+**chat has an additional `test` branch:**
 - PRs should target `test`, not `main`
 - Before starting work, sync test with main: `git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test`
 
 ## Build Commands by Project
 
-**Recoup-Chat & Recoup-API:**
+**chat & api:**
 ```bash
 pnpm install        # Install dependencies
 pnpm dev            # Start dev server
@@ -72,14 +73,14 @@ pnpm lint           # Fix lint issues
 pnpm format         # Run prettier
 ```
 
-**Recoup-Tasks:**
+**tasks:**
 ```bash
 pnpm install                     # Install dependencies
 pnpm dev                         # Start Trigger.dev dev mode
 pnpm run deploy:trigger-prod     # Deploy to production
 ```
 
-**Recoup-Bash:**
+**bash:**
 ```bash
 pnpm install        # Install dependencies
 pnpm dev            # Start dev server
@@ -87,7 +88,7 @@ pnpm build          # Production build
 pnpm lint           # Fix lint issues
 ```
 
-**Recoup-Docs:**
+**docs:**
 ```bash
 npx mintlify@latest dev          # Preview docs locally
 ```
@@ -95,18 +96,18 @@ npx mintlify@latest dev          # Preview docs locally
 ## Cross-Project Architecture
 
 ### Data Flow
-- **Recoup-Chat** (frontend) -> **Recoup-API** (backend) -> **Supabase** (database)
-- **Recoup-Tasks** handles async background jobs triggered by the API
-- **MCP Server**: Recoup-API provides MCP tools (like `send_email`) used by Recoup-Chat
+- **chat** (frontend) -> **api** (backend) -> **Supabase** (database)
+- **tasks** handles async background jobs triggered by the API
+- **MCP Server**: api provides MCP tools (like `send_email`) used by chat
 
 ### API Endpoints
-- **Recoup Chat**: `https://chat.recoupable.com/api`
-- **Recoup API**: `https://recoup-api.vercel.app/api`
+- **Chat**: `https://chat.recoupable.com/api`
+- **API**: `https://recoup-api.vercel.app/api`
 - **API Docs**: `https://developers.recoupable.com` (LLM-readable)
 
 ### Shared Patterns
 
-**Supabase Operations (Recoup-API & Recoup-Chat):**
+**Supabase Operations (api & chat):**
 - Never import Supabase client directly in domain code
 - All database calls must go through `lib/supabase/[table_name]/[function].ts`
 - Use naming: `select*`, `insert*`, `update*`, `delete*`, `get*` (for complex queries)
@@ -126,9 +127,9 @@ npx mintlify@latest dev          # Preview docs locally
 
 When making changes that span multiple submodules:
 1. Work in each submodule independently (each has its own git history)
-2. Coordinate API changes between Recoup-Chat and Recoup-API
-3. Update Recoup-Docs when API endpoints change
-4. Database schema changes go in Recoup-Supabase migrations
+2. Coordinate API changes between chat and api
+3. Update docs when API endpoints change
+4. Database schema changes go in database migrations
 
 ## Branding
 
