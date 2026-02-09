@@ -13,6 +13,7 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 | `Recoup-Tasks` | Background job workers | Trigger.dev v4 |
 | `Recoup-Docs` | API documentation | Mintlify |
 | `Recoup-Supabase` | Database migrations | Supabase CLI |
+| `Recoup-Bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 
 ## Git Workflow
 
@@ -76,6 +77,14 @@ pnpm format         # Run prettier
 pnpm install                     # Install dependencies
 pnpm dev                         # Start Trigger.dev dev mode
 pnpm run deploy:trigger-prod     # Deploy to production
+```
+
+**Recoup-Bash:**
+```bash
+pnpm install        # Install dependencies
+pnpm dev            # Start dev server
+pnpm build          # Production build
+pnpm lint           # Fix lint issues
 ```
 
 **Recoup-Docs:**
