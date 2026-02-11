@@ -62,6 +62,9 @@ git worktree prune
 - PRs should target `test`, not `main`
 - Before starting work, sync test with main: `git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test`
 
+**bash PRs target `main`:**
+- PRs should target `main` directly (no `test` branch)
+
 ## Build Commands by Project
 
 **chat & api:**
