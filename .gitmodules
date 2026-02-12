@@ -19,3 +19,6 @@
 [submodule "bash"]
 	path = bash
 	url = https://github.com/recoupable/bash.git
+[submodule "skills/setup-sandbox"]
+	path = skills/setup-sandbox
+	url = https://github.com/recoupable/skill-setup-sandbox.git
