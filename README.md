@@ -27,17 +27,18 @@ git submodule update --init --recursive
 
 ## Using This Repo with an LLM
 
-This monorepo is designed for LLM-assisted development. Each submodule contains its own `CLAUDE.md` with project-specific context and instructions.
+This monorepo is designed for LLM-assisted development. Each submodule contains its own agent context files with project-specific instructions.
 
 ### Key Files for LLM Context
 
-- **`CLAUDE.md`** (root): Monorepo-wide guidance, git workflow, cross-project architecture
-- **Each submodule's `CLAUDE.md`**: Project-specific build commands, patterns, and conventions
+- **`AGENTS.md`** (root): Monorepo-wide guidance, git workflow, cross-project architecture — the source of truth for all AI agents
+- **`CLAUDE.md`** (root): Symlink to `AGENTS.md` — ensures Claude automatically picks up the same instructions
+- **Each submodule's context files**: Project-specific build commands, patterns, and conventions
 - **API Docs**: https://developers.recoupable.com (LLM-readable)
 
 ### Tips for LLM Sessions
 
-1. **Start with context**: Point your LLM to `CLAUDE.md` at the root for overall guidance
+1. **Start with context**: Point your LLM to `AGENTS.md` (or `CLAUDE.md`) at the root for overall guidance
 2. **Work in submodules**: Each submodule is an independent git repo - cd into the relevant folder
 3. **Branch workflow**: Never push directly to `main`. Use feature branches and PRs
 4. **Special branches**: `api` and `chat` have a `test` branch - PRs should target `test`, not `main`
