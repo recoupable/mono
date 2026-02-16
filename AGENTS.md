@@ -1,10 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to any AI agent working with code in this repository.
 
 ## Monorepo Structure
 
-This is a git submodule-based monorepo for the Recoup platform. Each submodule has its own CLAUDE.md with project-specific guidance.
+This is a git submodule-based monorepo for the Recoup platform. Each submodule has its own context files with project-specific guidance.
 
 | Submodule | Description | Key Tech |
 |-----------|-------------|----------|
