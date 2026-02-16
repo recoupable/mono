@@ -15,6 +15,7 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 | `database` | Database migrations | Supabase CLI |
 | `remotion` | Video generation | Remotion |
 | `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
+| `skills` | AI agent skills monorepo | Markdown, Git submodules |
 
 ## Git Workflow
 

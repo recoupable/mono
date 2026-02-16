@@ -23,6 +23,7 @@ git submodule update --init --recursive
 | `database` | Database migrations | Supabase CLI |
 | `remotion` | Video generation | Remotion |
 | `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
+| `skills` | AI agent skills monorepo | Markdown, Git submodules |
 
 ## Using This Repo with an LLM
 
