@@ -19,3 +19,7 @@
 [submodule "bash"]
 	path = bash
 	url = https://github.com/recoupable/bash.git
+[submodule "skills"]
+	path = skills
+	url = https://github.com/recoupable/skills
+	update = none
