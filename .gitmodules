@@ -22,4 +22,3 @@
 [submodule "skills"]
 	path = skills
 	url = https://github.com/recoupable/skills
-	update = none
