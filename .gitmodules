@@ -21,4 +21,7 @@
 	url = https://github.com/recoupable/bash.git
 [submodule "skills"]
 	path = skills
-	url = https://github.com/recoupable/skills
+	url = https://github.com/recoupable/skills.git
+[submodule "cli"]
+	path = cli
+	url = https://github.com/recoupable/cli.git
