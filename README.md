@@ -24,6 +24,7 @@ git submodule update --init --recursive
 | `remotion` | Video generation | Remotion |
 | `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 | `skills` | AI agent skills monorepo | Markdown, Git submodules |
+| `cli` | CLI for the Recoup platform | Commander.js, tsup, Vitest |
 
 ## Using This Repo with an LLM
 

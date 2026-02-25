@@ -22,3 +22,6 @@
 [submodule "skills"]
 	path = skills
 	url = https://github.com/recoupable/skills
+[submodule "cli"]
+	path = cli
+	url = https://github.com/recoupable/cli.git

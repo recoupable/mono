@@ -16,6 +16,7 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 | `remotion` | Video generation | Remotion |
 | `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 | `skills` | AI agent skills monorepo | Markdown, Git submodules |
+| `cli` | CLI for the Recoup platform | Commander.js, tsup, Vitest |
 
 ## Git Workflow
 
@@ -87,6 +88,15 @@ pnpm install        # Install dependencies
 pnpm dev            # Start dev server
 pnpm build          # Production build
 pnpm lint           # Fix lint issues
+```
+
+**cli:**
+```bash
+pnpm install        # Install dependencies
+pnpm build          # Build with tsup
+pnpm test           # Run tests with vitest
+pnpm lint           # Fix lint issues
+pnpm format         # Run prettier
 ```
 
 **docs:**
