@@ -134,6 +134,26 @@ npx mintlify@latest dev          # Preview docs locally
 - YAGNI: Don't build for hypothetical future needs
 - TDD: API changes should include unit tests
 
+### Reviewer Expectations (PR-blocking)
+
+The reviewer treats SRP/DRY violations as blocking feedback. These are not style preferences.
+
+- **Barrel-only index files**: `index.ts` should re-export only; do not put business logic in barrel files.
+- **One exported responsibility per file**: If a file starts collecting multiple helpers, split into focused files.
+- **No duplicated schemas/contracts**: If API and MCP validate the same payload, they must share the same schema/validator.
+- **Prefer shared utilities over copy/paste**: Repeated transforms, parsers, and type guards must be extracted.
+- **Keep route/tool behavior aligned**: API and MCP versions of the same operation should enforce the same rules.
+
+### Pre-PR SRP/DRY Checklist
+
+Before pushing, confirm:
+
+- [ ] No business logic was added to `index.ts` barrel files.
+- [ ] Any new helper/parser/type-guard lives in its own appropriately named file.
+- [ ] I searched for an existing schema/validator before creating a new one.
+- [ ] API endpoint and matching MCP tool share validation + contract behavior.
+- [ ] I did not duplicate transform/parsing logic already present in the domain.
+
 ## Working Across Submodules
 
 When making changes that span multiple submodules:
