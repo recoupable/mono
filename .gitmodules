@@ -25,3 +25,9 @@
 [submodule "cli"]
 	path = cli
 	url = https://github.com/recoupable/cli.git
+[submodule "marketing"]
+	path = marketing
+	url = https://github.com/recoupable/marketing.git
+[submodule "admin"]
+	path = admin
+	url = https://github.com/recoupable/admin.git
