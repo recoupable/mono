@@ -4,7 +4,7 @@ This file provides guidance to any AI agent working with code in this repository
 
 ## Monorepo Structure
 
-This is a git submodule-based monorepo for the Recoup platform. Each submodule has its own context files with project-specific guidance.
+This is a git submodule-based monorepo for the Recoupable platform. Each submodule has its own context files with project-specific guidance.
 
 | Submodule | Description | Key Tech |
 |-----------|-------------|----------|
@@ -16,7 +16,9 @@ This is a git submodule-based monorepo for the Recoup platform. Each submodule h
 | `remotion` | Video generation | Remotion |
 | `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 | `skills` | AI agent skills monorepo | Markdown, Git submodules |
-| `cli` | Command-line interface for the Recoup platform | Commander.js, tsup, Node 22 |
+| `cli` | Command-line interface for the Recoupable platform | Commander.js, tsup, Node 22 |
+| `marketing` | Marketing website and landing pages | Next.js, React, Tailwind CSS |
+| `admin` | Internal admin dashboard for platform management | Next.js, React, Supabase |
 
 ## Git Workflow
 
