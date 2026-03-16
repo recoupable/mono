@@ -1,49 +1,108 @@
-# Recoupable Platform Progress
+# PROGRESS.md
 
-_Last updated: 2026-03-16_
+> Last updated: 2026-03-16
+> Purpose: Handoff notes for the next dev/agent picking up work.
 
-## Active Work
+---
 
-<!-- Agent: add new tasks here, remove when done -->
+## Current State of Each Submodule
 
-- [ ] Set up Tasks repo to read/write PROGRESS.md (coding-agent + update-pr tasks)
+### `tasks` (on `main`)
+**Latest commits:**
+- `fad189e` fix: push mono repo root progress files directly to main (#96)
+- `e2599e7` fix: set cwd to `/vercel/sandbox/mono` for Claude Code agent (#94)
+- `70f345c` feat: increase maxDuration of coding-agent task (#89)
+- `6625395` feat: inject `CLAUDE_CODE_OAUTH_TOKEN` into sandbox environment (#86)
 
-## Recent Completions
+**Status:** Stable. The coding agent pipeline is working end-to-end:
+1. Sandbox spins up → monorepo cloned → submodules synced
+2. Claude Code agent runs with the user prompt (cwd = `/vercel/sandbox/mono`)
+3. Changes are committed and PRs opened via `pushAndCreatePRsViaAgent`
+4. Mono repo root files (e.g., `PROGRESS.md`) are pushed directly to `main`
 
-<!-- Agent: move finished items here with ISO date -->
+**What to know:** `runClaudeCodeAgent` now defaults `cwd` to `/vercel/sandbox/mono`. The `pushAndCreatePRsViaAgent` agent handles both mono root changes (direct push to main) and submodule changes (feature branch + PR).
 
-- 2026-03-16: Added admin and marketing submodules to AGENTS.md (PR #26)
-- 2026-03-16: Updated submodule pointers (PR #25)
-- 2026-03-16: Added PROGRESS.md + PROGRESS_USAGE.md to mono repo root
+---
 
-## Known Issues / Blockers
+### `api` (on `test`)
+**Latest commits:**
+- `6ff735d` feat: add Slack chat bot integration for Record Label Agent (#296)
+- `f1d9035` feat: add content-creation API endpoints and video persistence (#259)
+- `5b1f6bc` feat: admin accounts table endpoint (#288)
+- `6c5eda3` feat: endpoint to check if authenticated account is admin (#281)
 
-<!-- Agent: log discovered bugs, blockers, or tech debt worth remembering -->
+**Status:** Stable on `test`. PRs target `test` branch, not `main`.
 
-(none)
+**What to know:** Slack integration added for Record Label Agent. Content-creation endpoints live. Admin-check endpoint added.
 
-## Key Decisions
+---
 
-<!-- Agent: record architectural choices future tasks should respect -->
+### `chat` (on `test`)
+**Latest commits:**
+- `03714296` feat: add navbar item for accounts (#1574)
+- `729a9062` feat: task page top-left back link (#1573)
+- `6efe316d` fix: duration stuck at 0ms for in-progress tasks (#1572)
+- `eaeb5799` feat: polling UI for `prompt_sandbox` when `runId` present (#1563)
+- `c3611b31` feat: move pulse to tasks page as Schedule/Recent/Pulse tabs (#1561)
+- `c7fb2744` feat: artist connectors UI with tabbed settings modal (#1558)
 
-- `api` and `chat` PRs must target the `test` branch, not `main`
-- Supabase calls go through `lib/supabase/[table_name]/[fn].ts` — never import client directly
-- One exported function per file (SRP); no barrel re-exports
-- Zod for all API input validation; pattern: `validate<Name>Body.ts` / `validate<Name>Query.ts`
-- Tasks use Trigger.dev v4 SDK — never use deprecated `client.defineJob`
-- `triggerAndWait()` returns `Result` — always check `result.ok` before `result.output`
-- Never wrap `triggerAndWait` / `wait` calls in `Promise.all`
+**Status:** Stable on `test`. PRs target `test` branch.
 
-## Submodule Notes
+**What to know:** Tasks page has been significantly built out — duration display, polling UI for sandbox runs, and pulse moved to tabs. Navbar now has accounts link.
 
-<!-- Agent: add per-submodule context that isn't in CLAUDE.md -->
+---
 
-| Submodule | Target Branch | Notes |
-|-----------|--------------|-------|
-| api       | test          | payment middleware, MCP tools |
-| chat      | test          | main Next.js frontend |
-| tasks     | main          | Trigger.dev v4 background workers |
-| admin     | main          | internal dashboard; recently added |
-| cli       | main          | Commander.js + tsup |
-| docs      | main          | Mintlify; update when API endpoints change |
-| marketing | main          | recently added |
+### `cli` (on `main`, v0.1.11)
+**Latest commits:**
+- `a09929a` chore: bump version to 0.1.11
+- `e4d4548` feat: add `recoup content` command suite (#13)
+- `07e2b85` feat: add `music analyze` command (#7)
+- `056257a` feat: add `--account` flag to notifications command (#12)
+
+**Status:** Stable. Published to npm as `0.1.11`.
+
+**What to know:** `recoup content` command suite added. `music analyze` command added. Version auto-bumped via CI.
+
+---
+
+### `docs` (on `main`)
+**Latest commits:**
+- `fd82b14` feat: add authentication page (#62)
+- `0445501` docs: add CLI content command documentation (#61)
+- `bf59ecf` docs: update `/api/admins/sandboxes` docs (#59)
+- `e49f7ca` docs: add admin accounts table endpoint docs (#58)
+
+**Status:** Stable. Docs are at `https://developers.recoupable.com`.
+
+---
+
+### `admin` (on `main`)
+**Latest commits:**
+- `3fcd006` feat: update favicon to match app (#6)
+- `11b64e2` feat: accounts table with subscription status (#5)
+- `5dd9571` feat: endpoint to check if account is admin (#3)
+- `47295e8` feat: Privy login support (#2)
+- `b53363f` feat: initial Next.js app setup (#1)
+
+**Status:** Stable. Basic admin dashboard with Privy auth, accounts table, and admin check endpoint.
+
+---
+
+## Known Issues / Next Steps
+
+- `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
+- No `PROGRESS_USAGE.md` exists yet — if this file should have a companion usage guide, create it.
+- The `progress.txt` init file referenced in the task prompt was not found — likely hasn't been created yet, or was intended as a seed for future use.
+
+---
+
+## Architecture Reminder
+
+```
+chat (frontend) → api (backend) → Supabase (database)
+                              ↘ tasks (async Trigger.dev jobs)
+```
+
+- **Coding agent flow:** Trigger.dev task → Vercel Sandbox → Claude Code CLI (`claude -p --dangerously-skip-permissions`) → git commit/push → PR via `gh`
+- PRs for `api` and `chat` target `test` branch; all others target `main`
+- Admin check: POST `/api/admins/check` — verifies if authenticated Privy user is in admins table
