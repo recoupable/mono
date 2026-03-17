@@ -163,6 +163,18 @@
 
 ---
 
+## [2026-03-17] Docs — All API Keys Are Personal (Remove Org Key Distinction)
+
+**Prompt:** Update docs to reflect new API key architecture: all keys are personal. If a personal account has access to an org, it can use account_id filtering within that org. Remove "organization API keys" vs "personal API keys" distinction.
+**Status:** completed
+**Changes:**
+- `docs`: `authentication.mdx` — removed "Personal vs. Organization API Keys" section and "How We Determine Key Type at Creation" section. Added "Access to Organizations" subsection under API Keys explaining that org members can use account_id filtering. Updated access-control diagram to remove personal/org key distinction.
+- `docs`: `openapi.json` — updated all `account_id` parameter descriptions from "Only applicable for organization API keys - org keys can filter to any account within their organization. Personal keys cannot use this parameter." → "Only applicable to accounts the provided API Key has access to - keys can filter to any account within their organizations." Also updated all endpoint-level descriptions (chats, artists, sandboxes, pulses, orgs, etc.) to remove personal/org key distinction.
+**PRs:** Branch `feature/personal-api-keys-docs` pushed to `recoupable/docs` — open PR at: https://github.com/recoupable/docs/pull/new/feature/personal-api-keys-docs (target: `main`)
+**Notes:** This is docs-only. API and Chat changes (actual auth logic) are a separate PR per task scope. The new descriptions say "Only applicable to accounts the provided API Key has access to" which covers both own-account and org-member access uniformly.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
