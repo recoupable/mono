@@ -186,6 +186,17 @@
 
 ---
 
+## [2026-03-17] Admin — Remove total_privy_users from PrivyLoginsResponse type
+
+**Prompt:** Remove `total_privy_users` from the `PrivyLoginsResponse` type in the admin repo (the `PrivyLoginsStats` component only uses `total_new` and `total_active`).
+**Status:** completed
+**Changes:**
+- `admin`: Removed `total_privy_users: number` field from `PrivyLoginsResponse` type in `types/privy.ts`.
+**PRs:** admin: `feature/remove-total-privy-users-type` → main: https://github.com/recoupable/admin/pull/new/feature/remove-total-privy-users-type
+**Notes:** No UI changes needed — `PrivyLoginsStats` never rendered `total_privy_users`.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
