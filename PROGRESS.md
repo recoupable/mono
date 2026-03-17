@@ -149,6 +149,20 @@
 
 ---
 
+## [2026-03-17] API — GET /api/admins/privy — Fix total field and remove total_active
+
+**Prompt:** Remove `total_active_users` from the response and update `total` to use the same logic (active users count within period).
+**Status:** completed
+**Changes:**
+- `api`: `getPrivyLoginsHandler.ts` — changed `total: users.length` to `total: total_active` (i.e., `countActiveAccounts(users, period)`); removed `total_active` and `total_privy_users` from response. Updated unit tests to match.
+- `docs`: `api-reference/openapi.json` — removed `total_active` from required fields and properties; updated `total` description to "Number of accounts active (latest_verified_at) within the requested period".
+**PRs:**
+- api: `feature/privy-total-active-users-fix` → test: https://github.com/recoupable/api/pull/new/feature/privy-total-active-users-fix
+- docs: `feature/privy-total-active-users-fix` → main: https://github.com/recoupable/docs/pull/new/feature/privy-total-active-users-fix
+**Notes:** `total` is now the count of accounts whose `latest_verified_at` (across all linked_accounts) falls within the requested period. This matches what the docs page (developers.recoupable.com) shows as the intended `total` definition.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
