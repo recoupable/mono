@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-17 (tasks: agentStdout context fix)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -14,13 +14,11 @@
 - `70f345c` feat: increase maxDuration of coding-agent task (#89)
 - `6625395` feat: inject `CLAUDE_CODE_OAUTH_TOKEN` into sandbox environment (#86)
 
-**Status:** Stable. The coding agent pipeline is working end-to-end:
-1. Sandbox spins up → monorepo cloned → submodules synced
-2. Claude Code agent runs with the user prompt (cwd = `/vercel/sandbox/mono`)
-3. Changes are committed and PRs opened via `pushAndCreatePRsViaAgent`
-4. Mono repo root files (e.g., `PROGRESS.md`) are pushed directly to `main`
+**Status:** In progress — PR open for stdout context passing fix.
 
 **What to know:** `runClaudeCodeAgent` now defaults `cwd` to `/vercel/sandbox/mono`. The `pushAndCreatePRsViaAgent` agent handles both mono root changes (direct push to main) and submodule changes (feature branch + PR).
+
+**Pending PR:** Branch `fix/coding-agent-stdout-context` pushed to `recoupable/tasks`. PR needs to be opened: https://github.com/recoupable/tasks/pull/new/fix/coding-agent-stdout-context (base: `main`). `agentStdout` is now passed from the coding agent step into `pushAndCreatePRsViaAgent` so the git push agent has full context of what was changed. This fixes the bug where context was lost between the two agent steps and the push agent would incorrectly report no changes.
 
 ---
 
