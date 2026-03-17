@@ -167,3 +167,14 @@ chat (frontend) → api (backend) → Supabase (database)
 - **Coding agent flow:** Trigger.dev task → Vercel Sandbox → Claude Code CLI (`claude -p --dangerously-skip-permissions`) → git commit/push → PR via `gh`
 - PRs for `api` and `chat` target `test` branch; all others target `main`
 - Admin check: POST `/api/admins/check` — verifies if authenticated Privy user is in admins table
+
+## [2026-03-17] Docs — Added response items for GET /api/admins/privy
+
+**Prompt:** Update docs for GET /api/admins/privy to include the latest API response — missing default of `all` for period and missing response fields (`total_new`, `total_active`, `total_privy_users`)
+**Status:** completed
+**Changes:**
+- `docs`: Updated `api-reference/openapi.json` — added `all` to `period` enum (set as default, replacing incorrect `daily` default); added missing 200 response fields: `total_new`, `total_active`, `total_privy_users`; updated endpoint description to reflect actual API behavior.
+**PRs:** Branch `agent/-u0ajm7x8fbr-docs---added-resp-1773769254740` pushed to `recoupable/docs` — PR targeting `main`.
+**Notes:** Actual API code (`validateGetPrivyLoginsQuery.ts`) defaults `period` to `"all"` (no date filter). Handler returns `{ status, total, total_new, total_active, total_privy_users, logins }`.
+
+---
