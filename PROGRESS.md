@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-16 (updated same day)
+> Last updated: 2026-03-17
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -122,20 +122,20 @@
 
 ---
 
-## [2026-03-17] Admin PR Buttons in Slack Thread
+## [2026-03-17] Admin README — API Calls Documentation
 
-**Prompt:** When coding-agent opens a PR in admin repo, show Review/Merge buttons in Slack (not just text)
+**Prompt:** Update the Admin README to highlight the API calls used and link to the docs where devs can learn more.
 **Status:** completed
 **Changes:**
-- `tasks`: Added `admin` and `marketing` to `SUBMODULE_CONFIG` so push agent handles these repos. Added `parseGitHubPRUrls` function to `parsePRUrls.ts` that extracts raw GitHub PR URLs from main agent stdout (for cases where main agent already ran `gh pr create` before push agent runs). Updated `codingAgentTask.ts` to merge PR results from both main agent stdout and push agent, deduplicating by URL.
-**PRs:** `feature/admin-pr-buttons` pushed to `recoupable/tasks` — open PR at https://github.com/recoupable/tasks/pull/new/feature/admin-pr-buttons (target: `main`)
-**Notes:** Root cause: main agent follows CLAUDE.md and creates PRs directly (outputting raw GitHub URL), but `parsePRUrls` only matched `PR_CREATED:` sentinel lines from the push agent. Admin/marketing were also missing from SUBMODULE_CONFIG so push agent skipped them entirely.
+- `admin`: Rewrote `README.md` — added "API Calls" section with a table of all 5 endpoints (`/api/admins`, `/api/admins/emails`, `/api/admins/sandboxes`, `/api/admins/sandboxes/orgs`, `/api/tasks/runs`), doc links to `developers.recoupable.com`, and a "Where each call is made" breakdown per hook/lib file. Also updated Tech Stack section to include Privy and TanStack React Query.
+**PRs:** none (README-only change)
+**Notes:** Doc links point to `https://developers.recoupable.com/api-reference/admins/*` and `.../tasks/runs`. All admin endpoints require Bearer auth (Privy access token).
 
 ---
 
 ## Known Issues / Next Steps
 
-- `SUBMODULE_CONFIG` now includes `admin` and `marketing` (fixed in `feature/admin-pr-buttons` PR).
+- `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
 - No `PROGRESS_USAGE.md` exists yet — if this file should have a companion usage guide, create it.
 - The `progress.txt` init file referenced in the task prompt was not found — likely hasn't been created yet, or was intended as a seed for future use.
 
