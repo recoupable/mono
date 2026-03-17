@@ -175,6 +175,17 @@
 
 ---
 
+## [2026-03-17] API — Formatter GitHub Action
+
+**Prompt:** Add a GitHub Action that automatically runs the formatter (`pnpm format:check`) on all pull requests so all code changes follow standardized formatting.
+**Status:** completed
+**Changes:**
+- `api`: Created `.github/workflows/format.yml` — runs `pnpm format:check` (Prettier) on every PR targeting `main` or `test`. Mirrors the existing `test.yml` pattern (Node 20, pnpm 9). PR fails if any file doesn't match Prettier standards.
+**PRs:** Branch `feature/formatter-github-action` pushed to `recoupable/api` — PR needs to be opened manually (target: `test`): https://github.com/recoupable/api/pull/new/feature/formatter-github-action
+**Notes:** `gh` CLI not available in sandbox so PR was not auto-created. The workflow only runs on `pull_request` events (not `push`), so it won't retroactively flag existing code on main/test — only new PRs.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
