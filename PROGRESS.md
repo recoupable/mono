@@ -230,6 +230,21 @@
 
 ---
 
+## [2026-03-18] API — Replace x402 with MPP (mppx)
+
+**Prompt:** Replace x402 payment middleware endpoints with MPP (Machine Payments Protocol) using mppx SDK. Follow https://mpp.dev/overview.
+**Status:** completed
+**Changes:**
+- `api`: Removed `@coinbase/x402`, `x402-fetch`, `x402-next`; added `mppx@0.4.7`, upgraded `viem` to 2.47.5 (required for mppx Tempo chain support). New `app/api/mpp/image/generate/route.ts` — MPP-protected endpoint using `mppx/server` `tempo.charge()`. New `lib/mpp/` utilities: `getMppServer`, `getPayerAddress`, `fetchWithMppPayment`, `getCreditsForPrice`, `recoup/mppGenerateImage`. Deleted `app/api/x402/` and `lib/x402/`. Simplified `middleware.ts` (no x402 paymentMiddleware). Updated `app/api/image/generate/route.ts` to use `mppGenerateImage`.
+**PRs:** Branch `feature/replace-x402-with-mpp` pushed → target `test`: https://github.com/recoupable/api/pull/new/feature/replace-x402-with-mpp
+**Notes:**
+- mppx `tempo` uses the **Tempo blockchain** (chainId 4217, RPC: https://rpc.tempo.xyz), NOT Base. Currency is Tempo USDC (`0x20C000000000000000000000b9537d11c60E8b50`).
+- Two new env vars required: `MPP_SECRET_KEY` (HMAC for challenge verification) and `MPP_PAYMENT_KEY` (0x private key for Tempo payer wallet — must be funded with Tempo USDC).
+- The `loadAccount`/`getTransferCalls` (Coinbase CDP USDC pre-funding on Base) was removed — MPP client pays directly from the `MPP_PAYMENT_KEY` wallet.
+- For testnet: set `testnet: true` in `getMppServer()` and `fetchWithMppPayment()` to use Tempo testnet (pathUSD, no real tokens needed).
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
