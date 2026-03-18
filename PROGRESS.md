@@ -195,6 +195,17 @@
 
 ---
 
+## [2026-03-18] Admin — Hide Sensitive Info Toggle
+
+**Prompt:** Add a HideProvider wrapping the admin app with a toggle in the top-right of the global layout to hide/show all email fields.
+**Status:** completed
+**Changes:**
+- `admin`: New `providers/HideProvider.tsx` — React context with `isHidden: boolean` + `toggle()`. New `hooks/useHide` pattern exported from the provider. New `lib/maskEmail.ts` — masks emails to `jo***@ex***.com`. New `components/HideToggle.tsx` — fixed top-right Eye/EyeOff button reading from `useHide()`. `providers/Providers.tsx` — wraps children in `<HideProvider>` + renders `<HideToggle />`. `components/PrivyLogins/privyLoginsColumns.tsx`, `components/Sandboxes/sandboxesColumns.tsx`, `components/SandboxOrgs/AccountReposList.tsx` — all email cells now use `useHide()` + `maskEmail()`.
+**PRs:** `feature/hide-sensitive-info-toggle` → main: https://github.com/recoupable/admin/pull/new/feature/hide-sensitive-info-toggle
+**Notes:** Toggle is global — one click hides all emails across all pages simultaneously. `maskEmail` shows first 2 chars of local part + `***`, and first 2 chars of domain + `***` (e.g. `john@example.com` → `jo***@ex***.com`).
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
