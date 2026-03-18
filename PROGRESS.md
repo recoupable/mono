@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17 (tasks: agentStdout context fix)
+> Last updated: 2026-03-17
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -14,11 +14,13 @@
 - `70f345c` feat: increase maxDuration of coding-agent task (#89)
 - `6625395` feat: inject `CLAUDE_CODE_OAUTH_TOKEN` into sandbox environment (#86)
 
-**Status:** In progress — PR open for stdout context passing fix.
+**Status:** Stable. The coding agent pipeline is working end-to-end:
+1. Sandbox spins up → monorepo cloned → submodules synced
+2. Claude Code agent runs with the user prompt (cwd = `/vercel/sandbox/mono`)
+3. Changes are committed and PRs opened via `pushAndCreatePRsViaAgent`
+4. Mono repo root files (e.g., `PROGRESS.md`) are pushed directly to `main`
 
 **What to know:** `runClaudeCodeAgent` now defaults `cwd` to `/vercel/sandbox/mono`. The `pushAndCreatePRsViaAgent` agent handles both mono root changes (direct push to main) and submodule changes (feature branch + PR).
-
-**Pending PR:** Branch `fix/coding-agent-stdout-context` pushed to `recoupable/tasks`. PR needs to be opened: https://github.com/recoupable/tasks/pull/new/fix/coding-agent-stdout-context (base: `main`). `agentStdout` is now passed from the coding agent step into `pushAndCreatePRsViaAgent` so the git push agent has full context of what was changed. This fixes the bug where context was lost between the two agent steps and the push agent would incorrectly report no changes.
 
 ---
 
@@ -203,6 +205,17 @@
 - `admin`: New `providers/HideProvider.tsx` — React context with `isHidden: boolean` + `toggle()`. New `hooks/useHide` pattern exported from the provider. New `lib/maskEmail.ts` — masks emails to `jo***@ex***.com`. New `components/HideToggle.tsx` — fixed top-right Eye/EyeOff button reading from `useHide()`. `providers/Providers.tsx` — wraps children in `<HideProvider>` + renders `<HideToggle />`. `components/PrivyLogins/privyLoginsColumns.tsx`, `components/Sandboxes/sandboxesColumns.tsx`, `components/SandboxOrgs/AccountReposList.tsx` — all email cells now use `useHide()` + `maskEmail()`.
 **PRs:** `feature/hide-sensitive-info-toggle` → main: https://github.com/recoupable/admin/pull/new/feature/hide-sensitive-info-toggle
 **Notes:** Toggle is global — one click hides all emails across all pages simultaneously. `maskEmail` shows first 2 chars of local part + `***`, and first 2 chars of domain + `***` (e.g. `john@example.com` → `jo***@ex***.com`).
+
+---
+
+## [2026-03-18] Chat — Remove Org API Keys from /keys Page
+
+**Prompt:** On /keys, selecting an org showed org API keys instead of personal keys. Always show personal API keys regardless of selected org (removing org API key concept).
+**Status:** completed
+**Changes:**
+- `chat`: `hooks/useApiKey.ts` — removed `selectedOrgId` from query key and all function calls. `lib/keys/fetchApiKeys.ts` — removed `organizationId` parameter. `lib/keys/createApiKey.ts` — removed `organizationId` parameter.
+**PRs:** `feature/keys-always-personal` pushed to `recoupable/chat` — open PR at: https://github.com/recoupable/chat/pull/new/feature/keys-always-personal (target: `test`)
+**Notes:** The API backend (`api/lib/keys/org/`) still has org key handlers but they are no longer called from the frontend. Those can be cleaned up in a future task if desired.
 
 ---
 
