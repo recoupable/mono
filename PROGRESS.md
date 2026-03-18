@@ -245,6 +245,17 @@
 
 ---
 
+## [2026-03-18] Tasks — Replace PROGRESS.md References with Git Commits in Agent Prompt
+
+**Prompt:** Tasks - coding-agent - replace progress.txt notes with Git commits. Replace prefix/suffix that reference PROGRESS.md with instructions to read latest git commits and commit changes.
+**Status:** completed
+**Changes:**
+- `tasks`: `src/tasks/promptPrefixes.ts` — `PROGRESS_PROMPT_PREFIX` now says "Run `git log --oneline -10` in each relevant submodule to understand what was recently worked on"; `PROGRESS_PROMPT_SUFFIX` now says "Commit all your changes with a descriptive message so the next developer knows what was worked on."
+**PRs:** Branch `feature/replace-progress-txt-with-git-commits` pushed to `recoupable/tasks` — open PR at: https://github.com/recoupable/tasks/pull/new/feature/replace-progress-txt-with-git-commits (target: `main`)
+**Notes:** Git commits are the authoritative source of truth. PROGRESS.md was unreliable because agents could forget to update it or update it incorrectly. The new approach leverages git history directly.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
