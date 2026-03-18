@@ -219,6 +219,17 @@
 
 ---
 
+## [2026-03-18] Database — Migrate Org API Keys to Personal Account
+
+**Prompt:** Create a migration that transfers all org API keys into personal API keys for personal account fb678396-a68f-4294-ae50-b8cacf9ce77b (deprecating org API keys).
+**Status:** completed
+**Changes:**
+- `database`: New migration `20260318000000_migrate_org_api_keys_to_personal_account.sql` — updates all `account_api_keys` rows where `account` points to an organization account (any account appearing as `organization_id` in `account_organization_ids`) to instead point to personal account `fb678396-a68f-4294-ae50-b8cacf9ce77b`. The `WHERE account != 'fb678396-...'` guard is a no-op safety check.
+**PRs:** none (database migration only — apply via `supabase db push` or Supabase dashboard)
+**Notes:** Org API keys are identified by their `account` column referencing an org account (an account that has members in `account_organization_ids`). After this migration, all org-scoped keys will resolve as personal keys for account fb678396-a68f-4294-ae50-b8cacf9ce77b. If you later want to restrict org key creation at the API level, update `createOrgApiKeysHandler.ts` in the `api` submodule.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
