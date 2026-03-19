@@ -131,6 +131,17 @@
 
 ---
 
+## [2026-03-19] Prevent API Keys for Org Accounts (DB Migration)
+
+**Prompt:** Add a migration that prevents API keys from being created where `account_api_keys.account` equals an `organization_id` in `account_organization_ids`.
+**Status:** completed
+**Changes:**
+- `database`: New migration `20260319000000_prevent_org_account_api_keys.sql` — creates `prevent_org_account_api_keys()` trigger function and attaches it as a `BEFORE INSERT OR UPDATE` trigger on `account_api_keys`. Raises an exception if the target `account` value exists as an `organization_id` in `account_organization_ids`.
+**PRs:** none (migration-only change, needs to be applied via Supabase CLI)
+**Notes:** The check queries `account_organization_ids.organization_id = NEW.account`. Org accounts are defined as rows where the account appears in the `organization_id` column. Member accounts (`account_id` column) are unaffected and can still have API keys.
+
+---
+
 ## [2026-03-17] Admin Privy Logins Page
 
 **Prompt:** Admin dashboard page to review Privy logins on a daily, weekly, and monthly basis — total count + table of results per time frame.
