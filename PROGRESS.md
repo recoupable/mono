@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17 (tasks: agentStdout context fix)
+> Last updated: 2026-03-19 (investigation: content/ credit system integration)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -276,3 +276,68 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 3. **MCP-only (strictest):** Same as Option 1 but no REST proxy — Chartmetric is only callable via MCP tools. Key stays entirely in `api` service env.
 
 ---
+
+## [2026-03-19] Investigation — Content Pipeline Credit System Integration
+
+**Prompt:** How should the content/ API be connected to the credit system so customers use credits when they run the content pipeline? Investigate existing credit system, propose usage-based pricing with margin.
+**Status:** investigation complete — implementation not started
+**Changes:** none (research only)
+**PRs:** none
+
+### Key Findings
+
+**Credit system (fully implemented):**
+- Table: `credits_usage` — `account_id`, `remaining_credits`, `timestamp`
+- 1 credit = $0.01 USD (conversion via `Math.ceil(usdCost * 100)`)
+- Core deduction fn: `api/lib/credits/deductCredits.ts` — validates balance, updates DB, throws on insufficient credits
+- Chat/LLM credits: token-based via `handleChatCredits.ts` → `getCreditUsage.ts` (actual model pricing × tokens)
+- Image credits: flat $0.15 = 15 credits via `fetchWithPayment.ts`
+- Free tier: 333 credits. Pro tier: 1,000 credits/month (reset by `checkAndResetCredits` in chat)
+
+**Content pipeline (credit deduction NOT YET IMPLEMENTED):**
+- `POST /api/content/create` → `createContentHandler.ts` triggers Trigger.dev task — no credit check or deduction exists today
+- `GET /api/content/estimate` → `getContentEstimateHandler.ts` has the cost logic already: base cost = `$0.82` (image-to-video) or `$0.95` (audio-to-video/lipsync), multiplied by `batch`
+- The `validated.accountId` is already available at the top of `createContentHandler` (auth is fully resolved), so credit deduction can be dropped in right after validation
+
+**Actual pipeline costs per video (rough, based on FAL.ai models):**
+- Base (image-to-video, `fal-ai/veo3.1/fast`): ~$0.82
+- Lipsync (audio-to-video, `fal-ai/ltx-2-19b`): ~$0.95
+- Optional upscale (image or video, `fal-ai/seedvr`): ~$0.10–$0.20 additional
+- Caption (Gemini 2.5 Flash via Recoup chat API): ~$0.01 (negligible)
+
+### Recommended Implementation Plan
+
+**Pricing with margin (~2× actual cost, 100% markup):**
+
+| Option | Actual Cost | Credits Charged | Revenue | Margin |
+|--------|-------------|-----------------|---------|--------|
+| Base video | $0.82 | **165** credits ($1.65) | $0.83 | ~101% |
+| With lipsync | $0.95 | **190** credits ($1.90) | $0.95 | ~100% |
+| +Upscale add-on | +~$0.15 | **+30** credits ($0.30) | $0.15 | ~100% |
+| Batch × N | multiply | multiply | multiply | same |
+
+**Why these numbers:**
+- Rounds cleanly, communicates value (165 credits = "about half a free account's budget for a professional video")
+- 2× markup is standard for AI infra reselling
+- Free account (333 credits) gets 2 base videos before needing to upgrade — strong trial hook
+- Pro account (1,000 credits) gets ~6 base videos/month — reasonable for serious use
+
+**Implementation — 3 files to touch in `api`:**
+
+1. **NEW `api/lib/content/getContentCreditCost.ts`** — pure function, returns `creditsToDeduct` given `{ lipsync, upscale, batch }`. Constants: `BASE_VIDEO_CREDITS = 165`, `LIPSYNC_EXTRA_CREDITS = 25`, `UPSCALE_CREDITS = 30`. Example: `(165 + 25 + 30) * 3 batch = 660`.
+
+2. **MODIFY `api/lib/content/createContentHandler.ts`** — after `validateCreateContentBody()` succeeds, call `getContentCreditCost()`, then `deductCredits({ accountId: validated.accountId, creditsToDeduct })`. Wrap in try/catch — if `deductCredits` throws "Insufficient credits", return `402` with `{ status: "error", error: "Insufficient credits", credits_required: N }`. Only proceed to `triggerCreateContent` on success. **No refund on task failure** (keep it simple; pipeline failure is rare and infra cost is still incurred).
+
+3. **MODIFY `api/lib/content/getContentEstimateHandler.ts`** — add `credits_per_video` and `total_credits` fields to the response so callers can show the user how many credits will be spent before confirming.
+
+**TDD: write tests first in `api/lib/content/__tests__/getContentCreditCost.test.ts` and `createContentHandler.test.ts`.**
+
+**What NOT to do:**
+- Don't charge in the Trigger.dev task itself — the task has no auth context and runs async, making refunds complex
+- Don't use token-based pricing for video (unlike LLM, FAL.ai costs are per-call, not per-token)
+- Don't add a `content_credits_usage` audit table yet — overkill until volume justifies it
+
+**Notes:**
+- `getContentEstimateHandler` already has the actual cost constants in the same file — extract them to a shared `contentPricingConstants.ts` if desired (or keep inline in `getContentCreditCost.ts` for KISS)
+- `deductCredits` throws on insufficient credits, so the 402 response pattern matches how `fetchWithPayment.ts` handles it for image gen
+- `validateCreateContentBody.ts` already resolves `accountId` from auth — no schema changes needed
