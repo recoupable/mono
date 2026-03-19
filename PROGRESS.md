@@ -219,6 +219,17 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 
 ---
 
+## [2026-03-19] Database — Migrate Org API Keys to Personal Account (audit trail added)
+
+**Prompt:** Apply feedback on migration — document the 12 specific API keys confirmed to be impacted.
+**Status:** completed
+**Changes:**
+- `database`: Updated `20260318000000_migrate_org_api_keys_to_personal_account.sql` — added a comment block listing the 12 specific `account_api_keys` rows confirmed to be affected at review time (2026-03-19) as an audit trail. The SQL logic itself is unchanged (dynamic subquery approach retained so any keys created after review are also migrated).
+**PRs:** Branch `feature/migrate-org-api-keys-to-personal-account` pushed to `recoupable/database` — PR targeting `main`.
+**Notes:** 12 impacted keys span 5 org accounts: `cebcc866` (5 keys), `04e3aba9` (3 keys), `82bde32c` (2 keys), `6e544578` (1 key), `460c4cda` (1 key). All will be reassigned to personal account `fb678396-a68f-4294-ae50-b8cacf9ce77b`. Apply via `supabase db push` or Supabase dashboard after PR is merged.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
