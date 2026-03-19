@@ -222,8 +222,7 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
-- No `PROGRESS_USAGE.md` exists yet — if this file should have a companion usage guide, create it.
-- The `progress.txt` init file referenced in the task prompt was not found — likely hasn't been created yet, or was intended as a seed for future use.
+- `CHARTMETRIC_REFRESH_TOKEN` must be added to Trigger.dev secrets for the chartmetric skill to work in sandboxes (see 2026-03-19 entry).
 
 ---
 
@@ -260,23 +259,6 @@ chat (frontend) → api (backend) → Supabase (database)
 
 ---
 
-## [2026-03-19] Architecture — Chartmetric API Key in Sandbox (No Key Exposure)
-
-**Prompt:** How can we give Recoup the ability to use a Chartmetric API key in a sandbox without exposing the key?
-**Status:** architecture design — no code written yet
-**Changes:** none (design/research task)
-**PRs:** none
-**Notes:**
-Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** as it fits the existing architecture:
-
-1. **API Proxy + MCP tools (recommended):** Store `CHARTMETRIC_API_KEY` in Vercel env vars for the `api` service only. Build `lib/chartmetric/` domain functions internally. Expose MCP tools (`chartmetric_get_artist`, etc.) in `lib/mcp/tools/chartmetric/` that call those functions. Optionally add `app/api/chartmetric/[...path]/route.ts` REST proxy for non-MCP callers. Key never enters the sandbox.
-
-2. **Short-lived token injection (simpler):** In `tasks`, exchange the Chartmetric `refresh_token` for a 1-hour `access_token` via `POST https://api.chartmetric.com/api/token`. Inject only the `access_token` (not the refresh token or key) into the sandbox env. Token expires after the sandbox run — reduced blast radius even if the agent reads it.
-
-3. **MCP-only (strictest):** Same as Option 1 but no REST proxy — Chartmetric is only callable via MCP tools. Key stays entirely in `api` service env.
-
----
-
 ## [2026-03-19] Investigation — Content Pipeline Credit System Integration
 
 **Prompt:** How should the content/ API be connected to the credit system so customers use credits when they run the content pipeline? Investigate existing credit system, propose usage-based pricing with margin.
@@ -299,45 +281,21 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 - `GET /api/content/estimate` → `getContentEstimateHandler.ts` has the cost logic already: base cost = `$0.82` (image-to-video) or `$0.95` (audio-to-video/lipsync), multiplied by `batch`
 - The `validated.accountId` is already available at the top of `createContentHandler` (auth is fully resolved), so credit deduction can be dropped in right after validation
 
-**Actual pipeline costs per video (rough, based on FAL.ai models):**
-- Base (image-to-video, `fal-ai/veo3.1/fast`): ~$0.82
-- Lipsync (audio-to-video, `fal-ai/ltx-2-19b`): ~$0.95
-- Optional upscale (image or video, `fal-ai/seedvr`): ~$0.10–$0.20 additional
-- Caption (Gemini 2.5 Flash via Recoup chat API): ~$0.01 (negligible)
-
-### Recommended Implementation Plan
-
-**Pricing with margin (~2× actual cost, 100% markup):**
-
-| Option | Actual Cost | Credits Charged | Revenue | Margin |
-|--------|-------------|-----------------|---------|--------|
-| Base video | $0.82 | **165** credits ($1.65) | $0.83 | ~101% |
-| With lipsync | $0.95 | **190** credits ($1.90) | $0.95 | ~100% |
-| +Upscale add-on | +~$0.15 | **+30** credits ($0.30) | $0.15 | ~100% |
-| Batch × N | multiply | multiply | multiply | same |
-
-**Why these numbers:**
-- Rounds cleanly, communicates value (165 credits = "about half a free account's budget for a professional video")
-- 2× markup is standard for AI infra reselling
-- Free account (333 credits) gets 2 base videos before needing to upgrade — strong trial hook
-- Pro account (1,000 credits) gets ~6 base videos/month — reasonable for serious use
-
 **Implementation — 3 files to touch in `api`:**
 
-1. **NEW `api/lib/content/getContentCreditCost.ts`** — pure function, returns `creditsToDeduct` given `{ lipsync, upscale, batch }`. Constants: `BASE_VIDEO_CREDITS = 165`, `LIPSYNC_EXTRA_CREDITS = 25`, `UPSCALE_CREDITS = 30`. Example: `(165 + 25 + 30) * 3 batch = 660`.
+1. **NEW `api/lib/content/getContentCreditCost.ts`** — pure function, returns `creditsToDeduct` given `{ lipsync, upscale, batch }`. Constants: `BASE_VIDEO_CREDITS = 165`, `LIPSYNC_EXTRA_CREDITS = 25`, `UPSCALE_CREDITS = 30`.
+2. **MODIFY `api/lib/content/createContentHandler.ts`** — call `getContentCreditCost()`, then `deductCredits(...)` after validation. Return 402 on insufficient credits.
+3. **MODIFY `api/lib/content/getContentEstimateHandler.ts`** — add `credits_per_video` and `total_credits` to response.
 
-2. **MODIFY `api/lib/content/createContentHandler.ts`** — after `validateCreateContentBody()` succeeds, call `getContentCreditCost()`, then `deductCredits({ accountId: validated.accountId, creditsToDeduct })`. Wrap in try/catch — if `deductCredits` throws "Insufficient credits", return `402` with `{ status: "error", error: "Insufficient credits", credits_required: N }`. Only proceed to `triggerCreateContent` on success. **No refund on task failure** (keep it simple; pipeline failure is rare and infra cost is still incurred).
+---
 
-3. **MODIFY `api/lib/content/getContentEstimateHandler.ts`** — add `credits_per_video` and `total_credits` fields to the response so callers can show the user how many credits will be spent before confirming.
+## [2026-03-19] tasks — Inject CHARTMETRIC_REFRESH_TOKEN into sandbox env
 
-**TDD: write tests first in `api/lib/content/__tests__/getContentCreditCost.test.ts` and `createContentHandler.test.ts`.**
+**Prompt:** Give Recoup the ability to use a Chartmetric API key in a sandbox without exposing the key, so the agent can use the chartmetric skill via bash.
+**Status:** completed
+**Changes:**
+- `tasks`: `src/sandboxes/getSandboxEnv.ts` — added optional `CHARTMETRIC_REFRESH_TOKEN` injection (same pattern as `GITHUB_TOKEN`; no-op if env var not set). `src/sandboxes/setupOpenClaw.ts` — injects `CHARTMETRIC_REFRESH_TOKEN` into `openclaw.json` env block so OpenClaw agent and all subprocesses get it.
+**PRs:** Branch `feature/chartmetric-env-injection` pushed to `recoupable/tasks` — open PR at: https://github.com/recoupable/tasks/pull/new/feature/chartmetric-env-injection (target: `main`). `gh` not available in sandbox so PR not auto-created.
+**Notes:** The chartmetric skill (`skills/chartmetric`) is already installed in sandboxes at `.recoup/skills/chartmetric`. Scripts read `CHARTMETRIC_REFRESH_TOKEN` from env. **Action required:** Add `CHARTMETRIC_REFRESH_TOKEN` to Trigger.dev environment secrets (same place as `RECOUP_API_KEY`, `GITHUB_TOKEN`). Once set, the agent can run `python .recoup/skills/chartmetric/scripts/search_artist.py "Drake"` without the token being user-visible.
 
-**What NOT to do:**
-- Don't charge in the Trigger.dev task itself — the task has no auth context and runs async, making refunds complex
-- Don't use token-based pricing for video (unlike LLM, FAL.ai costs are per-call, not per-token)
-- Don't add a `content_credits_usage` audit table yet — overkill until volume justifies it
-
-**Notes:**
-- `getContentEstimateHandler` already has the actual cost constants in the same file — extract them to a shared `contentPricingConstants.ts` if desired (or keep inline in `getContentCreditCost.ts` for KISS)
-- `deductCredits` throws on insufficient credits, so the 402 response pattern matches how `fetchWithPayment.ts` handles it for image gen
-- `validateCreateContentBody.ts` already resolves `accountId` from auth — no schema changes needed
+---
