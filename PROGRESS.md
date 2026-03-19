@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-19
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -9,6 +9,7 @@
 
 ### `tasks` (on `main`)
 **Latest commits:**
+- `[pending]` feat: inject `CHARTMETRIC_REFRESH_TOKEN` into sandbox env and openclaw.json
 - `fad189e` fix: push mono repo root progress files directly to main (#96)
 - `e2599e7` fix: set cwd to `/vercel/sandbox/mono` for Claude Code agent (#94)
 - `70f345c` feat: increase maxDuration of coding-agent task (#89)
@@ -199,5 +200,21 @@ chat (frontend) → api (backend) → Supabase (database)
 - `docs`: Renamed `total_privy_users` → `total_privy_accounts` in `api-reference/openapi.json` (required field list, property name, and description).
 **PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-docs---added-resp-1773769254740` on `recoupable/docs`.
 **Notes:** Matches the API response field naming convention (accounts, not users).
+
+---
+
+## [2026-03-19] Chartmetric skill — sandbox env injection
+
+**Prompt:** Give sandbox agents access to the Chartmetric API key so they can use the chartmetric skill without exposing the key.
+**Status:** completed
+**Changes:**
+- `tasks`: `src/sandboxes/getSandboxEnv.ts` — added optional `CHARTMETRIC_REFRESH_TOKEN` injection (same pattern as `GITHUB_TOKEN`; no-op if env var not set).
+- `tasks`: `src/sandboxes/setupOpenClaw.ts` — added optional `CHARTMETRIC_REFRESH_TOKEN` injection into openclaw.json's `env` block so the OpenClaw agent and all subprocess spawns get it.
+**PRs:** PR needed — branch not yet pushed (done via direct edit in sandbox).
+**Notes:**
+- **Action required:** Add `CHARTMETRIC_REFRESH_TOKEN` to Trigger.dev environment secrets (same place as `RECOUP_API_KEY`, `GITHUB_TOKEN`, `CLAUDE_CODE_OAUTH_TOKEN`).
+- The chartmetric skill (`skills/chartmetric`) is pre-installed in sandboxes at `.recoup/skills/chartmetric`. Its Python scripts read `CHARTMETRIC_REFRESH_TOKEN` from env and call the Chartmetric API directly — no new tools needed.
+- The key is optional; existing sandboxes without it won't break.
+- **Open question — tying Chartmetric usage to account credits:** The cleanest approach is to proxy Chartmetric API calls through `recoup-api.vercel.app` (e.g. `POST /api/chartmetric/search`). The proxy route authenticates via `RECOUP_API_KEY` + `RECOUP_ACCOUNT_ID`, deducts credits, then forwards to Chartmetric. The skill would point `CHARTMETRIC_BASE_URL` at the proxy instead of calling Chartmetric directly. This keeps the Chartmetric key server-side only and gives per-account usage tracking. Alternatively, log calls client-side via a lightweight fire-and-forget `POST /api/usage` call from the skill's bash wrapper — simpler but less reliable (agent could skip it). Proxy approach is recommended for production.
 
 ---
