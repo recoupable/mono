@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-17 (tasks: agentStdout context fix)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -14,13 +14,11 @@
 - `70f345c` feat: increase maxDuration of coding-agent task (#89)
 - `6625395` feat: inject `CLAUDE_CODE_OAUTH_TOKEN` into sandbox environment (#86)
 
-**Status:** Stable. The coding agent pipeline is working end-to-end:
-1. Sandbox spins up → monorepo cloned → submodules synced
-2. Claude Code agent runs with the user prompt (cwd = `/vercel/sandbox/mono`)
-3. Changes are committed and PRs opened via `pushAndCreatePRsViaAgent`
-4. Mono repo root files (e.g., `PROGRESS.md`) are pushed directly to `main`
+**Status:** In progress — PR open for stdout context passing fix.
 
 **What to know:** `runClaudeCodeAgent` now defaults `cwd` to `/vercel/sandbox/mono`. The `pushAndCreatePRsViaAgent` agent handles both mono root changes (direct push to main) and submodule changes (feature branch + PR).
+
+**Pending PR:** Branch `fix/coding-agent-stdout-context` pushed to `recoupable/tasks`. PR needs to be opened: https://github.com/recoupable/tasks/pull/new/fix/coding-agent-stdout-context (base: `main`). `agentStdout` is now passed from the coding agent step into `pushAndCreatePRsViaAgent` so the git push agent has full context of what was changed. This fixes the bug where context was lost between the two agent steps and the push agent would incorrectly report no changes.
 
 ---
 
@@ -197,62 +195,27 @@
 
 ---
 
-## [2026-03-18] Admin — Hide Sensitive Info Toggle
+## [2026-03-19] Architecture — Chartmetric API Key in Sandbox (No Key Exposure)
 
-**Prompt:** Add a HideProvider wrapping the admin app with a toggle in the top-right of the global layout to hide/show all email fields.
-**Status:** completed
-**Changes:**
-- `admin`: New `providers/HideProvider.tsx` — React context with `isHidden: boolean` + `toggle()`. New `hooks/useHide` pattern exported from the provider. New `lib/maskEmail.ts` — masks emails to `jo***@ex***.com`. New `components/HideToggle.tsx` — fixed top-right Eye/EyeOff button reading from `useHide()`. `providers/Providers.tsx` — wraps children in `<HideProvider>` + renders `<HideToggle />`. `components/PrivyLogins/privyLoginsColumns.tsx`, `components/Sandboxes/sandboxesColumns.tsx`, `components/SandboxOrgs/AccountReposList.tsx` — all email cells now use `useHide()` + `maskEmail()`.
-**PRs:** `feature/hide-sensitive-info-toggle` → main: https://github.com/recoupable/admin/pull/new/feature/hide-sensitive-info-toggle
-**Notes:** Toggle is global — one click hides all emails across all pages simultaneously. `maskEmail` shows first 2 chars of local part + `***`, and first 2 chars of domain + `***` (e.g. `john@example.com` → `jo***@ex***.com`).
-
----
-
-## [2026-03-18] Chat — Remove Org API Keys from /keys Page
-
-**Prompt:** On /keys, selecting an org showed org API keys instead of personal keys. Always show personal API keys regardless of selected org (removing org API key concept).
-**Status:** completed
-**Changes:**
-- `chat`: `hooks/useApiKey.ts` — removed `selectedOrgId` from query key and all function calls. `lib/keys/fetchApiKeys.ts` — removed `organizationId` parameter. `lib/keys/createApiKey.ts` — removed `organizationId` parameter.
-**PRs:** `feature/keys-always-personal` pushed to `recoupable/chat` — open PR at: https://github.com/recoupable/chat/pull/new/feature/keys-always-personal (target: `test`)
-**Notes:** The API backend (`api/lib/keys/org/`) still has org key handlers but they are no longer called from the frontend. Those can be cleaned up in a future task if desired.
-
----
-
-## [2026-03-18] Database — Migrate Org API Keys to Personal Account
-
-**Prompt:** Create a migration that transfers all org API keys into personal API keys for personal account fb678396-a68f-4294-ae50-b8cacf9ce77b (deprecating org API keys).
-**Status:** completed
-**Changes:**
-- `database`: New migration `20260318000000_migrate_org_api_keys_to_personal_account.sql` — updates all `account_api_keys` rows where `account` points to an organization account (any account appearing as `organization_id` in `account_organization_ids`) to instead point to personal account `fb678396-a68f-4294-ae50-b8cacf9ce77b`. The `WHERE account != 'fb678396-...'` guard is a no-op safety check.
-**PRs:** none (database migration only — apply via `supabase db push` or Supabase dashboard)
-**Notes:** Org API keys are identified by their `account` column referencing an org account (an account that has members in `account_organization_ids`). After this migration, all org-scoped keys will resolve as personal keys for account fb678396-a68f-4294-ae50-b8cacf9ce77b. If you later want to restrict org key creation at the API level, update `createOrgApiKeysHandler.ts` in the `api` submodule.
-
----
-
-## [2026-03-18] API — Replace x402 with MPP (mppx)
-
-**Prompt:** Replace x402 payment middleware endpoints with MPP (Machine Payments Protocol) using mppx SDK. Follow https://mpp.dev/overview.
-**Status:** completed
-**Changes:**
-- `api`: Removed `@coinbase/x402`, `x402-fetch`, `x402-next`; added `mppx@0.4.7`, upgraded `viem` to 2.47.5 (required for mppx Tempo chain support). New `app/api/mpp/image/generate/route.ts` — MPP-protected endpoint using `mppx/server` `tempo.charge()`. New `lib/mpp/` utilities: `getMppServer`, `getPayerAddress`, `fetchWithMppPayment`, `getCreditsForPrice`, `recoup/mppGenerateImage`. Deleted `app/api/x402/` and `lib/x402/`. Simplified `middleware.ts` (no x402 paymentMiddleware). Updated `app/api/image/generate/route.ts` to use `mppGenerateImage`.
-**PRs:** Branch `feature/replace-x402-with-mpp` pushed → target `test`: https://github.com/recoupable/api/pull/new/feature/replace-x402-with-mpp
+**Prompt:** How can we give Recoup the ability to use a Chartmetric API key in a sandbox without exposing the key?
+**Status:** architecture design — no code written yet
+**Changes:** none (design/research task)
+**PRs:** none
 **Notes:**
-- mppx `tempo` uses the **Tempo blockchain** (chainId 4217, RPC: https://rpc.tempo.xyz), NOT Base. Currency is Tempo USDC (`0x20C000000000000000000000b9537d11c60E8b50`).
-- Two new env vars required: `MPP_SECRET_KEY` (HMAC for challenge verification) and `MPP_PAYMENT_KEY` (0x private key for Tempo payer wallet — must be funded with Tempo USDC).
-- The `loadAccount`/`getTransferCalls` (Coinbase CDP USDC pre-funding on Base) was removed — MPP client pays directly from the `MPP_PAYMENT_KEY` wallet.
-- For testnet: set `testnet: true` in `getMppServer()` and `fetchWithMppPayment()` to use Tempo testnet (pathUSD, no real tokens needed).
+Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** as it fits the existing architecture:
 
----
+1. **API Proxy + MCP tools (recommended):** Store `CHARTMETRIC_API_KEY` in Vercel env vars for the `api` service only. Build `lib/chartmetric/` domain functions internally. Expose MCP tools (`chartmetric_get_artist`, etc.) in `lib/mcp/tools/chartmetric/` that call those functions. Optionally add `app/api/chartmetric/[...path]/route.ts` REST proxy for non-MCP callers. Key never enters the sandbox.
 
-## [2026-03-18] Tasks — Replace PROGRESS.md References with Git Commits in Agent Prompt
+2. **Short-lived token injection (simpler):** In `tasks`, exchange the Chartmetric `refresh_token` for a 1-hour `access_token` via `POST https://api.chartmetric.com/api/token`. Inject only the `access_token` (not the refresh token or key) into the sandbox env. Token expires after the sandbox run — reduced blast radius even if the agent reads it.
 
-**Prompt:** Tasks - coding-agent - replace progress.txt notes with Git commits. Replace prefix/suffix that reference PROGRESS.md with instructions to read latest git commits and commit changes.
-**Status:** completed
-**Changes:**
-- `tasks`: `src/tasks/promptPrefixes.ts` — `PROGRESS_PROMPT_PREFIX` now says "Run `git log --oneline -10` in each relevant submodule to understand what was recently worked on"; `PROGRESS_PROMPT_SUFFIX` now says "Commit all your changes with a descriptive message so the next developer knows what was worked on."
-**PRs:** Branch `feature/replace-progress-txt-with-git-commits` pushed to `recoupable/tasks` — open PR at: https://github.com/recoupable/tasks/pull/new/feature/replace-progress-txt-with-git-commits (target: `main`)
-**Notes:** Git commits are the authoritative source of truth. PROGRESS.md was unreliable because agents could forget to update it or update it incorrectly. The new approach leverages git history directly.
+3. **MCP-only (strictest):** Same as Option 1 but no REST proxy — Chartmetric is only callable via MCP tools. Key stays entirely in `api` service env.
+
+**Implementation plan for Option 1:**
+- Add `CHARTMETRIC_API_KEY` to Vercel env (api service only)
+- `lib/chartmetric/fetchChartmetric.ts` — internal fetch wrapper
+- `lib/mcp/tools/chartmetric/` — register MCP tools
+- `app/api/chartmetric/[...path]/route.ts` — authenticated REST proxy (optional)
+- Pattern mirrors existing MCP tools: `get_chats`, `get_pulses`, etc.
 
 ---
 
@@ -294,5 +257,22 @@ chat (frontend) → api (backend) → Supabase (database)
 - `docs`: Renamed `total_privy_users` → `total_privy_accounts` in `api-reference/openapi.json` (required field list, property name, and description).
 **PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-docs---added-resp-1773769254740` on `recoupable/docs`.
 **Notes:** Matches the API response field naming convention (accounts, not users).
+
+---
+
+## [2026-03-19] Architecture — Chartmetric API Key in Sandbox (No Key Exposure)
+
+**Prompt:** How can we give Recoup the ability to use a Chartmetric API key in a sandbox without exposing the key?
+**Status:** architecture design — no code written yet
+**Changes:** none (design/research task)
+**PRs:** none
+**Notes:**
+Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** as it fits the existing architecture:
+
+1. **API Proxy + MCP tools (recommended):** Store `CHARTMETRIC_API_KEY` in Vercel env vars for the `api` service only. Build `lib/chartmetric/` domain functions internally. Expose MCP tools (`chartmetric_get_artist`, etc.) in `lib/mcp/tools/chartmetric/` that call those functions. Optionally add `app/api/chartmetric/[...path]/route.ts` REST proxy for non-MCP callers. Key never enters the sandbox.
+
+2. **Short-lived token injection (simpler):** In `tasks`, exchange the Chartmetric `refresh_token` for a 1-hour `access_token` via `POST https://api.chartmetric.com/api/token`. Inject only the `access_token` (not the refresh token or key) into the sandbox env. Token expires after the sandbox run — reduced blast radius even if the agent reads it.
+
+3. **MCP-only (strictest):** Same as Option 1 but no REST proxy — Chartmetric is only callable via MCP tools. Key stays entirely in `api` service env.
 
 ---
