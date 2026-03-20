@@ -369,3 +369,14 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** `CHARTMETRIC_REFRESH_TOKEN` stays in the `api` service env only — never injected into sandboxes under this approach. Sandboxes call `POST /api/chartmetric/{path}` with their `RECOUP_API_KEY`. Each call costs 1 credit. The proxy preserves the original HTTP method, body, and query params.
 
 ---
+
+## [2026-03-20] tasks — Switch CHARTMETRIC_REFRESH_TOKEN to CHARTMETRIC_BASE_URL
+
+**Prompt:** Follow-up to Option A proxy: update tasks to inject proxy URL instead of refresh token.
+**Status:** completed
+**Changes:**
+- `tasks`: `getSandboxEnv.ts` — replaced `CHARTMETRIC_REFRESH_TOKEN` injection with a hardcoded `CHARTMETRIC_BASE_URL=https://recoup-api.vercel.app/api/chartmetric`. `setupOpenClaw.ts` — removed `chartmetricRefreshToken` variable and its openclaw.json injection; replaced with always-on `CHARTMETRIC_BASE_URL` injection into openclaw.json env block.
+**PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-how-can-we-give-r-1773964072471` on `recoupable/tasks` (target: `main`).
+**Notes:** Sandboxes no longer need `CHARTMETRIC_REFRESH_TOKEN` in Trigger.dev secrets. The skill should read `CHARTMETRIC_BASE_URL` from env and call the proxy using `RECOUP_API_KEY` for auth. The proxy in `api` handles token exchange + credit deduction.
+
+---
