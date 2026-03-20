@@ -283,6 +283,17 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 
 ---
 
+## [2026-03-20] tasks — Fix failing tests for CHARTMETRIC_BASE_URL injection
+
+**Prompt:** Deployment failed on branch `agent/-u0ajm7x8fbr-how-can-we-give-r-1773964072471` — fix it.
+**Status:** completed
+**Changes:**
+- `tasks`: Updated `src/sandboxes/__tests__/getSandboxEnv.test.ts` — added `CHARTMETRIC_BASE_URL` to expected env in both test cases (`returns RECOUP_API_KEY...` and `omits GITHUB_TOKEN...`). The prior commits added the env var to `getSandboxEnv.ts` but forgot to update the tests. All 165 tests now pass.
+**PRs:** Pushed fix (commit `f069a08`) to `agent/-u0ajm7x8fbr-how-can-we-give-r-1773964072471` on `recoupable/tasks`.
+**Notes:** The deployment CI runs `pnpm test` before deploying. The test file expected only `RECOUP_API_KEY`, `RECOUP_ACCOUNT_ID`, and optionally `GITHUB_TOKEN` — it needed `CHARTMETRIC_BASE_URL` added.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
