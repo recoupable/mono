@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-19
+> Last updated: 2026-03-20
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -86,6 +86,17 @@
 **Status:** Stable. Basic admin dashboard with Privy auth, accounts table, admin check, and new Org Repos commits table.
 
 **What to know:** Added `/sandboxes/orgs` page showing a data table of commits per org sub-module. Key column is "Recent Commits" (latest_commit_messages array) showing up to 5 latest commit messages per repo. Data from `GET /api/admins/sandboxes/orgs`. New files: `types/sandbox.ts` (OrgRepoRow), `lib/fetchAdminSandboxOrgs.ts`, `hooks/useAdminSandboxOrgs.ts`, `components/SandboxOrgs/*`, `app/sandboxes/orgs/page.tsx`, `components/Home/OrgReposNavButton.tsx`. Nav button added to AdminDashboard.
+
+---
+
+## [2026-03-20] Fix Chartmetric Proxy Route TypeScript Build Error
+
+**Prompt:** Verify the build works on feature/chartmetric-proxy branch
+**Status:** completed
+**Changes:**
+- `api`: Fixed `app/api/chartmetric/[...path]/route.ts` — params must be `Promise<{path: string[]}>` and awaited in Next.js 15+. The type error `.next/types/validator.ts TS2344` is now resolved. TypeScript compiles successfully (`✓ Compiled successfully`). All 5 Chartmetric tests pass.
+**PRs:** https://github.com/recoupable/api/pull/318 (feature/chartmetric-proxy → test, existing PR updated)
+**Notes:** Build still fails at "collect page data" step due to missing SUPABASE_URL/SUPABASE_KEY env vars in sandbox — pre-existing environment issue, not from our changes. TypeScript itself is clean for the new code.
 
 ---
 
