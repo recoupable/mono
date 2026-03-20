@@ -394,8 +394,8 @@ chat (frontend) → api (backend) → Supabase (database)
 **Status:** completed
 **Changes:**
 - `api`: New `lib/chartmetric/getChartmetricToken.ts` — exchanges `CHARTMETRIC_REFRESH_TOKEN` (server-side only) for a short-lived Chartmetric access token via `POST https://api.chartmetric.com/api/token`. New `lib/chartmetric/proxyChartmetricRequest.ts` — authenticates via `validateAuthContext`, deducts 1 credit, gets token, and forwards the request to Chartmetric. New `app/api/chartmetric/[...path]/route.ts` — exposes `GET` and `POST` handlers. New `lib/chartmetric/__tests__/proxyChartmetricRequest.test.ts` — 5 vitest tests (401, 402, 500, GET proxy, POST proxy), all green.
-**PRs:** Branch `feature/chartmetric-proxy` pushed to `recoupable/api` — open PR at: https://github.com/recoupable/api/pull/new/feature/chartmetric-proxy (target: `test`). `gh` not available in sandbox.
-**Notes:** `CHARTMETRIC_REFRESH_TOKEN` stays in the `api` service env only — never injected into sandboxes under this approach. Sandboxes call `POST /api/chartmetric/{path}` with their `RECOUP_API_KEY`. Each call costs 1 credit. The proxy preserves the original HTTP method, body, and query params.
+**PRs:** https://github.com/recoupable/api/pull/318 (branch `feature/chartmetric-proxy` → `test`)
+**Notes:** `CHARTMETRIC_REFRESH_TOKEN` stays in the `api` service env only — never injected into sandboxes under this approach. Sandboxes call `POST /api/chartmetric/{path}` with their `RECOUP_API_KEY`. Each call costs 5 credits. The proxy preserves the original HTTP method, body, and query params.
 
 ---
 
