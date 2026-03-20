@@ -265,6 +265,24 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 
 ---
 
+## [2026-03-20] api — Chartmetric proxy credit cost updated to 5
+
+**Prompt:** Research Chartmetric API costs, read the skill, calculate costs for typical uses, then update the credit deduction amount.
+**Status:** completed
+**Changes:**
+- `api`: Updated `lib/chartmetric/proxyChartmetricRequest.ts` — changed `creditsToDeduct` from 1 to 5 per Chartmetric API call. Added JSDoc explaining the rationale.
+- `api`: Updated `lib/chartmetric/__tests__/proxyChartmetricRequest.test.ts` — updated all credit amount assertions from 1 → 5.
+**PRs:** Pushed to `feature/chartmetric-proxy` branch (commit `21ba61f`).
+**Notes:**
+- Chartmetric pricing: **$350/month** flat for 1 req/sec API access.
+- Typical skill task = **6–7 API calls** (search + metrics + playlists + audience).
+- At **5 credits ($0.05/call)**: break-even at 7,000 calls/month (~233/day) — realistic at moderate scale.
+- Per typical task: **30–35 credits ($0.30–$0.35)** — fair value for the music data returned.
+- Free tier (25 credits): ~4–5 individual API calls, enough for one mini-trial.
+- At 1 credit/call (old), we'd need 35,000 calls/month to cover costs — not viable early on.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
