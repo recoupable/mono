@@ -1,7 +1,6 @@
 # PROGRESS.md
 
 > Last updated: 2026-03-19
-> Last updated: 2026-03-19 (investigation: content/ credit system integration)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -249,6 +248,20 @@ Three options evaluated — **Option 1 (API Proxy + MCP tools) is recommended** 
 - `database`: Updated `20260318000000_migrate_org_api_keys_to_personal_account.sql` — added a comment block listing the 12 specific `account_api_keys` rows confirmed to be affected at review time (2026-03-19) as an audit trail. The SQL logic itself is unchanged (dynamic subquery approach retained so any keys created after review are also migrated).
 **PRs:** Branch `feature/migrate-org-api-keys-to-personal-account` pushed to `recoupable/database` — PR targeting `main`.
 **Notes:** 12 impacted keys span 5 org accounts: `cebcc866` (5 keys), `04e3aba9` (3 keys), `82bde32c` (2 keys), `6e544578` (1 key), `460c4cda` (1 key). All will be reassigned to personal account `fb678396-a68f-4294-ae50-b8cacf9ce77b`. Apply via `supabase db push` or Supabase dashboard after PR is merged.
+
+---
+
+## [2026-03-19] Cleanup Org API Key Terminology — Docs & API
+
+**Prompt:** Remove all "org key" / "organization API key" references from docs openapi.json and API codebase. Update docs to use neutral "API key" / membership-based language. Remove dead lib/keys/org/ code from API.
+**Status:** completed
+**Changes:**
+- `docs`: Updated `api-reference/openapi.json` — 24 lines updated. Removed all "org key"/"org API key" phrasing. Updated `account_id` param descriptions from "org keys only" to "accounts within your organizations". Updated pulses array description to remove personal/org key distinction. Updated 403 error descriptions from "personal key tried to filter" to "account tried to filter by an account_id they don't have access to".
+- `api`: Deleted `lib/keys/org/` directory (3 dead files: `createOrgApiKeysHandler.ts`, `getOrgApiKeysHandler.ts`, `onlyOrgAccounts.ts`). Simplified `createApiKeyHandler.ts` and `getApiKeysHandler.ts` to remove `organizationId` delegation branches. Removed `organizationId` from `validateCreateApiKeyBody.ts`. Cleaned up ~50+ stale "org key" / "For org keys:" / "For personal keys:" comments across handlers, validators, MCP tools, tests, and AGENTS.md. Updated `lib/auth/validateAuthContext.ts`, `validateAccountIdOverride.ts`, `lib/organizations/validateGetOrganizationsRequest.ts`, `lib/chats/validateGetChatsRequest.ts`, `lib/chats/getChatsHandler.ts`, `lib/artists/validateGetArtistsRequest.ts`, pulse handlers, sandbox validators, notification handlers, and all associated test descriptions.
+**PRs:**
+- docs: https://github.com/recoupable/docs/pull/71 (feat/remove-org-key-terminology → main)
+- api: changes pushed directly to `test` branch (commit `5dbcacf`)
+**Notes:** All keys are personal. Org access is determined at access-check time via account membership (`canAccessAccount`). No code logic was changed — only terminology/comments. Lint was run and auto-fixed formatting.
 
 ---
 
