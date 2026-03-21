@@ -180,6 +180,30 @@
 
 ---
 
+## [2026-03-21] Artist Intel Pack — Feedback: "Just an Easy Prompt" → Real Data Intelligence
+
+**Prompt:** Feedback: the current output is just an easy prompt. Make it more valuable by thinking deeply.
+**Status:** completed
+**Changes:**
+- `api`: New `lib/spotify/getRelatedArtists.ts` — hits Spotify `/artists/{id}/related-artists` endpoint
+- `api`: New `lib/artistIntel/getRelatedArtistsData.ts` — fetches top 5 related artists by follower count, computes follower/popularity percentile rankings vs the target artist, returns actual Spotify numbers for peer benchmarking
+- `api`: New `lib/artistIntel/computeArtistOpportunityScores.ts` — four algorithmic scores (0–100) computed purely from real data (no AI):
+  - **Sync Score**: BPM range, energy versatility, mood count, production quality, instrument richness
+  - **Playlist Score**: danceability × energy × Spotify popularity
+  - **A&R Score**: popularity-to-follower efficiency ratio (the classic "undervalued artist" signal), peer gap below median
+  - **Brand Score**: lifestyle tag count, platform breadth, demographic specificity, marketing hook presence
+- `api`: New `lib/artistIntel/analyzeCatalogDepth.ts` — analyses all 10 top tracks: avg popularity, std deviation, consistency score, top-track concentration %, catalog type classification (consistent / hit-driven / emerging)
+- `api`: Updated `generateArtistIntelPack.ts` — three parallel fetches (MusicFlamingo + Perplexity + Related Artists); opportunity scores and catalog depth computed synchronously from fetched data; all 5 data sources fed into AI synthesis
+- `api`: Updated `buildArtistMarketingCopy.ts` — AI prompt now receives real peer follower counts and percentile rankings so "comparable artist" references cite actual data, not hallucinations; prompt instructs AI to use specific scores in each output section
+- `api`: Updated `formatArtistIntelPackAsMarkdown.ts` — 3 new report sections:
+  - `## Opportunity Scores` — table with ASCII bar charts (█░) and emoji rating per domain
+  - `## Peer Benchmarking` — table showing target artist vs 5 real peers with gap column (±K)
+  - `## Catalog Analysis` — table + per-track popularity bars + catalog type callout
+**PRs:** Pushed to `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:** Core insight: the value of the pack was almost entirely from AI text generation (easy to replicate, possible to hallucinate). Now the majority of value comes from real data: actual peer follower counts, algorithmically derived scores from MusicFlamingo audio data, and catalog consistency math from Spotify track popularity numbers. The AI copy is still valuable but is now grounded in real benchmarks.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
