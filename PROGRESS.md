@@ -320,3 +320,21 @@ chat (frontend) → api (backend) → Supabase (database)
 - chat: Added `TaskRecentRunsSection` and `TaskUpcomingRunsSection` components; extended `Task` type to include `recent_runs` and `upcoming`; surfaced these fields in `TaskDetailsDialogContent`
 **PRs:** https://github.com/recoupable/chat/pull/1593
 **Notes:** API already returns `recent_runs` and `upcoming` — only UI changes needed. Both sections hidden when empty.
+
+---
+
+## [2026-03-21] Artist Intel Pack — Gatsby Grace test + pre-market A&R fix
+
+**Prompt:** Test it with artist Gatsby-Grace and show me results
+**Status:** completed
+**Changes:**
+- `api`: Fixed A&R rationale bug in `computeArtistOpportunityScores.ts` — artists with <1000 followers AND <10 popularity (e.g. Gatsby Grace: 2 followers, 0 popularity) were incorrectly labeled "established/saturated". They now get the "Pre-market artist — highest early-discovery upside" rationale with a +10 discovery bonus (arScore goes from 40 → 50 for pre-market acts).
+- `api`: Added `lib/artistIntel/__tests__/computeArtistOpportunityScores.test.ts` — 6 tests covering pre-market detection, high-follower/low-popularity distinction, music analysis paths, and weighted overall score.
+- `api`: Added 8 Gatsby Grace integration tests to `generateArtistIntelPack.test.ts` using real Spotify data (ID: `7ljukJB2Ctl0T4vCoYfb2x`, 2 followers, 0 popularity, no genres). Mocks now include `getRelatedArtistsData`.
+- `api`: Fixed `formatArtistIntelPackAsMarkdown.test.ts` — `basePack` mock was missing `peer_benchmark`, `opportunity_scores`, `catalog_depth` fields added in earlier iterations; all 21 tests now pass.
+- Total: 45 artistIntel tests passing (was 31).
+**PRs:** Pushed to `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:**
+- **Gatsby Grace real Spotify data:** Spotify ID `7ljukJB2Ctl0T4vCoYfb2x`, name "Gatsby Grace", 2 followers, 0 popularity, no genres, top tracks "Stay" and "Running" (both 0 popularity, no preview URLs). This is a genuinely pre-market artist.
+- **Expected Intel Pack output for Gatsby Grace:** Sync 30/100 (weak), Playlist 35/100 (weak), A&R 50/100 (moderate — pre-market bonus), Brand 35/100 (weak), Overall 37/100. Catalog type: Emerging. No music DNA (no preview URL). No peer benchmark (no Spotify related artists). AI copy focuses on early-discovery angle.
+- **Test could not run live** because preview deployment (`recoup-api-git-agent-u0ajm7x8fbr-imp-a4ba93-recoupable-ad724970.vercel.app`) returns 401 for the sandbox's RECOUP_API_KEY — the preview environment likely uses a different PRIVY_PROJECT_SECRET hash than production. Production API (`recoup-api.vercel.app`) doesn't have this endpoint yet (unreleased branch).
