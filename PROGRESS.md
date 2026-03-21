@@ -158,6 +158,26 @@
 - https://github.com/recoupable/api/pull/new/agent/remove-org-api-key-logic
 **Notes:** Only `validateAccountIdOverride.ts` was changed in auth. The `buildGet*Params` functions that receive `orgId` from auth context don't need changes — when a personal key accesses via shared org, `orgId` in the auth context stays `null`, and the query params builders already handle `orgId: null` by not filtering on org. The access gate is purely in `validateAccountIdOverride`.
 
+## [2026-03-21] Artist Intel Pack — Industry-Grade Outputs for Artists & Labels
+
+**Prompt:** How is this helpful to artists and labels? What would make it more valuable?
+**Status:** completed
+**Changes:**
+- `api`: Upgraded `ArtistMarketingCopy` interface — added 5 new high-value industry outputs:
+  - `artist_one_sheet` — industry-standard one-pager (bio, stats, comps, contact)
+  - `ar_memo` — A&R discovery brief for label meetings (comps + momentum + recommendation)
+  - `sync_brief` — sync licensing brief for music supervisors with specific placement use cases (TV/film/ads)
+  - `spotify_playlist_targets` — 8–10 named Spotify editorial playlists to pitch (e.g., "New Music Friday", "Pollen", "bedroom pop") — not just "pitch to curators"
+  - `brand_partnership_pitch` — 3–4 brand alignments with pitch angle and activation type
+- `api`: `formatArtistIntelPackAsMarkdown.ts` — restructured report layout:
+  - New `## Industry Pack` section leads (one-sheet, A&R memo, sync brief, playlist targets, brand pitch)
+  - `## Outreach & Social` section now secondary (pitch email, press release, social captions)
+  - `## Recent Web Context` renamed to `## Recent News & Press`
+- `api`: Updated AI system prompt to "senior music industry executive" with A&R, sync, brand partnership, artist management framing
+- `api`: Updated tests — `mockMarketingCopy` includes new fields, formatter tests cover new sections (21 format tests + 10 integration tests = 31 total, all green)
+**PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:** The key insight from the feedback: social media captions are the *least* industry-specific output. Real value for artists = one-sheet + sync brief + named playlist targets. Real value for labels = A&R memo with comps. Social captions remain but are deprioritized. The `spotify_playlist_targets` field is now a `string[]` of actual playlist names — much more actionable than a generic pitch paragraph.
+
 ---
 
 ## Known Issues / Next Steps
