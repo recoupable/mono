@@ -301,3 +301,22 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** The MCP tool output design change is the biggest UX win — chat now shows a nicely formatted intelligence report instead of a raw JSON blob. The `formatted_report` field in the API response lets any REST consumer also display the pre-formatted version. `ArtistWebContext.results` (array of search results) was removed; it is now just `{ summary, citations }` — update any consumers that depended on `.results`.
 
 ---
+
+## [2026-03-21] Tasks Popup — Show Last Runs and Upcoming Runs
+
+**Prompt:** Task detail popup on /tasks page should show last runs and upcoming scheduled runs from the API (recent_runs / upcoming fields).
+**Status:** completed
+**Changes:**
+- `chat`: Extended `Task` type in `lib/tasks/getTasks.ts` to include `recent_runs?: TaskRunItem[]` and `upcoming?: string[]` (fields already returned by the API). Updated `useScheduledActions`, `TasksList`, `TaskDetailsDialog`, `TaskDetailsDialogContent` to use `Task` instead of `Tables<"scheduled_actions">`. Created `TaskRecentRunsSection.tsx` (shows last N runs with status badge, timestamp, duration) and `TaskUpcomingRunsSection.tsx` (shows next run datetimes). Both sections are hidden when data is absent.
+**PRs:** https://github.com/recoupable/chat/pull/1593
+**Notes:** The API already returns `recent_runs` and `upcoming` in the tasks array. The `Task` type extends the DB row type so all existing components remain compatible.
+
+---
+
+## [2026-03-21] Chat - last and next runs in task popup
+**Prompt:** Show last / upcoming runs when clicking a scheduled task on /tasks page
+**Status:** completed
+**Changes:**
+- chat: Added `TaskRecentRunsSection` and `TaskUpcomingRunsSection` components; extended `Task` type to include `recent_runs` and `upcoming`; surfaced these fields in `TaskDetailsDialogContent`
+**PRs:** https://github.com/recoupable/chat/pull/1593
+**Notes:** API already returns `recent_runs` and `upcoming` — only UI changes needed. Both sections hidden when empty.
