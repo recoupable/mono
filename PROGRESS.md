@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-21
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -199,5 +199,24 @@ chat (frontend) → api (backend) → Supabase (database)
 - `docs`: Renamed `total_privy_users` → `total_privy_accounts` in `api-reference/openapi.json` (required field list, property name, and description).
 **PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-docs---added-resp-1773769254740` on `recoupable/docs`.
 **Notes:** Matches the API response field naming convention (accounts, not users).
+
+---
+
+## [2026-03-21] Update Next.js to 16.2.1 across all submodules
+**Prompt:** Update all codebases to the latest version of Next.js (16.2) per https://nextjs.org/blog/next-16-2-ai and ensure no breaking changes.
+**Status:** completed
+**Changes:**
+- chat: `next` 16.0.10 → 16.2.1, `eslint-config-next` 14.2.13 → 16.2.1; branch `feat/update-nextjs-16.2` pushed
+- api: `next` 16.0.10 → 16.2.1, `eslint-config-next` 15.1.7 → 16.2.1; branch `feat/update-nextjs-16.2` pushed
+- admin: `next` 16.0.10 → 16.2.1, `eslint-config-next` ^15.3.0 → 16.2.1; branch `feat/update-nextjs-16.2` pushed
+- bash: `next` 16.2.0-canary.26 → 16.2.1 (promoted to stable), `eslint-config-next` 16.1.6 → 16.2.1; branch pushed
+- marketing: `next` 16.0.10 → 16.2.1 in both apps/web and apps/ops, `eslint-config-next` 14.2.13 → 16.2.1; branch pushed
+**PRs:** `gh` CLI not available in sandbox — branches pushed to `feat/update-nextjs-16.2` on each repo. PRs must be created manually:
+- https://github.com/recoupable/chat/pull/new/feat/update-nextjs-16.2 (target: `test`)
+- https://github.com/recoupable/api/pull/new/feat/update-nextjs-16.2 (target: `test`)
+- https://github.com/recoupable/admin/pull/new/feat/update-nextjs-16.2 (target: `main`)
+- https://github.com/recoupable/bash/pull/new/feat/update-nextjs-16.2 (target: `main`)
+- https://github.com/recoupable/marketing/pull/new/feat/update-nextjs-16.2 (target: `main`)
+**Notes:** 16.2 has zero breaking changes — all additions (browser log forwarding, dev lock file, agent scaffolding). `pnpm install` ran successfully in all submodules with updated lock files.
 
 ---
