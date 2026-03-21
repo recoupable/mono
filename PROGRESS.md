@@ -439,3 +439,14 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** 16.2 has zero breaking changes — all additions (browser log forwarding, dev lock file, agent scaffolding). `pnpm install` ran successfully in all submodules with updated lock files.
 
 ---
+
+## [2026-03-21] Chat — Update streamdown to v2.5.0
+
+**Prompt:** Update chat to the latest streamdown (https://github.com/vercel/streamdown).
+**Status:** completed
+**Changes:**
+- `chat`: Bumped `streamdown` from `^1.1.6` → `^2.5.0` in `package.json` + `pnpm-lock.yaml`. Updated Tailwind `@source` glob in `app/globals.css` from `dist/index.js` → `dist/*.js` (v2 distributes multiple chunks). No changes needed to `components/ai-elements/response.tsx` — `import { Streamdown } from "streamdown"` is unchanged in v2.
+**PRs:** Branch `feature/update-streamdown-v2` pushed to `recoupable/chat` (target: `test`) — open PR at: https://github.com/recoupable/chat/pull/new/feature/update-streamdown-v2
+**Notes:** v2.5.0 key changes: plugin architecture (code highlighting still bundled by default), horizontal scroll on code blocks, staggered animation delays, new props (`lineNumbers`, `icons`, `dir`, `controls`), Tailwind v3/v4 compat fixes. The only file requiring a code change was `globals.css` (`@source` glob). Full build could not be verified in-sandbox (OOM) but TypeScript API is confirmed compatible via inspection of `dist/index.d.ts`.
+
+---
