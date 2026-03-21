@@ -232,7 +232,7 @@ chat (frontend) → api (backend) → Supabase (database)
 - `api`: New MCP tool `generate_artist_intel_pack` in `lib/mcp/tools/artistIntel/` — registered in `lib/mcp/tools/index.ts`, available in the AI agent chat UI
 - 10 unit tests, all green. All 218 test files passing (1514 tests). No lint errors on new files.
 **PRs:**
-- api: `feature/artist-intel-pack` → test: https://github.com/recoupable/api/pull/new/feature/artist-intel-pack
+- api: `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → test: https://github.com/recoupable/api/pull/328
 **Notes:**
 - **Why this is WOW:** Type an artist name → in ~30 seconds get a complete professional marketing package powered by NVIDIA AI audio analysis. Artists can use this immediately for playlist pitching, PR outreach, and social campaigns.
 - **Key insight:** Spotify `preview_url` on tracks is a public 30-second MP3 clip — MusicFlamingo accepts any audio URL, so we can analyze ANY artist's music without auth or file uploads.
