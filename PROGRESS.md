@@ -252,3 +252,13 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** The API already returns `recent_runs` and `upcoming` in the tasks array. The `Task` type extends the DB row type so all existing components remain compatible.
 
 ---
+
+---
+
+## [2026-03-21] Chat - last and next runs in task popup
+**Prompt:** Show last / upcoming runs when clicking a scheduled task on /tasks page
+**Status:** completed
+**Changes:**
+- chat: Added `TaskRecentRunsSection` and `TaskUpcomingRunsSection` components; extended `Task` type to include `recent_runs` and `upcoming`; surfaced these fields in `TaskDetailsDialogContent`
+**PRs:** https://github.com/recoupable/chat/pull/1593
+**Notes:** API already returns `recent_runs` and `upcoming` — only UI changes needed. Both sections hidden when empty.
