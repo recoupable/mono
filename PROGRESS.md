@@ -214,3 +214,30 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** Merge the `api` PR first (so x-api-key works on /api/keys), then the `cli` PR. `accounts upgrade` has no backend — it just prints the upgrade URL since no Stripe/subscription endpoint exists. `POST /api/accounts` returns `{ data: { account_id, email, ... } }` (nested shape — legacy behavior from existing handler).
 
 ---
+
+## [2026-03-21] Artist Intelligence Pack — Spotify + MusicFlamingo AI + Perplexity → Marketing Copy
+
+**Prompt:** Implement the wildest, most WOW demoable feature using underutilized API keys and services.
+**Status:** completed
+**Changes:**
+- `api`: New domain `lib/artistIntel/` (7 files + 1 test file):
+  - `generateArtistIntelPack.ts` — main orchestrator; fetches Spotify → runs MusicFlamingo + Perplexity in parallel → AI synthesis
+  - `getArtistSpotifyData.ts` — artist profile + top tracks with 30-second Spotify preview URLs (public MP3s, no auth needed)
+  - `getArtistMusicAnalysis.ts` — runs 4 MusicFlamingo NVIDIA 8B presets in parallel on the Spotify preview: `catalog_metadata` (BPM/key/genre/mood/instruments), `audience_profile` (demographics), `playlist_pitch` (target playlists), `mood_tags` (vibe tags)
+  - `getArtistWebContext.ts` — Perplexity search for recent press, streaming news, trends
+  - `buildArtistMarketingCopy.ts` — AI synthesizes all data into: playlist pitch email, Instagram/TikTok/Twitter captions, press release opener, key talking points
+  - `validateArtistIntelBody.ts` — Zod validation (artist_name required)
+  - `generateArtistIntelPackHandler.ts` — route handler with `validateAuthContext`
+- `api`: New endpoint `POST /api/artists/intel` — takes `{ artist_name }`, returns complete intelligence pack
+- `api`: New MCP tool `generate_artist_intel_pack` in `lib/mcp/tools/artistIntel/` — registered in `lib/mcp/tools/index.ts`, available in the AI agent chat UI
+- 10 unit tests, all green. All 218 test files passing (1514 tests). No lint errors on new files.
+**PRs:**
+- api: `feature/artist-intel-pack` → test: https://github.com/recoupable/api/pull/new/feature/artist-intel-pack
+**Notes:**
+- **Why this is WOW:** Type an artist name → in ~30 seconds get a complete professional marketing package powered by NVIDIA AI audio analysis. Artists can use this immediately for playlist pitching, PR outreach, and social campaigns.
+- **Key insight:** Spotify `preview_url` on tracks is a public 30-second MP3 clip — MusicFlamingo accepts any audio URL, so we can analyze ANY artist's music without auth or file uploads.
+- **MusicFlamingo endpoint:** `https://sidney-78147--music-flamingo-musicflamingo-generate.modal.run` (Modal serverless, already live).
+- **Demo flow:** In the chat UI, ask the agent: "Generate an artist intelligence pack for [artist name]" — `generate_artist_intel_pack` MCP tool fires automatically and returns the full pack.
+- **Parallel processing:** Spotify first (required for preview URL), then MusicFlamingo + Perplexity fire simultaneously, then AI synthesis. Graceful degradation if any source fails.
+
+---
