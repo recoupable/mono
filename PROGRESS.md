@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-21
+> Last updated: 2026-03-21 (updated)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -239,5 +239,21 @@ chat (frontend) → api (backend) → Supabase (database)
 - **MusicFlamingo endpoint:** `https://sidney-78147--music-flamingo-musicflamingo-generate.modal.run` (Modal serverless, already live).
 - **Demo flow:** In the chat UI, ask the agent: "Generate an artist intelligence pack for [artist name]" — `generate_artist_intel_pack` MCP tool fires automatically and returns the full pack.
 - **Parallel processing:** Spotify first (required for preview URL), then MusicFlamingo + Perplexity fire simultaneously, then AI synthesis. Graceful degradation if any source fails.
+
+---
+
+## [2026-03-21] Artist Intel Pack — Output Design Improvements
+
+**Prompt:** What would make this feature better? What is the output results and design?
+**Status:** completed
+**Changes:**
+- `api`: Typed `ArtistMusicAnalysis` fields — replaced `unknown` with `CatalogMetadata`, `AudienceProfile`, `MoodTagsResult`, and `string` for playlist_pitch (`lib/artistIntel/getArtistMusicAnalysis.ts`).
+- `api`: Upgraded `getArtistWebContext` from Perplexity search snippets joined with ` | ` to `chatWithPerplexity` (sonar-pro) — returns a researched narrative summary with citations.
+- `api`: New `lib/artistIntel/formatArtistIntelPackAsMarkdown.ts` — formats the full pack as a structured markdown report with sections: Artist Profile, Music DNA (MusicFlamingo AI), Recent Web Context, Marketing Pack (pitch email, social captions, press release, talking points).
+- `api`: `ArtistIntelPack` now includes `formatted_report: string` — the pre-formatted markdown is included in the REST API response.
+- `api`: `generate_artist_intel_pack` MCP tool now returns `formatted_report` directly (via `getCallToolResult`) instead of raw JSON, so the chat AI renders beautiful formatted output without needing to reformat the data.
+- `api`: 15 new formatter tests; 1529 total passing. All lint-clean on new files.
+**PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:** The MCP tool output design change is the biggest UX win — chat now shows a nicely formatted intelligence report instead of a raw JSON blob. The `formatted_report` field in the API response lets any REST consumer also display the pre-formatted version. `ArtistWebContext.results` (array of search results) was removed; it is now just `{ summary, citations }` — update any consumers that depended on `.results`.
 
 ---
