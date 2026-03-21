@@ -241,3 +241,14 @@ chat (frontend) → api (backend) → Supabase (database)
 - **Parallel processing:** Spotify first (required for preview URL), then MusicFlamingo + Perplexity fire simultaneously, then AI synthesis. Graceful degradation if any source fails.
 
 ---
+
+## [2026-03-21] Tasks Popup — Show Last Runs and Upcoming Runs
+
+**Prompt:** Task detail popup on /tasks page should show last runs and upcoming scheduled runs from the API (recent_runs / upcoming fields).
+**Status:** completed
+**Changes:**
+- `chat`: Extended `Task` type in `lib/tasks/getTasks.ts` to include `recent_runs?: TaskRunItem[]` and `upcoming?: string[]` (fields already returned by the API). Updated `useScheduledActions`, `TasksList`, `TaskDetailsDialog`, `TaskDetailsDialogContent` to use `Task` instead of `Tables<"scheduled_actions">`. Created `TaskRecentRunsSection.tsx` (shows last N runs with status badge, timestamp, duration) and `TaskUpcomingRunsSection.tsx` (shows next run datetimes). Both sections are hidden when data is absent.
+**PRs:** https://github.com/recoupable/chat/pull/1593
+**Notes:** The API already returns `recent_runs` and `upcoming` in the tasks array. The `Task` type extends the DB row type so all existing components remain compatible.
+
+---
