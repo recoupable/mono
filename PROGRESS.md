@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-21
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -52,16 +52,15 @@
 
 ---
 
-### `cli` (on `main`, v0.1.11)
+### `cli` (on `feature/accounts-and-keys-commands`)
 **Latest commits:**
+- `8b090df` feat: add accounts and keys commands to CLI
 - `a09929a` chore: bump version to 0.1.11
 - `e4d4548` feat: add `recoup content` command suite (#13)
-- `07e2b85` feat: add `music analyze` command (#7)
-- `056257a` feat: add `--account` flag to notifications command (#12)
 
-**Status:** Stable. Published to npm as `0.1.11`.
+**Status:** PR open targeting `main`. 92 tests passing.
 
-**What to know:** `recoup content` command suite added. `music analyze` command added. Version auto-bumped via CI.
+**What to know:** Added `recoup accounts create/upgrade` and `recoup keys list/create/delete`. Added `del()` to client.ts. Keys commands require the API PR (`feature/keys-api-key-auth`) to be merged first so x-api-key auth works on `/api/keys` endpoints.
 
 ---
 
@@ -202,12 +201,16 @@ chat (frontend) → api (backend) → Supabase (database)
 
 ---
 
-## [2026-03-21] CLI — Account Creation & API Key Research
+## [2026-03-21] CLI — accounts and keys commands
 
-**Prompt:** Does the CLI have a way for the user to create an account and API key?
-**Status:** completed (research only, no code changes)
-**Changes:** none
-**PRs:** none
-**Notes:** The CLI (v0.1.11) has **no** account creation or API key management commands. Auth is purely manual: users must obtain an API key from the developer dashboard and set `RECOUP_API_KEY` env var. The 8 command groups are: `whoami`, `artists`, `chats`, `organizations`, `sandboxes`, `songs`, `notifications`, `content`, `tasks`. If we want `recoup login` / `recoup keys create` flows, that's a new feature to build. Auth reads `RECOUP_API_KEY` via `src/config.ts`; all requests pass it as `x-api-key` header via `src/client.ts`.
+**Prompt:** Add the ability for users to create an account, upgrade to pro, and create and delete their API keys via the CLI.
+**Status:** completed
+**Changes:**
+- `cli`: New `src/commands/accounts.ts` — `recoup accounts create --email/--wallet` (POST /api/accounts, no auth required) and `recoup accounts upgrade` (prints https://chat.recoupable.com/settings). New `src/commands/keys.ts` — `recoup keys list` (GET /api/keys), `recoup keys create --name` (POST /api/keys), `recoup keys delete --id` (DELETE /api/keys). Added `del()` to `src/client.ts`. Commands registered in `src/bin.ts`. 18 new tests; 92 total passing.
+- `api`: Updated `lib/keys/getApiKeysHandler.ts`, `createApiKeyHandler.ts`, `deleteApiKeyHandler.ts` to use `validateAuthContext` instead of `getAuthenticatedAccountId` so CLI users with `RECOUP_API_KEY` (x-api-key header) can manage keys.
+**PRs:** Branches pushed — PRs need to be opened via GitHub (gh not available in sandbox):
+- cli: `feature/accounts-and-keys-commands` → main: https://github.com/recoupable/cli/pull/new/feature/accounts-and-keys-commands
+- api: `feature/keys-api-key-auth` → test: https://github.com/recoupable/api/pull/new/feature/keys-api-key-auth
+**Notes:** Merge the `api` PR first (so x-api-key works on /api/keys), then the `cli` PR. `accounts upgrade` has no backend — it just prints the upgrade URL since no Stripe/subscription endpoint exists. `POST /api/accounts` returns `{ data: { account_id, email, ... } }` (nested shape — legacy behavior from existing handler).
 
 ---
