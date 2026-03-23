@@ -201,3 +201,19 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** Matches the API response field naming convention (accounts, not users).
 
 ---
+
+## [2026-03-23] Admin + Docs + API — Coding Agent Pull Request Tracking
+
+**Prompt:** Update the /coding admin page to show pull requests opened by the coding agent. For each Slack tag (prompt), show which PRs were opened, which codebase, and the original prompt. Add a PR line to the chart and a PR column to the table.
+**Status:** completed
+**Changes:**
+- `api`: Updated `lib/admins/slack/fetchSlackMentions.ts` — added `pull_requests: string[]` to `SlackTag` interface. For each mention, fetches thread replies via `conversations.replies` Slack API and extracts GitHub PR URLs from bot responses using regex (`https://github.com/.../pull/\d+`). Updated `__tests__/getSlackTagsHandler.test.ts` mock data to include `pull_requests`.
+- `docs`: Added `pull_requests` array field to `GET /api/admins/coding/slack` response schema in `openapi.json`.
+- `admin`: Added `pull_requests: string[]` to `SlackTag` type. Updated `getTagsByDate` to return `pull_request_count` per date alongside `count`. Updated `AdminLineChart` to support optional `secondLine` prop (renders second recharts `<Line>` with legend). Added "Pull Requests" column to `SlackTagsColumns` (clickable `#N` links). Updated `CodingAgentSlackTagsPage` to render Tags vs PRs dual-line chart and updated loading skeleton.
+**PRs:** Branches pushed to `feature/coding-agent-pr-tracking` — PRs need to be opened via GitHub:
+- api: `feature/coding-agent-pr-tracking` → `test`: https://github.com/recoupable/api/pull/new/feature/coding-agent-pr-tracking
+- admin: `feature/coding-agent-pr-tracking` → `main`: https://github.com/recoupable/admin/pull/new/feature/coding-agent-pr-tracking
+- docs: `feature/coding-agent-pr-tracking` → `main`: https://github.com/recoupable/docs/pull/new/feature/coding-agent-pr-tracking
+**Notes:** PR URLs are extracted from Slack bot reply text using the pattern `https://github.com/[owner]/[repo]/pull/[number]`. Slack wraps URLs in `<URL>` or `<URL|label>` format — the regex handles this because `>` is excluded from the match. The `AdminLineChart` now supports an optional `secondLine` prop; the `PrivyLoginsPage` that also uses `AdminLineChart` is unaffected (backward compatible).
+
+---
