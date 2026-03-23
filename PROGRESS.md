@@ -251,6 +251,22 @@
 
 ---
 
+## [2026-03-23] Admin /coding page — PR Merged Status
+
+**Prompt:** Update the /coding admin page to show which PRs opened by the coding agent have been merged. New graph line, ship emoji in table, merged PRs top stat.
+**Status:** completed
+**Changes:**
+- `docs`: Added `GET /api/admins/coding/pr` to `openapi.json`; created `api-reference/admins/coding-pr.mdx`; added page to `docs.json` Admins nav group.
+- `api`: New `lib/admins/pr/fetchGithubPrMergedStatus.ts` — calls GitHub REST API (`/pulls/{n}/merge`; 204=merged, 404=not merged). New `validateGetCodingPrQuery.ts` (accepts `pull_requests[]` repeated query params). New `getPrMergedStatusHandler.ts`. New `app/api/admins/coding/pr/route.ts`. 10 unit tests, all passing.
+- `admin`: New `types/coding-agent.ts` — `CodingPrStatus`, `CodingPrStatusResponse`. New `lib/recoup/fetchCodingPrStatus.ts` + `hooks/useCodingPrStatus.ts` (returns `Set<string>` of merged PR URLs). Extended `getTagsByDate` with `merged_pr_count`. Extended `AdminLineChart` with `thirdLine` prop. `SlackTagsColumns` refactored to `createSlackTagsColumns(mergedPrUrls?)` factory — shows 🚢 emoji for merged PRs. `SlackTagsTable` accepts `mergedPrUrls` prop. `CodingAgentSlackTagsPage` wires it all: merged PRs top stat, "PRs Merged" green chart line, ship emoji in table.
+**PRs:** Branches pushed — PRs need to be opened via GitHub (gh not available):
+- docs: `feature/coding-pr-merged-status` → main: https://github.com/recoupable/docs/pull/new/feature/coding-pr-merged-status
+- api: `feature/coding-pr-merged-status` → test: https://github.com/recoupable/api/pull/new/feature/coding-pr-merged-status
+- admin: `feature/coding-pr-merged-status` → main: https://github.com/recoupable/admin/pull/new/feature/coding-pr-merged-status
+**Notes:** The `GITHUB_TOKEN` env var is used if present for authenticated GitHub API calls (higher rate limit). Without it, unauthenticated requests (60/hr) are used — sufficient for typical admin use. The `/coding` page first fetches Slack tags, then fires a second request to `/api/admins/coding/pr` with all unique PR URLs found. Merged PR count in top stats reflects total unique merged PR URLs across all tags in the selected period.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
