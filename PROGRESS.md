@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-21 (updated)
+> Last updated: 2026-03-23 (updated)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -354,3 +354,16 @@ chat (frontend) → api (backend) → Supabase (database)
 - **Gatsby Grace real Spotify data:** Spotify ID `7ljukJB2Ctl0T4vCoYfb2x`, name "Gatsby Grace", 2 followers, 0 popularity, no genres, top tracks "Stay" and "Running" (both 0 popularity, no preview URLs). This is a genuinely pre-market artist.
 - **Expected Intel Pack output for Gatsby Grace:** Sync 30/100 (weak), Playlist 35/100 (weak), A&R 50/100 (moderate — pre-market bonus), Brand 35/100 (weak), Overall 37/100. Catalog type: Emerging. No music DNA (no preview URL). No peer benchmark (no Spotify related artists). AI copy focuses on early-discovery angle.
 - **Test could not run live** because preview deployment (`recoup-api-git-agent-u0ajm7x8fbr-imp-a4ba93-recoupable-ad724970.vercel.app`) returns 401 for the sandbox's RECOUP_API_KEY — the preview environment likely uses a different PRIVY_PROJECT_SECRET hash than production. Production API (`recoup-api.vercel.app`) doesn't have this endpoint yet (unreleased branch).
+
+---
+
+## [2026-03-23] Coding Agent Slack Tags Analytics — Admin + API + Docs
+
+**Prompt:** @U0AJM7X8FBR Admin + Docs + API - we want a new admin page to view analytics for the coding-agent task triggered by slack tags. The first analytic which should be focused on is the number of times "Recoup Coding Agent" is tagged on slack. Shows both a graph and a table of who tagged the agent, what the prompt was, and the timestamp.
+**Status:** completed
+**Changes:**
+- docs: Added `GET /api/admins/coding-agent/slack-tags` to `openapi.json`; new `api-reference/admins/coding-agent-slack-tags.mdx` page; updated `docs.json` navigation
+- api: `lib/admins/coding-agent/fetchSlackMentions.ts` — pulls from Slack API (auth.test → conversations.list → conversations.history → users.info); `validateGetSlackTagsQuery.ts`, `getSlackTagsHandler.ts`, `route.ts`; 11 tests passing
+- admin: New `/coding-agent` page with period selector, total tag count, line chart of tags per day, sortable table (Tagged By with avatar, Prompt, Channel, Timestamp); "Coding Agent Tags" button on Admin Dashboard
+**PRs:** pending (see PR_CREATED lines in agent output)
+**Notes:** Ensure `SLACK_BOT_TOKEN` has `channels:history`, `groups:history`, `conversations:history`, and `users:read` OAuth scopes.
