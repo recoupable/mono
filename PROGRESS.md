@@ -88,6 +88,22 @@
 
 ---
 
+## [2026-03-23] /files Page — Drag-and-Drop Upload to GitHub Org Submodule
+
+**Prompt:** /files page drag-and-drop — allow dragging files onto the /files page to add them to a GitHub org submodule repo.
+**Status:** completed
+**Changes:**
+- `docs`: Added `POST /api/sandboxes/files` to `openapi.json` (multipart/form-data schema), new `api-reference/sandboxes/upload.mdx`, added upload page to Sandboxes nav group in `docs.json`.
+- `api`: New `lib/github/commitFileToRepo.ts` — uses GitHub Contents API to create or update a file (handles existing SHA for updates). New `lib/sandbox/uploadSandboxFilesHandler.ts` — accepts multipart form data (files + folder path), resolves git submodule paths via existing `resolveSubmodulePath`, commits each file to the correct repo. New `app/api/sandboxes/files/route.ts` — POST handler wired up. 6 TDD tests all passing.
+- `chat`: New `lib/sandboxes/uploadFilesToSandbox.ts` — fetches `POST /api/sandboxes/files` with Bearer auth. New `hooks/useUploadSandboxFiles.ts` — React hook wrapping upload with loading/error state. Updated `components/Sandboxes/SandboxFileTree.tsx` — added `useDragAndDrop` zone over the file tree panel; drop target defaults to first org folder, updates to parent of selected file; uploads on drop and calls `refetch()` after success.
+**PRs:** Branches pushed to `feature/sandbox-file-upload` — PRs need to be opened via GitHub:
+- api: `feature/sandbox-file-upload` → test: https://github.com/recoupable/api/pull/new/feature/sandbox-file-upload
+- chat: `feature/sandbox-file-upload` → test: https://github.com/recoupable/chat/pull/new/feature/sandbox-file-upload
+- docs: `feature/sandbox-file-upload` → main: https://github.com/recoupable/docs/pull/new/feature/sandbox-file-upload
+**Notes:** Files dropped onto the /files page are committed directly to the GitHub repo that the account's git submodule points to (e.g., `.openclaw/workspace/orgs/myorg/` resolves to the org's repo via `.gitmodules`). The drop target path is shown above the file tree with a dotted underline — clicking it resets to auto-detect mode (uses parent of selected file, or first org folder).
+
+---
+
 ## [2026-03-16] Account Task Runs Page + Pulse Sub-Task Tagging
 
 **Prompt:** Admin page to view recent Pulse task runs for a specific account (e.g., "What Pulse emails has Alexis received in the past 7 days?")
