@@ -204,6 +204,22 @@
 
 ---
 
+## [2026-03-23] Admin + Docs + API — Coding Agent Slack Tags Analytics Page
+
+**Prompt:** Create an admin page to view analytics for Slack tags of the Recoup Coding Agent — show total count, a chart of tags over time, and a table of who tagged the agent, the prompt, and the timestamp.
+**Status:** completed
+**Changes:**
+- `docs`: Added `GET /api/admins/coding-agent/slack-tags` to `openapi.json` (full response schema with `status`, `total`, `tags[]`). New `api-reference/admins/coding-agent-slack-tags.mdx`. Updated `docs.json` nav (Admins group).
+- `api`: New `lib/admins/coding-agent/fetchSlackMentions.ts` — calls Slack Web API directly (`auth.test` → `conversations.list` → `conversations.history`) using `SLACK_BOT_TOKEN` as source of truth. Filters messages containing `<@BOT_USER_ID>`, strips mention from prompt, resolves user display names + avatars via `users.info` (cached). Supports period filtering (all/daily/weekly/monthly). New `validateGetSlackTagsQuery.ts`, `getSlackTagsHandler.ts`, `app/api/admins/coding-agent/slack-tags/route.ts`. 11 unit tests, all passing.
+- `admin`: New `types/coding-agent.ts`, `lib/recoup/fetchSlackTags.ts`, `hooks/useSlackTags.ts`, `lib/coding-agent/getTagsByDate.ts`. New `/coding-agent` page with period selector, total count, line chart (tags per day), and sortable table (Tagged By with avatar, Prompt, Channel, Timestamp). Added "Coding Agent Tags" nav button to `AdminDashboard`.
+**PRs:** Branches pushed — PRs need to be opened via GitHub:
+- docs: `feature/coding-agent-slack-tags` → main: https://github.com/recoupable/docs/pull/new/feature/coding-agent-slack-tags
+- api: `feature/coding-agent-slack-tags` → test: https://github.com/recoupable/api/pull/new/feature/coding-agent-slack-tags
+- admin: `feature/coding-agent-slack-tags` → main: https://github.com/recoupable/admin/pull/new/feature/coding-agent-slack-tags
+**Notes:** The Slack API approach paginate all channels the bot is in and scans message history. For large workspaces with many channels and messages this may be slow — consider caching or storing mentions in Supabase on `onNewMention` if latency becomes an issue. `SLACK_BOT_TOKEN` must have `channels:history`, `groups:history`, `conversations:history`, and `users:read` OAuth scopes.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
