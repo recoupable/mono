@@ -446,3 +446,19 @@ chat (frontend) → api (backend) → Supabase (database)
 - chat → test: https://github.com/recoupable/chat/pull/1594
 - docs → main: https://github.com/recoupable/docs/pull/76
 **Notes:** Drop target defaults to first org folder, updates on file click. Shows toast progress and refreshes tree after upload.
+
+---
+
+## [2026-03-23] Admin + Docs + API — Coding page PR merged status
+
+**Prompt:** @U0AJM7X8FBR Admin + Docs + API - we want to update the /coding page in the admin codebase to view analytics around pull requests MERGED by the coding-agent. Of the pull requests opened by the coding agent, which have been merged?
+**Status:** completed
+**Changes:**
+- `docs`: Added `GET /api/admins/coding/pr` to `openapi.json`; created `api-reference/admins/coding-pr.mdx`; added to Admins nav group in `docs.json`.
+- `api`: New route `app/api/admins/coding/pr/route.ts`; `lib/admins/pr/fetchGithubPrMergedStatus.ts` (checks GitHub `/pulls/{n}/merge`); `lib/admins/pr/validateGetCodingPrQuery.ts`; `lib/admins/pr/getPrMergedStatusHandler.ts`; 10 unit tests all passing.
+- `admin`: `hooks/useCodingPrStatus.ts`; `lib/recoup/fetchCodingPrStatus.ts`; extended `AdminLineChart` with `thirdLine` prop (PRs Merged line); `SlackTagsColumns` shows 🚢 emoji on merged PR links; top stats show merged PR count; `getTagsByDate` extended with `merged_pr_count`.
+**PRs:**
+- docs → main: https://github.com/recoupable/docs/pull/77
+- admin → main: https://github.com/recoupable/admin/pull/22
+- api → test: https://github.com/recoupable/api/pull/334
+**Notes:** GitHub merged status uses `GET /repos/{owner}/{repo}/pulls/{pull_number}/merge` — 204 = merged, 404 = not merged.
