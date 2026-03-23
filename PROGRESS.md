@@ -414,3 +414,19 @@ chat (frontend) → api (backend) → Supabase (database)
 - admin: `feature/coding-agent-pr-tracking` → `main`: https://github.com/recoupable/admin/pull/new/feature/coding-agent-pr-tracking
 - docs: `feature/coding-agent-pr-tracking` → `main`: https://github.com/recoupable/docs/pull/new/feature/coding-agent-pr-tracking
 **Notes:** PR URLs are extracted from Slack bot reply text using the pattern `https://github.com/[owner]/[repo]/pull/[number]`. Slack wraps URLs in `<URL>` or `<URL|label>` format — the regex handles this because `>` is excluded from the match. The `AdminLineChart` now supports an optional `secondLine` prop; the `PrivyLoginsPage` that also uses `AdminLineChart` is unaffected (backward compatible).
+
+---
+
+## [2026-03-23] Chat /files page — Drag-and-Drop File Upload to GitHub Org Submodule
+
+**Prompt:** @U0AJM7X8FBR Chat - /files page - Drag-n-Drop Files. actual: I am unable to drag and drop files on the /files page to add them to my github repository in an org submodule. required: I can drag and drop files on the /files page to add them to my github repository in an org submodule.
+**Status:** completed
+**Changes:**
+- `docs`: Added `api-reference/sandboxes/upload.mdx` (new docs page), updated `api-reference/openapi.json` with `POST /api/sandboxes/files` spec, added upload page to `docs.json` navigation.
+- `api`: Added `lib/github/commitFileToRepo.ts` (GitHub Contents API utility), `lib/sandbox/uploadSandboxFilesHandler.ts` (multipart form handler), `lib/sandbox/__tests__/uploadSandboxFilesHandler.test.ts` (6 TDD tests), `app/api/sandboxes/files/route.ts` (new route).
+- `chat`: Added `lib/sandboxes/uploadFilesToSandbox.ts`, `hooks/useUploadSandboxFiles.ts`, updated `components/Sandboxes/SandboxFileTree.tsx` with drag-and-drop zone.
+**PRs:**
+- api → test: https://github.com/recoupable/api/pull/333
+- chat → test: https://github.com/recoupable/chat/pull/1594
+- docs → main: https://github.com/recoupable/docs/pull/76
+**Notes:** Drop target defaults to first org folder, updates on file click. Shows toast progress and refreshes tree after upload.
