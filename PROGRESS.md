@@ -462,3 +462,17 @@ chat (frontend) → api (backend) → Supabase (database)
 - admin → main: https://github.com/recoupable/admin/pull/22
 - api → test: https://github.com/recoupable/api/pull/334
 **Notes:** GitHub merged status uses `GET /repos/{owner}/{repo}/pulls/{pull_number}/merge` — 204 = merged, 404 = not merged.
+
+---
+
+## [2026-03-23] setup-artist skill — idempotency fix to prevent duplicate directories
+
+**Prompt:** Fix the setup-artist skill (in the skills sub-repo) to be idempotent. Customers reported duplicate artist directories (e.g. two "Gatsby" folders — one with content, one empty). Root cause: skill had no guard against running twice on an already-configured workspace.
+**Status:** completed
+**Changes:**
+- `skills/setup-artist`: Updated `SKILL.md` — added Step 0 idempotency guard (check `status` in `RECOUP.md`; if `active`, stop immediately and report already configured). Added file existence checks in Steps 3–7 so user content is never overwritten. Added two new Principles: "Idempotent by design" and "Work within the existing folder" (explicit warning never to create a new artist-level directory or append to the slug).
+**PRs:** Branch `fix/idempotent-setup` pushed to `recoupable/setup-artist` → target `main`:
+- https://github.com/recoupable/setup-artist/pull/new/fix/idempotent-setup
+**Notes:** The duplicate pattern was plain-name folder (original, with content) + name-with-hex-suffix folder (new, empty). The hex suffix appeared to be a fragment of the artistId being misused as a slug. The fix stops the skill from running at all if status is already `active`. The mono repo skills submodule pointer for setup-artist will need to be bumped once the PR is merged.
+
+---
