@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-17
+> Last updated: 2026-03-23 (updated)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -52,16 +52,15 @@
 
 ---
 
-### `cli` (on `main`, v0.1.11)
+### `cli` (on `feature/accounts-and-keys-commands`)
 **Latest commits:**
+- `8b090df` feat: add accounts and keys commands to CLI
 - `a09929a` chore: bump version to 0.1.11
 - `e4d4548` feat: add `recoup content` command suite (#13)
-- `07e2b85` feat: add `music analyze` command (#7)
-- `056257a` feat: add `--account` flag to notifications command (#12)
 
-**Status:** Stable. Published to npm as `0.1.11`.
+**Status:** PR open targeting `main`. 92 tests passing.
 
-**What to know:** `recoup content` command suite added. `music analyze` command added. Version auto-bumped via CI.
+**What to know:** Added `recoup accounts create/upgrade` and `recoup keys list/create/delete`. Added `del()` to client.ts. Keys commands require the API PR (`feature/keys-api-key-auth`) to be merged first so x-api-key auth works on `/api/keys` endpoints.
 
 ---
 
@@ -159,6 +158,66 @@
 - https://github.com/recoupable/api/pull/new/agent/remove-org-api-key-logic
 **Notes:** Only `validateAccountIdOverride.ts` was changed in auth. The `buildGet*Params` functions that receive `orgId` from auth context don't need changes — when a personal key accesses via shared org, `orgId` in the auth context stays `null`, and the query params builders already handle `orgId: null` by not filtering on org. The access gate is purely in `validateAccountIdOverride`.
 
+## [2026-03-21] Artist Intel Pack — Industry-Grade Outputs for Artists & Labels
+
+**Prompt:** How is this helpful to artists and labels? What would make it more valuable?
+**Status:** completed
+**Changes:**
+- `api`: Upgraded `ArtistMarketingCopy` interface — added 5 new high-value industry outputs:
+  - `artist_one_sheet` — industry-standard one-pager (bio, stats, comps, contact)
+  - `ar_memo` — A&R discovery brief for label meetings (comps + momentum + recommendation)
+  - `sync_brief` — sync licensing brief for music supervisors with specific placement use cases (TV/film/ads)
+  - `spotify_playlist_targets` — 8–10 named Spotify editorial playlists to pitch (e.g., "New Music Friday", "Pollen", "bedroom pop") — not just "pitch to curators"
+  - `brand_partnership_pitch` — 3–4 brand alignments with pitch angle and activation type
+- `api`: `formatArtistIntelPackAsMarkdown.ts` — restructured report layout:
+  - New `## Industry Pack` section leads (one-sheet, A&R memo, sync brief, playlist targets, brand pitch)
+  - `## Outreach & Social` section now secondary (pitch email, press release, social captions)
+  - `## Recent Web Context` renamed to `## Recent News & Press`
+- `api`: Updated AI system prompt to "senior music industry executive" with A&R, sync, brand partnership, artist management framing
+- `api`: Updated tests — `mockMarketingCopy` includes new fields, formatter tests cover new sections (21 format tests + 10 integration tests = 31 total, all green)
+**PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:** The key insight from the feedback: social media captions are the *least* industry-specific output. Real value for artists = one-sheet + sync brief + named playlist targets. Real value for labels = A&R memo with comps. Social captions remain but are deprioritized. The `spotify_playlist_targets` field is now a `string[]` of actual playlist names — much more actionable than a generic pitch paragraph.
+
+---
+
+## [2026-03-21] Artist Intel Pack — Feedback: "Just an Easy Prompt" → Real Data Intelligence
+
+**Prompt:** Feedback: the current output is just an easy prompt. Make it more valuable by thinking deeply.
+**Status:** completed
+**Changes:**
+- `api`: New `lib/spotify/getRelatedArtists.ts` — hits Spotify `/artists/{id}/related-artists` endpoint
+- `api`: New `lib/artistIntel/getRelatedArtistsData.ts` — fetches top 5 related artists by follower count, computes follower/popularity percentile rankings vs the target artist, returns actual Spotify numbers for peer benchmarking
+- `api`: New `lib/artistIntel/computeArtistOpportunityScores.ts` — four algorithmic scores (0–100) computed purely from real data (no AI):
+  - **Sync Score**: BPM range, energy versatility, mood count, production quality, instrument richness
+  - **Playlist Score**: danceability × energy × Spotify popularity
+  - **A&R Score**: popularity-to-follower efficiency ratio (the classic "undervalued artist" signal), peer gap below median
+  - **Brand Score**: lifestyle tag count, platform breadth, demographic specificity, marketing hook presence
+- `api`: New `lib/artistIntel/analyzeCatalogDepth.ts` — analyses all 10 top tracks: avg popularity, std deviation, consistency score, top-track concentration %, catalog type classification (consistent / hit-driven / emerging)
+- `api`: Updated `generateArtistIntelPack.ts` — three parallel fetches (MusicFlamingo + Perplexity + Related Artists); opportunity scores and catalog depth computed synchronously from fetched data; all 5 data sources fed into AI synthesis
+- `api`: Updated `buildArtistMarketingCopy.ts` — AI prompt now receives real peer follower counts and percentile rankings so "comparable artist" references cite actual data, not hallucinations; prompt instructs AI to use specific scores in each output section
+- `api`: Updated `formatArtistIntelPackAsMarkdown.ts` — 3 new report sections:
+  - `## Opportunity Scores` — table with ASCII bar charts (█░) and emoji rating per domain
+  - `## Peer Benchmarking` — table showing target artist vs 5 real peers with gap column (±K)
+  - `## Catalog Analysis` — table + per-track popularity bars + catalog type callout
+**PRs:** Pushed to `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:** Core insight: the value of the pack was almost entirely from AI text generation (easy to replicate, possible to hallucinate). Now the majority of value comes from real data: actual peer follower counts, algorithmically derived scores from MusicFlamingo audio data, and catalog consistency math from Spotify track popularity numbers. The AI copy is still valuable but is now grounded in real benchmarks.
+
+---
+
+## [2026-03-23] Admin + Docs + API — Coding Agent Slack Tags Analytics Page
+
+**Prompt:** Create an admin page to view analytics for Slack tags of the Recoup Coding Agent — show total count, a chart of tags over time, and a table of who tagged the agent, the prompt, and the timestamp.
+**Status:** completed
+**Changes:**
+- `docs`: Added `GET /api/admins/coding-agent/slack-tags` to `openapi.json` (full response schema with `status`, `total`, `tags[]`). New `api-reference/admins/coding-agent-slack-tags.mdx`. Updated `docs.json` nav (Admins group).
+- `api`: New `lib/admins/coding-agent/fetchSlackMentions.ts` — calls Slack Web API directly (`auth.test` → `conversations.list` → `conversations.history`) using `SLACK_BOT_TOKEN` as source of truth. Filters messages containing `<@BOT_USER_ID>`, strips mention from prompt, resolves user display names + avatars via `users.info` (cached). Supports period filtering (all/daily/weekly/monthly). New `validateGetSlackTagsQuery.ts`, `getSlackTagsHandler.ts`, `app/api/admins/coding-agent/slack-tags/route.ts`. 11 unit tests, all passing.
+- `admin`: New `types/coding-agent.ts`, `lib/recoup/fetchSlackTags.ts`, `hooks/useSlackTags.ts`, `lib/coding-agent/getTagsByDate.ts`. New `/coding-agent` page with period selector, total count, line chart (tags per day), and sortable table (Tagged By with avatar, Prompt, Channel, Timestamp). Added "Coding Agent Tags" nav button to `AdminDashboard`.
+**PRs:** Branches pushed — PRs need to be opened via GitHub:
+- docs: `feature/coding-agent-slack-tags` → main: https://github.com/recoupable/docs/pull/new/feature/coding-agent-slack-tags
+- api: `feature/coding-agent-slack-tags` → test: https://github.com/recoupable/api/pull/new/feature/coding-agent-slack-tags
+- admin: `feature/coding-agent-slack-tags` → main: https://github.com/recoupable/admin/pull/new/feature/coding-agent-slack-tags
+**Notes:** The Slack API approach paginate all channels the bot is in and scans message history. For large workspaces with many channels and messages this may be slow — consider caching or storing mentions in Supabase on `onNewMention` if latency becomes an issue. `SLACK_BOT_TOKEN` must have `channels:history`, `groups:history`, `conversations:history`, and `users:read` OAuth scopes.
+
 ---
 
 ## Known Issues / Next Steps
@@ -202,6 +261,115 @@ chat (frontend) → api (backend) → Supabase (database)
 
 ---
 
+## [2026-03-21] CLI — accounts and keys commands
+
+**Prompt:** Add the ability for users to create an account, upgrade to pro, and create and delete their API keys via the CLI.
+**Status:** completed
+**Changes:**
+- `cli`: New `src/commands/accounts.ts` — `recoup accounts create --email/--wallet` (POST /api/accounts, no auth required) and `recoup accounts upgrade` (prints https://chat.recoupable.com/settings). New `src/commands/keys.ts` — `recoup keys list` (GET /api/keys), `recoup keys create --name` (POST /api/keys), `recoup keys delete --id` (DELETE /api/keys). Added `del()` to `src/client.ts`. Commands registered in `src/bin.ts`. 18 new tests; 92 total passing.
+- `api`: Updated `lib/keys/getApiKeysHandler.ts`, `createApiKeyHandler.ts`, `deleteApiKeyHandler.ts` to use `validateAuthContext` instead of `getAuthenticatedAccountId` so CLI users with `RECOUP_API_KEY` (x-api-key header) can manage keys.
+**PRs:** Branches pushed — PRs need to be opened via GitHub (gh not available in sandbox):
+- cli: `feature/accounts-and-keys-commands` → main: https://github.com/recoupable/cli/pull/new/feature/accounts-and-keys-commands
+- api: `feature/keys-api-key-auth` → test: https://github.com/recoupable/api/pull/new/feature/keys-api-key-auth
+**Notes:** Merge the `api` PR first (so x-api-key works on /api/keys), then the `cli` PR. `accounts upgrade` has no backend — it just prints the upgrade URL since no Stripe/subscription endpoint exists. `POST /api/accounts` returns `{ data: { account_id, email, ... } }` (nested shape — legacy behavior from existing handler).
+
+---
+
+## [2026-03-21] Artist Intelligence Pack — Spotify + MusicFlamingo AI + Perplexity → Marketing Copy
+
+**Prompt:** Implement the wildest, most WOW demoable feature using underutilized API keys and services.
+**Status:** completed
+**Changes:**
+- `api`: New domain `lib/artistIntel/` (7 files + 1 test file):
+  - `generateArtistIntelPack.ts` — main orchestrator; fetches Spotify → runs MusicFlamingo + Perplexity in parallel → AI synthesis
+  - `getArtistSpotifyData.ts` — artist profile + top tracks with 30-second Spotify preview URLs (public MP3s, no auth needed)
+  - `getArtistMusicAnalysis.ts` — runs 4 MusicFlamingo NVIDIA 8B presets in parallel on the Spotify preview: `catalog_metadata` (BPM/key/genre/mood/instruments), `audience_profile` (demographics), `playlist_pitch` (target playlists), `mood_tags` (vibe tags)
+  - `getArtistWebContext.ts` — Perplexity search for recent press, streaming news, trends
+  - `buildArtistMarketingCopy.ts` — AI synthesizes all data into: playlist pitch email, Instagram/TikTok/Twitter captions, press release opener, key talking points
+  - `validateArtistIntelBody.ts` — Zod validation (artist_name required)
+  - `generateArtistIntelPackHandler.ts` — route handler with `validateAuthContext`
+- `api`: New endpoint `POST /api/artists/intel` — takes `{ artist_name }`, returns complete intelligence pack
+- `api`: New MCP tool `generate_artist_intel_pack` in `lib/mcp/tools/artistIntel/` — registered in `lib/mcp/tools/index.ts`, available in the AI agent chat UI
+- 10 unit tests, all green. All 218 test files passing (1514 tests). No lint errors on new files.
+**PRs:**
+- api: `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → test: https://github.com/recoupable/api/pull/328
+**Notes:**
+- **Why this is WOW:** Type an artist name → in ~30 seconds get a complete professional marketing package powered by NVIDIA AI audio analysis. Artists can use this immediately for playlist pitching, PR outreach, and social campaigns.
+- **Key insight:** Spotify `preview_url` on tracks is a public 30-second MP3 clip — MusicFlamingo accepts any audio URL, so we can analyze ANY artist's music without auth or file uploads.
+- **MusicFlamingo endpoint:** `https://sidney-78147--music-flamingo-musicflamingo-generate.modal.run` (Modal serverless, already live).
+- **Demo flow:** In the chat UI, ask the agent: "Generate an artist intelligence pack for [artist name]" — `generate_artist_intel_pack` MCP tool fires automatically and returns the full pack.
+- **Parallel processing:** Spotify first (required for preview URL), then MusicFlamingo + Perplexity fire simultaneously, then AI synthesis. Graceful degradation if any source fails.
+
+---
+
+## [2026-03-21] Artist Intel Pack — Output Design Improvements
+
+**Prompt:** What would make this feature better? What is the output results and design?
+**Status:** completed
+**Changes:**
+- `api`: Typed `ArtistMusicAnalysis` fields — replaced `unknown` with `CatalogMetadata`, `AudienceProfile`, `MoodTagsResult`, and `string` for playlist_pitch (`lib/artistIntel/getArtistMusicAnalysis.ts`).
+- `api`: Upgraded `getArtistWebContext` from Perplexity search snippets joined with ` | ` to `chatWithPerplexity` (sonar-pro) — returns a researched narrative summary with citations.
+- `api`: New `lib/artistIntel/formatArtistIntelPackAsMarkdown.ts` — formats the full pack as a structured markdown report with sections: Artist Profile, Music DNA (MusicFlamingo AI), Recent Web Context, Marketing Pack (pitch email, social captions, press release, talking points).
+- `api`: `ArtistIntelPack` now includes `formatted_report: string` — the pre-formatted markdown is included in the REST API response.
+- `api`: `generate_artist_intel_pack` MCP tool now returns `formatted_report` directly (via `getCallToolResult`) instead of raw JSON, so the chat AI renders beautiful formatted output without needing to reformat the data.
+- `api`: 15 new formatter tests; 1529 total passing. All lint-clean on new files.
+**PRs:** Pushed to existing branch `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:** The MCP tool output design change is the biggest UX win — chat now shows a nicely formatted intelligence report instead of a raw JSON blob. The `formatted_report` field in the API response lets any REST consumer also display the pre-formatted version. `ArtistWebContext.results` (array of search results) was removed; it is now just `{ summary, citations }` — update any consumers that depended on `.results`.
+
+---
+
+## [2026-03-21] Tasks Popup — Show Last Runs and Upcoming Runs
+
+**Prompt:** Task detail popup on /tasks page should show last runs and upcoming scheduled runs from the API (recent_runs / upcoming fields).
+**Status:** completed
+**Changes:**
+- `chat`: Extended `Task` type in `lib/tasks/getTasks.ts` to include `recent_runs?: TaskRunItem[]` and `upcoming?: string[]` (fields already returned by the API). Updated `useScheduledActions`, `TasksList`, `TaskDetailsDialog`, `TaskDetailsDialogContent` to use `Task` instead of `Tables<"scheduled_actions">`. Created `TaskRecentRunsSection.tsx` (shows last N runs with status badge, timestamp, duration) and `TaskUpcomingRunsSection.tsx` (shows next run datetimes). Both sections are hidden when data is absent.
+**PRs:** https://github.com/recoupable/chat/pull/1593
+**Notes:** The API already returns `recent_runs` and `upcoming` in the tasks array. The `Task` type extends the DB row type so all existing components remain compatible.
+
+---
+
+## [2026-03-21] Chat - last and next runs in task popup
+**Prompt:** Show last / upcoming runs when clicking a scheduled task on /tasks page
+**Status:** completed
+**Changes:**
+- chat: Added `TaskRecentRunsSection` and `TaskUpcomingRunsSection` components; extended `Task` type to include `recent_runs` and `upcoming`; surfaced these fields in `TaskDetailsDialogContent`
+**PRs:** https://github.com/recoupable/chat/pull/1593
+**Notes:** API already returns `recent_runs` and `upcoming` — only UI changes needed. Both sections hidden when empty.
+
+---
+
+## [2026-03-21] Artist Intel Pack — Gatsby Grace test + pre-market A&R fix
+
+**Prompt:** Test it with artist Gatsby-Grace and show me results
+**Status:** completed
+**Changes:**
+- `api`: Fixed A&R rationale bug in `computeArtistOpportunityScores.ts` — artists with <1000 followers AND <10 popularity (e.g. Gatsby Grace: 2 followers, 0 popularity) were incorrectly labeled "established/saturated". They now get the "Pre-market artist — highest early-discovery upside" rationale with a +10 discovery bonus (arScore goes from 40 → 50 for pre-market acts).
+- `api`: Added `lib/artistIntel/__tests__/computeArtistOpportunityScores.test.ts` — 6 tests covering pre-market detection, high-follower/low-popularity distinction, music analysis paths, and weighted overall score.
+- `api`: Added 8 Gatsby Grace integration tests to `generateArtistIntelPack.test.ts` using real Spotify data (ID: `7ljukJB2Ctl0T4vCoYfb2x`, 2 followers, 0 popularity, no genres). Mocks now include `getRelatedArtistsData`.
+- `api`: Fixed `formatArtistIntelPackAsMarkdown.test.ts` — `basePack` mock was missing `peer_benchmark`, `opportunity_scores`, `catalog_depth` fields added in earlier iterations; all 21 tests now pass.
+- Total: 45 artistIntel tests passing (was 31).
+**PRs:** Pushed to `agent/-u0ajm7x8fbr-implement-the-wil-1774118338794` → PR #328 (target: `test`)
+**Notes:**
+- **Gatsby Grace real Spotify data:** Spotify ID `7ljukJB2Ctl0T4vCoYfb2x`, name "Gatsby Grace", 2 followers, 0 popularity, no genres, top tracks "Stay" and "Running" (both 0 popularity, no preview URLs). This is a genuinely pre-market artist.
+- **Expected Intel Pack output for Gatsby Grace:** Sync 30/100 (weak), Playlist 35/100 (weak), A&R 50/100 (moderate — pre-market bonus), Brand 35/100 (weak), Overall 37/100. Catalog type: Emerging. No music DNA (no preview URL). No peer benchmark (no Spotify related artists). AI copy focuses on early-discovery angle.
+- **Test could not run live** because preview deployment (`recoup-api-git-agent-u0ajm7x8fbr-imp-a4ba93-recoupable-ad724970.vercel.app`) returns 401 for the sandbox's RECOUP_API_KEY — the preview environment likely uses a different PRIVY_PROJECT_SECRET hash than production. Production API (`recoup-api.vercel.app`) doesn't have this endpoint yet (unreleased branch).
+
+---
+
+## [2026-03-23] Coding Agent Slack Tags Analytics — Admin + API + Docs
+
+**Prompt:** @U0AJM7X8FBR Admin + Docs + API - we want a new admin page to view analytics for the coding-agent task triggered by slack tags. The first analytic which should be focused on is the number of times "Recoup Coding Agent" is tagged on slack. Shows both a graph and a table of who tagged the agent, what the prompt was, and the timestamp.
+**Status:** completed
+**Changes:**
+- docs: Added `GET /api/admins/coding-agent/slack-tags` to `openapi.json`; new `api-reference/admins/coding-agent-slack-tags.mdx` page; updated `docs.json` navigation
+- api: `lib/admins/coding-agent/fetchSlackMentions.ts` — pulls from Slack API (auth.test → conversations.list → conversations.history → users.info); `validateGetSlackTagsQuery.ts`, `getSlackTagsHandler.ts`, `route.ts`; 11 tests passing
+- admin: New `/coding-agent` page with period selector, total tag count, line chart of tags per day, sortable table (Tagged By with avatar, Prompt, Channel, Timestamp); "Coding Agent Tags" button on Admin Dashboard
+**PRs:** pending (see PR_CREATED lines in agent output)
+**Notes:** Ensure `SLACK_BOT_TOKEN` has `channels:history`, `groups:history`, `conversations:history`, and `users:read` OAuth scopes.
+
+---
+
 ## [2026-03-23] Admin + Docs + API — Coding Agent Pull Request Tracking
 
 **Prompt:** Update the /coding admin page to show pull requests opened by the coding agent. For each Slack tag (prompt), show which PRs were opened, which codebase, and the original prompt. Add a PR line to the chart and a PR column to the table.
@@ -209,11 +377,9 @@ chat (frontend) → api (backend) → Supabase (database)
 **Changes:**
 - `api`: Updated `lib/admins/slack/fetchSlackMentions.ts` — added `pull_requests: string[]` to `SlackTag` interface. For each mention, fetches thread replies via `conversations.replies` Slack API and extracts GitHub PR URLs from bot responses using regex (`https://github.com/.../pull/\d+`). Updated `__tests__/getSlackTagsHandler.test.ts` mock data to include `pull_requests`.
 - `docs`: Added `pull_requests` array field to `GET /api/admins/coding/slack` response schema in `openapi.json`.
-- `admin`: Added `pull_requests: string[]` to `SlackTag` type. Updated `getTagsByDate` to return `pull_request_count` per date alongside `count`. Updated `AdminLineChart` to support optional `secondLine` prop (renders second recharts `<Line>` with legend). Added "Pull Requests" column to `SlackTagsColumns` (clickable `#N` links). Updated `CodingAgentSlackTagsPage` to render Tags vs PRs dual-line chart and updated loading skeleton.
+- `admin`: Added `pull_requests: string[]` to `SlackTag` type. Updated `getTagsByDate` to return `pull_request_count` per date alongside `count`. Updated `AdminLineChart` to support optional `secondLine` prop (renders second recharts Line with legend). Added "Pull Requests" column to `SlackTagsColumns` (clickable #N links). Updated `CodingAgentSlackTagsPage` to render Tags vs PRs dual-line chart and updated loading skeleton.
 **PRs:** Branches pushed to `feature/coding-agent-pr-tracking` — PRs need to be opened via GitHub:
 - api: `feature/coding-agent-pr-tracking` → `test`: https://github.com/recoupable/api/pull/new/feature/coding-agent-pr-tracking
 - admin: `feature/coding-agent-pr-tracking` → `main`: https://github.com/recoupable/admin/pull/new/feature/coding-agent-pr-tracking
 - docs: `feature/coding-agent-pr-tracking` → `main`: https://github.com/recoupable/docs/pull/new/feature/coding-agent-pr-tracking
 **Notes:** PR URLs are extracted from Slack bot reply text using the pattern `https://github.com/[owner]/[repo]/pull/[number]`. Slack wraps URLs in `<URL>` or `<URL|label>` format — the regex handles this because `>` is excluded from the match. The `AdminLineChart` now supports an optional `secondLine` prop; the `PrivyLoginsPage` that also uses `AdminLineChart` is unaffected (backward compatible).
-
----
