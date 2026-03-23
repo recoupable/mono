@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-23 (updated)
+> Last updated: 2026-03-23
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -9,10 +9,9 @@
 
 ### `tasks` (on `main`)
 **Latest commits:**
-- `fad189e` fix: push mono repo root progress files directly to main (#96)
-- `e2599e7` fix: set cwd to `/vercel/sandbox/mono` for Claude Code agent (#94)
-- `70f345c` feat: increase maxDuration of coding-agent task (#89)
-- `6625395` feat: inject `CLAUDE_CODE_OAUTH_TOKEN` into sandbox environment (#86)
+- `feature/agent-day-task` PR #108 — agent-day Sunday task (open, awaiting merge)
+- `5df28de` fix: update CODING_AGENT_ACCOUNT_ID to personal account (#105)
+- `df2e32f` coding-agent task passes stdout to the git push step (#102)
 
 **Status:** Stable. The coding agent pipeline is working end-to-end:
 1. Sandbox spins up → monorepo cloned → submodules synced
@@ -217,6 +216,22 @@
 - api: `feature/coding-agent-slack-tags` → test: https://github.com/recoupable/api/pull/new/feature/coding-agent-slack-tags
 - admin: `feature/coding-agent-slack-tags` → main: https://github.com/recoupable/admin/pull/new/feature/coding-agent-slack-tags
 **Notes:** The Slack API approach paginate all channels the bot is in and scans message history. For large workspaces with many channels and messages this may be slow — consider caching or storing mentions in Supabase on `onNewMention` if latency becomes an issue. `SLACK_BOT_TOKEN` must have `channels:history`, `groups:history`, `conversations:history`, and `users:read` OAuth scopes.
+
+---
+
+## [2026-03-23] Agent Day Task — Autonomous Sunday Feature Implementation
+
+**Prompt:** Create a new Trigger.dev task (`agent-day`) that runs only on Sundays and implements a new feature end-to-end: searches recent commits, plans a feature, implements it, reviews the PR (checks + feedback + Vercel preview), merges it, and posts to Slack.
+**Status:** completed
+**Changes:**
+- `tasks`: New `src/tasks/agentDayTask.ts` — `schedules.task` with cron `0 10 * * 0` (10 AM ET Sundays), 2h maxDuration. Flow: fetch commits → generate feature prompt via Claude → trigger `coding-agent` → wait for CI checks → assess PR feedback with Claude → apply fixes via `update-pr` → test Vercel preview → squash-merge → post to Slack `#C08HN8RKJHZ`.
+- `tasks`: New GitHub utilities: `fetchRecentSubmoduleCommits`, `waitForPRChecks`, `fetchPRReviews`, `mergePR`, `getVercelPreviewUrl`.
+- `tasks`: New `src/slack/postToSlackChannel.ts` — posts to any Slack channel via `SLACK_BOT_TOKEN`.
+- `tasks`: New AI utilities: `generateFeaturePrompt` and `assessPRFeedback` — both call Anthropic API directly via `fetch` with `ANTHROPIC_API_KEY`. Both fall back gracefully if the key is missing.
+- `tasks`: `codingAgentSchema` and `updatePRSchema` — made `callbackThreadId` optional (backward compatible). Both tasks skip the Slack callback when `callbackThreadId` is absent (used when triggered programmatically by `agent-day`).
+- `tasks`: 19 new files, 186/186 tests passing.
+**PRs:** https://github.com/recoupable/tasks/pull/108 (target: `main`)
+**Notes:** Requires `ANTHROPIC_API_KEY` and `GITHUB_TOKEN` env vars in the Trigger.dev deployment for the AI planning and GitHub merge steps. Falls back gracefully when `ANTHROPIC_API_KEY` is missing (uses a canned improvement prompt). Vercel preview testing only runs for `recoupable/api` and `recoupable/chat` repos.
 
 ---
 
