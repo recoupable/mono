@@ -553,3 +553,18 @@ Reasons not to embed Paperclip directly:
 - api: Updated 3 test files — all 13 tests pass
 **PRs:** https://github.com/recoupable/api/pull/337
 **Notes:** PR targets `test` branch. Changes are in feature/composio-more-connectors branch.
+
+---
+
+## [2026-03-24] Coding agent tag-based filtering
+**Prompt:** Add tag filter chips to admin coding page with new API endpoint for filter options
+**Status:** completed
+**Changes:**
+- `api`: Added optional `tag` query param to `GET /api/admins/coding/slack` (filters by user_id); created new `GET /api/admins/coding-agent/slack-tags` endpoint returning distinct Slack users; added 5 passing tests
+- `admin`: Added `SlackTagOption`/`SlackTagOptionsResponse` types; created `fetchSlackTagOptions` and `useSlackTagOptions`; updated `useSlackTags` to accept optional `tag` param; updated `CodingAgentSlackTagsPage` with clickable filter chips, toggle, and clear-filter UX
+**PRs:**
+- api: https://github.com/recoupable/api/pull/338 (base: test)
+- admin: https://github.com/recoupable/admin/pull/23 (base: main)
+**Notes:** Admin lint was non-functional due to pre-existing monorepo root eslint.config.js missing `@eslint/js` package — unrelated to this task. API lint errors in my new files match the same pattern as existing route files (pre-existing jsdoc rules). All new tests pass.
+
+---
