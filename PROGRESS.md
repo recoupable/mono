@@ -51,15 +51,15 @@
 
 ---
 
-### `cli` (on `feature/accounts-and-keys-commands`)
+### `cli` (on `agent/-u0ajm7x8fbr-cli---add-the-abi-1774105595692`)
 **Latest commits:**
+- `7581abd` fix: handle undefined responses in accounts and keys commands
 - `8b090df` feat: add accounts and keys commands to CLI
 - `a09929a` chore: bump version to 0.1.11
-- `e4d4548` feat: add `recoup content` command suite (#13)
 
-**Status:** PR open targeting `main`. 92 tests passing.
+**Status:** PR #18 open targeting `main`. 94 tests passing.
 
-**What to know:** Added `recoup accounts create/upgrade` and `recoup keys list/create/delete`. Added `del()` to client.ts. Keys commands require the API PR (`feature/keys-api-key-auth`) to be merged first so x-api-key auth works on `/api/keys` endpoints.
+**What to know:** Added `recoup accounts create/upgrade` and `recoup keys list/create/delete`. Added `del()` to client.ts. Keys commands require the API PR (`feature/keys-api-key-auth`) to be merged first so x-api-key auth works on `/api/keys` endpoints. Code review fixes applied: accounts create now errors on missing account_id; keys create errors on missing key; keys delete falls back to data.error or JSON.stringify if message is absent.
 
 ---
 
