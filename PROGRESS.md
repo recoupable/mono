@@ -133,6 +133,20 @@
 
 ---
 
+## [2026-03-24] Expand Composio Connections to Major Platforms
+
+**Prompt:** Add more important Composio connections beyond the limited 4 toolkits that existed.
+**Status:** completed
+**Changes:**
+- `api`: `getConnectors.ts` — `SUPPORTED_TOOLKITS` expanded from 4 (`googlesheets`, `googledrive`, `googledocs`, `tiktok`) to 12, adding: `gmail`, `googlecalendar`, `spotify`, `instagram`, `twitter`, `youtube`, `slack`, `linkedin`.
+- `api`: `getConnectorsHandler.ts` — `CONNECTOR_DISPLAY_NAMES` updated with display names for all 12 connectors.
+- `api`: `isAllowedArtistConnector.ts` — `ALLOWED_ARTIST_CONNECTORS` expanded from `["tiktok"]` to `["tiktok", "spotify", "instagram", "twitter", "youtube"]` so artists can connect their social/music platforms.
+- All 3 test files updated; 13 tests pass.
+**PRs:** `feature/composio-more-connectors` → test: https://github.com/recoupable/api/pull/new/feature/composio-more-connectors
+**Notes:** Composio toolkit slugs used are lowercase standard slugs (`twitter` for Twitter/X, `googlecalendar` for Google Calendar). The `SUPPORTED_TOOLKITS` list is passed explicitly to `composio.create()` because the default session only returns 20 toolkits — keep the list explicit to control exactly which connectors appear.
+
+---
+
 ## [2026-03-17] Admin Privy Logins Page
 
 **Prompt:** Admin dashboard page to review Privy logins on a daily, weekly, and monthly basis — total count + table of results per time frame.
