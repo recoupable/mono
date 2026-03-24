@@ -284,11 +284,21 @@
 
 ---
 
+## [2026-03-24] skills/chartmetric — Proxy auth support
+
+**Prompt:** Continue Chartmetric proxy integration — update the skill scripts to use CHARTMETRIC_BASE_URL instead of calling Chartmetric directly.
+**Status:** completed
+**Changes:**
+- `skills/chartmetric`: New `scripts/get_auth.py` — provides `get_auth_headers()` and `get_api_base()`. In proxy mode (`CHARTMETRIC_BASE_URL` set), returns `{"x-api-key": RECOUP_API_KEY}` and proxy base URL. Falls back to `get_token.py` for direct Chartmetric auth. All 21 scripts updated to import from `get_auth` instead of `get_token`. Updated `SKILL.md` and `README.md` to document proxy mode.
+**PRs:** Branch `feature/proxy-auth` pushed to `recoupable/chartmetric` — open PR at: https://github.com/recoupable/chartmetric/pull/new/feature/proxy-auth (target: `main`)
+**Notes:** End-to-end flow is now complete: sandbox gets `CHARTMETRIC_BASE_URL=https://recoup-api.vercel.app/api/chartmetric` + `RECOUP_API_KEY` from tasks injection → skill scripts call proxy with `x-api-key` → proxy authenticates, deducts 5 credits, exchanges refresh token, forwards to Chartmetric. `CHARTMETRIC_REFRESH_TOKEN` no longer needs to be in Trigger.dev secrets.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
-- No `PROGRESS_USAGE.md` exists yet — if this file should have a companion usage guide, create it.
-- The `progress.txt` init file referenced in the task prompt was not found — likely hasn't been created yet, or was intended as a seed for future use.
+- `api` PR #318 (`feature/chartmetric-proxy` → `test`) still needs to be merged to deploy the proxy endpoint.
 
 ---
 
