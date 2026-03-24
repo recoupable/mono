@@ -267,6 +267,23 @@
 
 ---
 
+## [2026-03-24] Code Review Fix — eslint upgrade for Next.js 16.2.1 branches
+
+**Prompt:** @sweetman need code review on branch `agent/-u0ajm7x8fbr-update-or-codebas-1774058502626`
+**Status:** completed
+**Changes:**
+- `chat`: `eslint` ^8 → ^9 — satisfies `eslint-config-next@16.2.1` peer dep (`eslint>=9.0.0`); lock file regenerated
+- `admin`: `eslint` ^8.57.0 → ^9 — same fix; lock file regenerated
+- `marketing`: `eslint` ^8 → ^9 in both apps/ops and apps/web; lock file regenerated
+- `api` and `bash` were already on `eslint@^9` — no changes needed
+**PRs:** Fix commits pushed to `agent/-u0ajm7x8fbr-update-or-codebas-1774058502626` on each repo. Branches already existed:
+- chat → test: https://github.com/recoupable/chat/pull/new/agent/-u0ajm7x8fbr-update-or-codebas-1774058502626
+- admin → main: https://github.com/recoupable/admin/pull/new/agent/-u0ajm7x8fbr-update-or-codebas-1774058502626
+- marketing → main: https://github.com/recoupable/marketing/pull/new/agent/-u0ajm7x8fbr-update-or-codebas-1774058502626
+**Notes:** `eslint-config-next@16.2.1` declares `peerDependencies: { eslint: ">=9.0.0" }`. Using eslint@8 resulted in a peer dep mismatch in chat, admin, and marketing. The fix bumps eslint to `^9` and regenerates lock files — now resolved against `eslint@9.39.4`. No source code changes beyond package.json + pnpm-lock.yaml.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
