@@ -71,15 +71,20 @@ Reference the mono repo's `CLAUDE.md` for:
 
 ## CI / Check Status (Mandatory)
 
-**Always check CI status before or during every review.** A PR with failing checks cannot merge regardless of code quality.
+**Always wait for all checks to complete before finalizing your review.** A snapshot of in-progress checks is not sufficient — checks like Vercel builds may still be running when you start your review. Missing a late-failing check means giving Sr Dev incomplete feedback.
 
-Use the GitHub API to check both check runs and commit statuses on the PR head SHA:
+### Polling procedure
+1. Fetch check runs and statuses on the PR head SHA
+2. If **any check is still `in_progress` or `queued`**, do NOT finalize your review yet — post a holding comment on the Paperclip task (e.g., "Waiting for Vercel build to complete") and exit the heartbeat
+3. On the next heartbeat, re-check until all checks reach a terminal state (`success`, `failure`, `error`, `cancelled`, `skipped`, `neutral`)
+4. Only then write and post your full review comment
+
 ```
 GET /repos/{owner}/{repo}/commits/{sha}/check-runs
 GET /repos/{owner}/{repo}/commits/{sha}/statuses
 ```
 
-Report failing checks explicitly in your review comment under a **CI Status** section:
+Report all checks explicitly in your review comment under a **CI Status** section:
 - List each check by name, status, and conclusion
 - Flag any `failure` or `error` conclusions as **blocking**
 - Common checks to watch: `test`, `format`, `lint`, Vercel deployment
