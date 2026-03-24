@@ -161,6 +161,20 @@
 
 ---
 
+## [2026-03-24] Release Autopilot — Viral TikTok Feature
+
+**Prompt:** Build a feature that would go viral if demoed on TikTok. Think deeply, challenge your thinking.
+**Status:** completed
+**Changes:**
+- `api`: New `POST /api/launch` endpoint (streaming). Takes `artist_name`, `song_name`, `genre`, `release_date`, optional `description`. Uses `streamText` (Vercel AI SDK) to stream 6 campaign sections with XML-style markers: `[SECTION:press_release]`, `[SECTION:spotify_pitch]`, `[SECTION:instagram_captions]`, `[SECTION:tiktok_hooks]`, `[SECTION:fan_newsletter]`, `[SECTION:curator_email]`. Auth via `validateAuthContext` (both API key and Bearer). 8 unit tests, all green. Files: `lib/launch/validateLaunchBody.ts`, `lib/launch/buildCampaignPrompt.ts`, `lib/launch/generateCampaignHandler.ts`, `app/api/launch/route.ts`.
+- `chat`: New `/launch` page with real-time campaign generation UI. `useLaunchCampaign` hook streams from API and parses section markers, updating each card's status (pending → generating → complete). Each section card shows live typing cursor, copy button when done. Progress bar at top. "Copy Full Campaign" + "Generate Another" actions when complete. Launch nav item added to sidebar (top of secondary nav, star icon). Files: `app/launch/page.tsx`, `components/Launch/`, `hooks/useLaunchCampaign.ts`, `components/Sidebar/LaunchNavItem.tsx`.
+**PRs:** Branches pushed — PRs need to be opened via GitHub:
+- api: `feature/release-autopilot` → test: https://github.com/recoupable/api/pull/new/feature/release-autopilot
+- chat: `feature/release-autopilot` → test: https://github.com/recoupable/chat/pull/new/feature/release-autopilot
+**Notes:** Viral angle: "Watch AI build your entire music release campaign in 60 seconds — what a PR firm charges $3,000 for." The streaming UX is key to the viral demo: each section appears live like a typewriter. The `[SECTION:key]...[/SECTION:key]` marker format is simple to parse and extend with more sections later. `DEFAULT_MODEL` is used (follows existing codebase pattern). The TikTok hook: "I replaced my music PR firm with AI" — screen record at `chat.recoupable.com/launch`.
+
+---
+
 ## [2026-03-24] AutoResearch Integration — Deep Analysis & Roadmap
 
 **Prompt:** Read autoresearch (github.com/karpathy/autoresearch), analyze the mono repo, and ULTRATHINK how to use autoresearch to add value to customers. Propose a way to run autoresearch easily (API endpoint, sandbox, skill).
