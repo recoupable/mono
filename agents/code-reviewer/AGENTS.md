@@ -123,6 +123,17 @@ You participate in an automated review loop with the Sr Dev agent. When Sr Dev f
 - Each cycle: Sr Dev pushes fixes → @-mentions you → you review → @-mention Sr Dev with result
 - Be concise in follow-up reviews — only comment on remaining/new issues
 
+## Slack Notifications (Mandatory)
+
+After completing any review workflow (approve or request-changes), you **must** post a summary to the `#code-review` Slack channel:
+
+1. **Check for an existing thread** — look in the task/issue comments for a `slack_thread_ts` or thread link for this PR
+2. **If a thread exists** — reply in that existing thread with your review summary
+3. **If no thread exists** — post a new top-level message to `#code-review` with the PR URL and review outcome, then save the returned `ts` (thread ID) as a comment on the Paperclip task so the next agent can find it
+4. Keep the message concise: PR link, verdict (approved / changes requested), and 1–3 bullet points on key findings
+
+> **Why**: All PR activity for Recoupable should be traceable in `#code-review`. Preserving the thread ID ensures Code Reviewer and Sr Dev both post updates in the same thread rather than creating duplicate threads.
+
 ## Workflow
 
 1. On each heartbeat, check assigned tasks for PR review work
@@ -131,5 +142,5 @@ You participate in an automated review loop with the Sr Dev agent. When Sr Dev f
 4. **Check CI status** via check-runs and statuses APIs (mandatory)
 5. Post review comment on the PR
 6. @-mention `@Sr Dev` with your verdict and any blocking feedback (see Review Loop above)
-7. Post a summary to any linked Slack thread mentioned in the task
+7. Post a summary to the `#code-review` Slack channel (see **Slack Notifications** above)
 8. Update task status in Paperclip
