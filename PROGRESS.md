@@ -542,3 +542,14 @@ Reasons not to embed Paperclip directly:
 **Notes:** The `@U0AJM7X8FBR` Slack user requested this research. Tier 1 items can each be implemented as a focused 2–4 hour coding agent task. Start with the Skills Index Endpoint as it's the most self-contained and directly mirrors Paperclip's design.
 
 ---
+
+## [2026-03-24] Expand Composio connections to major platforms
+**Prompt:** @U0AJM7X8FBR current: composio connections for limited tools. Expected: all major composio connections. Please review how composio currently connects and works and then add more tools that are important.
+**Status:** completed
+**Changes:**
+- api: Expanded SUPPORTED_TOOLKITS from 4 to 12 connectors (added Gmail, Google Calendar, Spotify, Instagram, Twitter/X, YouTube, Slack, LinkedIn)
+- api: Expanded ALLOWED_ARTIST_CONNECTORS to include spotify, instagram, twitter, youtube (in addition to tiktok)
+- api: Updated CONNECTOR_DISPLAY_NAMES with 8 new entries
+- api: Updated 3 test files — all 13 tests pass
+**PRs:** https://github.com/recoupable/api/pull/337
+**Notes:** PR targets `test` branch. Changes are in feature/composio-more-connectors branch.
