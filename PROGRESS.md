@@ -387,6 +387,20 @@ get_research_results(run_id)
 
 ---
 
+## [2026-03-24] Admin Coding Page — Tag Filter Chips
+
+**Prompt:** Add tag-based filtering to the admin coding agent page using GET /api/admins/coding-agent/slack-tags endpoint.
+**Status:** completed
+**Changes:**
+- `api`: Added optional `tag` query param to `GET /api/admins/coding/slack` — filters results to mentions where `user_id === tag`. New `GET /api/admins/coding-agent/slack-tags` endpoint returns distinct Slack users (id, name, avatar) sorted alphabetically — used as filter chip options. New files: `lib/admins/coding-agent/validateGetSlackTagOptionsQuery.ts`, `lib/admins/coding-agent/getSlackTagOptionsHandler.ts`, `app/api/admins/coding-agent/slack-tags/route.ts`, `lib/admins/coding-agent/__tests__/getSlackTagOptionsHandler.test.ts` (5 tests passing). Updated: `lib/admins/slack/validateGetSlackTagsQuery.ts` (added `tag` field), `lib/admins/slack/getSlackTagsHandler.ts` (filters by tag).
+- `admin`: Added `SlackTagOption` and `SlackTagOptionsResponse` types to `types/coding-agent.ts`. New `lib/recoup/fetchSlackTagOptions.ts` and `hooks/useSlackTagOptions.ts`. Updated `fetchSlackTags.ts` and `useSlackTags.ts` to accept optional `tag` param. Updated `CodingAgentSlackTagsPage.tsx` — renders a row of clickable filter chips (with avatar, active highlight in #345A5D, ×), plus a "Clear filter" link. Active chip filters the run list; clicking again deselects.
+**PRs:**
+- api: https://github.com/recoupable/api/pull/338 (target: `test`)
+- admin: https://github.com/recoupable/admin/pull/23 (target: `main`)
+**Notes:** The filter chip row only renders if tag options are available. Empty-state message says "No tags found for this period and filter" when a tag is active. Tag options are fetched once on mount (no period dependency — always all-time unique users).
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
