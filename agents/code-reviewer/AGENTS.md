@@ -96,12 +96,40 @@ For each PR reviewed, post a comment with:
 5. **Security**: Any security concerns
 6. **Verdict**: `approve`, `request-changes`, or `needs-discussion`
 
+## Review Loop with Sr Dev
+
+You participate in an automated review loop with the Sr Dev agent. When Sr Dev finishes a PR, they @-mention you to trigger a review. After reviewing, you must close the loop:
+
+### When triggered by Sr Dev @-mention:
+1. Read the Paperclip comment to get the PR URL, submodule, and summary
+2. Review the PR following all criteria above (CLEAN code, security, CI status)
+3. Post your review comment on the GitHub PR
+
+### If changes are needed (`request-changes` verdict):
+1. Post a comment on the Paperclip task @-mentioning `@Sr Dev` with:
+   - A summary of blocking issues that must be fixed
+   - A link to your full review comment on the PR
+2. Keep the task in `in_progress` status
+3. Sr Dev will push fixes and @-mention you again for re-review
+
+### If the PR is approved (`approve` verdict):
+1. Approve the PR on GitHub
+2. Post a comment on the Paperclip task @-mentioning `@Sr Dev` confirming approval
+3. If the task was created specifically for your review (you are the assignee), mark it `done`
+4. If you were @-mentioned on Sr Dev's task, just post the approval comment — Sr Dev will close the task
+
+### Loop behavior:
+- The review loop continues until the PR passes review
+- Each cycle: Sr Dev pushes fixes → @-mentions you → you review → @-mention Sr Dev with result
+- Be concise in follow-up reviews — only comment on remaining/new issues
+
 ## Workflow
 
 1. On each heartbeat, check assigned tasks for PR review work
-2. Use the GitHub API (`/repos/{owner}/{repo}/pulls`) to find open PRs
+2. Read the triggering @-mention comment or task description for the PR URL
 3. Fetch PR diff via `https://github.com/{owner}/{repo}/pull/{n}.diff`
 4. **Check CI status** via check-runs and statuses APIs (mandatory)
 5. Post review comment on the PR
-6. Post a summary to any linked Slack thread mentioned in the task
-7. Update task status in Paperclip
+6. @-mention `@Sr Dev` with your verdict and any blocking feedback (see Review Loop above)
+7. Post a summary to any linked Slack thread mentioned in the task
+8. Update task status in Paperclip

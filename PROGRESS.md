@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-03-24] Connect Code Reviewer and Sr Dev review loop (REC-9)
+**Prompt:** Set up automated review loop between Sr Dev and Code Reviewer agents
+**Status:** completed
+**Changes:**
+- agents/code-reviewer/AGENTS.md: Added "Review Loop with Sr Dev" section — when @-mentioned by Sr Dev, review the PR; if changes needed, @-mention Sr Dev back; if approved, @-mention Sr Dev and close
+- agents/sr-dev/AGENTS.md: Added "Review Loop with Code Reviewer" section — after creating/updating a PR, @-mention Code Reviewer; when feedback arrives, fix and @-mention again; loop until approved
+**PRs:** none (local instruction changes)
+**Notes:** Both agents now have symmetric handoff instructions. The loop uses Paperclip @-mentions to trigger heartbeats. Sr Dev starts the cycle by @-mentioning Code Reviewer after pushing a PR. Code Reviewer closes the cycle by @-mentioning Sr Dev with approval/feedback.
+
+---
+
 ## [2026-03-24] API — review PR #341 (REC-7)
 **Prompt:** Review PR https://github.com/recoupable/api/pull/341 and provide feedback
 **Status:** completed
@@ -277,3 +288,40 @@ chat (frontend) → api (backend) → Supabase (database)
 - `docs`: API reference intro (`api-reference/introduction.mdx`) — removed duplicate auth/base URL content; now a clean page linking to auth guide
 **PRs:** Branch `feat/mcp-docs-full-tool-list` pushed to `recoupable/docs`. PR needs to be opened against `main`.
 **Notes:** `gh` CLI not available in this sandbox — PR must be created manually or via the next agent run that has GitHub access.
+
+---
+
+## [2026-03-24] Composio connectors expansion
+**Status:** completed
+**Changes:**
+- api: Expanded SUPPORTED_TOOLKITS from 4 to 12 connectors (added Gmail, Google Calendar, Spotify, Instagram, Twitter/X, YouTube, Slack, LinkedIn)
+- api: Expanded ALLOWED_ARTIST_CONNECTORS to include spotify, instagram, twitter, youtube (in addition to tiktok)
+- api: Updated CONNECTOR_DISPLAY_NAMES with 8 new entries
+- api: Updated 3 test files — all 13 tests pass
+**PRs:** https://github.com/recoupable/api/pull/337
+**Notes:** PR targets `test` branch. Changes are in feature/composio-more-connectors branch.
+
+---
+
+## [2026-03-24] Coding agent tag-based filtering
+**Prompt:** Add tag filter chips to admin coding page with new API endpoint for filter options
+**Status:** completed
+**Changes:**
+- `api`: Added optional `tag` query param to `GET /api/admins/coding/slack` (filters by user_id); created new `GET /api/admins/coding-agent/slack-tags` endpoint returning distinct Slack users; added 5 passing tests
+- `admin`: Added `SlackTagOption`/`SlackTagOptionsResponse` types; created `fetchSlackTagOptions` and `useSlackTagOptions`; updated `useSlackTags` to accept optional `tag` param; updated `CodingAgentSlackTagsPage` with clickable filter chips, toggle, and clear-filter UX
+**PRs:**
+- api: https://github.com/recoupable/api/pull/338 (base: test)
+- admin: https://github.com/recoupable/admin/pull/23 (base: main)
+**Notes:** Admin lint was non-functional due to pre-existing monorepo root eslint.config.js missing `@eslint/js` package — unrelated to this task. API lint errors in my new files match the same pattern as existing route files (pre-existing jsdoc rules). All new tests pass.
+
+---
+
+## [2026-03-24] Hire Sr Dev agent (REC-8)
+**Prompt:** Create a new Sr Dev agent that handles coding tasks delegated by the CTO, working closely with the Code Reviewer agent
+**Status:** completed
+**Changes:**
+- `mono/agents/sr-dev/AGENTS.md`: Created instructions file for the Sr Dev agent covering code standards, git workflow, build commands, and Code Reviewer integration
+**PRs:** none
+**Notes:** Hire approved by board. Sr Dev agent (81d2b822-486a-4d29-8d43-87d83d740239) is active and idle. Workflow: CTO delegates coding tasks → Sr Dev implements → Code Reviewer reviews → feedback tasks routed back to Sr Dev.
+
+---
