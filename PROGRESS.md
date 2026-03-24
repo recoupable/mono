@@ -16,6 +16,19 @@
 
 ---
 
+## [2026-03-24] API — fix PR #341 review feedback (REC-7)
+**Prompt:** Fix code review feedback on content-agent PR #341
+**Status:** completed
+**Changes:**
+- api: Created clean branch `fix/content-agent-clean` from `test` with only 17 new feature files (removed ~90 JSDoc-only changes)
+- api: Renamed `handlers/handleContentAgentCallback.ts` → `registerOnSubscribedMessage.ts` (naming collision fix)
+- api: Added `crypto.timingSafeEqual` for callback secret comparison in `handleContentAgentCallback.ts`
+- api: Fixed all JSDoc lint errors in new feature files
+**PRs:** https://github.com/recoupable/api/pull/342 (supersedes #341)
+**Notes:** Old PR #341 had 106 files changed (90 unrelated JSDoc noise). New PR #342 has only 17 files. Posted update to Slack thread and commented on #341. Task reassigned to board for review.
+
+---
+
 ## [2026-03-24] API — review PR #341 (REC-7)
 **Prompt:** Review PR https://github.com/recoupable/api/pull/341 and provide feedback
 **Status:** completed
