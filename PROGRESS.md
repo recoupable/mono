@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-24
+> Last updated: 2026-03-24 (updated same day)
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -65,14 +65,20 @@
 
 ---
 
-### `docs` (on `main`)
+### `docs` (on `main`, feature branch `feat/mcp-docs-full-tool-list` open)
 **Latest commits:**
+- `05c455c` docs: improve user journey — navigation, quickstart, MCP client configs
+- `e083670` docs: expand MCP page with full tool list and docs search MCP explanation
 - `fd82b14` feat: add authentication page (#62)
-- `0445501` docs: add CLI content command documentation (#61)
-- `bf59ecf` docs: update `/api/admins/sandboxes` docs (#59)
-- `e49f7ca` docs: add admin accounts table endpoint docs (#58)
 
-**Status:** Stable. Docs are at `https://developers.recoupable.com`.
+**Status:** Feature branch `feat/mcp-docs-full-tool-list` pushed, PR needs to be opened against `main`.
+
+**What changed (2026-03-24 user journey improvements):**
+- Navigation order fixed: Authentication now comes before MCP in sidebar
+- Homepage (`index.mdx`): integration path cards (REST/MCP/CLI), clearer "what you can build" framing
+- Quickstart (`quickstart.mdx`): new first example uses Spotify search (works immediately, no existing data needed); Tasks list removed as first example
+- MCP page (`mcp.mdx`): ready-to-paste config snippets for Claude Desktop, Cursor, and VS Code added before TypeScript SDK
+- API reference intro (`api-reference/introduction.mdx`): stripped duplicate auth/base URL content, now links to auth guide
 
 ---
 
@@ -212,3 +218,16 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** Matches the API response field naming convention (accounts, not users).
 
 ---
+
+## [2026-03-24] Docs User Journey Improvements
+
+**Prompt:** Review docs from a user journey perspective — are they clear for Humans and Agents?
+**Status:** completed
+**Changes:**
+- `docs`: Navigation order fixed — authentication before MCP in sidebar
+- `docs`: Homepage (`index.mdx`) — integration path cards (REST API / MCP / CLI), clearer "what you can build" framing for humans and agents
+- `docs`: Quickstart (`quickstart.mdx`) — first example now uses Spotify search (no existing data needed, works immediately); removed Tasks list as first example; added MCP in next steps
+- `docs`: MCP page (`mcp.mdx`) — added copy-paste config snippets for Claude Desktop, Cursor, and VS Code before the TypeScript SDK; moved tool reference after connection guides
+- `docs`: API reference intro (`api-reference/introduction.mdx`) — removed duplicate auth/base URL content; now a clean page linking to auth guide
+**PRs:** Branch `feat/mcp-docs-full-tool-list` pushed to `recoupable/docs`. PR needs to be opened against `main`.
+**Notes:** `gh` CLI not available in this sandbox — PR must be created manually or via the next agent run that has GitHub access.
