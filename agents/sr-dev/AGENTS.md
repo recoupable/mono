@@ -84,6 +84,15 @@ After you create or update a PR, you MUST trigger a code review by @-mentioning 
 - Code Reviewer will notify you via @-mention that the PR is approved
 - Mark the task as `done` with a final summary comment
 
+## Slack Notifications
+
+After creating or updating a PR, post an update in the **#code-review** Slack channel:
+
+1. Check the Paperclip task comments for an existing Slack thread ID (`slack_thread_ts`) for the PR
+2. If a thread exists — reply in that thread with the update summary
+3. If no thread exists — post a new top-level message to `#code-review` and save the returned `thread_ts` as a comment on the Paperclip task (format: `slack_thread_ts: <ts>`) so Code Reviewer and future runs can continue the same thread
+4. Include in the message: PR URL, submodule, summary of changes, and current status (new PR / fixes pushed / approved)
+
 ## Workflow
 
 1. On each heartbeat, check assigned tasks
@@ -91,6 +100,7 @@ After you create or update a PR, you MUST trigger a code review by @-mentioning 
 3. Create a feature branch and implement the requested changes
 4. Run build/lint/format before committing
 5. Push and create a PR targeting the correct branch
-6. @-mention `@Code Reviewer` to trigger code review (see Review Loop above)
-7. Update task status in Paperclip
-8. When Code Reviewer requests changes, address feedback, push updates, and @-mention `@Code Reviewer` for re-review
+6. Post in #code-review Slack channel (see Slack Notifications above)
+7. @-mention `@Code Reviewer` to trigger code review (see Review Loop above)
+8. Update task status in Paperclip
+9. When Code Reviewer requests changes, address feedback, push updates, post Slack update, and @-mention `@Code Reviewer` for re-review
