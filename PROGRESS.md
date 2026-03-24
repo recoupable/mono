@@ -161,6 +161,204 @@
 
 ---
 
+## [2026-03-24] AutoResearch Integration — Deep Analysis & Roadmap
+
+**Prompt:** Read autoresearch (github.com/karpathy/autoresearch), analyze the mono repo, and ULTRATHINK how to use autoresearch to add value to customers. Propose a way to run autoresearch easily (API endpoint, sandbox, skill).
+**Status:** analysis complete — no code written yet, roadmap ready for implementation
+**Changes:** none (analysis/planning only)
+**PRs:** none
+
+---
+
+### What autoresearch actually is
+
+Karpathy's autoresearch is an **autonomous iterative optimization loop** for ML training:
+- An AI agent (Claude Code) edits `train.py`, runs a fixed 5-minute experiment, measures `val_bpb`, keeps improvements and reverts regressions, then loops forever
+- Human direction via a `program.md` skill file written in natural language
+- Git is the lab notebook — every iteration is a commit; reverts are `git reset`
+- Produces ~12 experiments/hour, ~100 per overnight session
+
+**The insight that matters:** The actual ML training is incidental. The **PATTERN** is the product:
+
+```
+define a metric → agent proposes change → run experiment → measure → keep/revert → log → repeat
+```
+
+This pattern is universally applicable to any domain where:
+1. Success is measurable (even approximately)
+2. Hypotheses can be tested cheaply
+3. Overnight unattended runs make economic sense
+
+---
+
+### How this maps to Recoupable's customers (music artists & labels)
+
+Music artists face research problems where this pattern is extremely valuable:
+
+| Problem | Metric | Experiment type | Overnight value |
+|---------|--------|-----------------|-----------------|
+| Pulse email effectiveness | open rate, reply rate | subject line variants, body style, timing, personalization depth | Agent tests 20+ variants while artist sleeps |
+| Playlist curator targeting | response rate | curator selection, pitch angle, personalization | Ranks which pitching approaches work for a genre |
+| Sync licensing leads | acceptance rate | platform, territory, mood tags, pitch framing | Finds which briefs match the artist's catalog |
+| Fan segment research | engagement prediction accuracy | segmentation approach, feature selection | Surfaces which fan cohorts are most actionable |
+| Social content strategy | engagement rate | post format, copy length, hashtag sets, posting time | Finds what resonates for the artist's audience |
+
+**The biggest immediate win: Pulse email autoresearch**
+
+Recoupable already has Pulse (sends emails to fans, tracks engagement). The autoresearch loop would:
+1. After each Pulse batch, log the performance (open rate, replies)
+2. Agent analyzes what varied and proposes the next variant
+3. Next Pulse batch uses the new variant
+4. Repeat — fans get increasingly well-targeted emails, artists see compounding engagement improvements
+
+This is zero net new infrastructure cost and directly improves the core product.
+
+---
+
+### Proposed architecture: autoresearch as a service
+
+The user wants this to work "like music flamingo" — a sandboxed API endpoint.
+
+#### New API endpoints (in `api` submodule)
+
+```
+POST   /api/research/runs         # start a research run
+GET    /api/research/runs         # list runs for authenticated account
+GET    /api/research/runs/:id     # get run + all iterations
+DELETE /api/research/runs/:id     # cancel an in-progress run
+```
+
+**POST /api/research/runs body:**
+```json
+{
+  "objective": "Find best subject line strategy for hip-hop artists",
+  "metric": "open_rate",
+  "max_iterations": 20,
+  "context": "artist_id optional — narrows data scope"
+}
+```
+
+**GET /api/research/runs/:id response:**
+```json
+{
+  "id": "uuid",
+  "status": "running|completed|failed",
+  "objective": "...",
+  "metric": "open_rate",
+  "best_result": { "value": 0.42, "iteration": 7, "hypothesis": "..." },
+  "iterations": [
+    { "n": 1, "hypothesis": "try ...", "result": 0.35, "kept": false },
+    { "n": 7, "hypothesis": "...", "result": 0.42, "kept": true }
+  ]
+}
+```
+
+#### New Supabase tables (in `database` submodule)
+
+```sql
+-- research_runs
+id, account_id, objective, metric, status, max_iterations,
+iterations_completed, best_result_value, best_hypothesis,
+created_at, completed_at
+
+-- research_iterations
+id, run_id, iteration_n, hypothesis, result_value, kept,
+agent_reasoning, created_at
+```
+
+#### New Trigger.dev task (in `tasks` submodule)
+
+`src/tasks/autoresearchTask.ts` — the loop:
+1. Load run config + prior iterations from Supabase
+2. Build a prompt: objective, metric, all prior iterations as "lab notebook"
+3. Call Claude API to propose the next hypothesis + experiment design
+4. Execute the experiment (e.g., call the Pulse API, query analytics)
+5. Measure the metric
+6. Log the iteration (kept/discarded)
+7. Update `research_runs.best_result` if improved
+8. Loop until `max_iterations` or `status = cancelled`
+
+Key: each iteration is ~$0.02 in Claude API cost — 20 iterations = $0.40 per research run.
+
+#### New MCP tools (in `api` submodule)
+
+```typescript
+// lib/mcp/tools/research/registerStartResearchTool.ts
+start_research(objective, metric, max_iterations?)
+  → returns run_id
+
+// lib/mcp/tools/research/registerGetResearchResultsTool.ts
+get_research_results(run_id)
+  → returns status + iterations + best result
+```
+
+#### New skill (in `skills` submodule)
+
+`autoresearch.md` skill that teaches any Claude agent how to:
+1. Frame a music business question as an autoresearch objective
+2. Choose the right metric (what does success look like?)
+3. Call `start_research` and poll `get_research_results`
+4. Interpret and act on the findings
+
+---
+
+### Implementation sequence (recommended order)
+
+**Step 1 — Database** (`database` submodule)
+- Migration: add `research_runs` and `research_iterations` tables
+
+**Step 2 — Supabase lib** (`api` submodule)
+- `lib/supabase/research_runs/insertResearchRun.ts`
+- `lib/supabase/research_runs/selectResearchRuns.ts`
+- `lib/supabase/research_runs/updateResearchRun.ts`
+- `lib/supabase/research_iterations/insertResearchIteration.ts`
+- `lib/supabase/research_iterations/selectResearchIterations.ts`
+
+**Step 3 — Domain logic + API endpoints** (`api` submodule)
+- `lib/research/startResearchRun.ts` — validates + inserts + triggers task
+- `lib/research/getResearchRun.ts` — fetches run + iterations
+- `app/api/research/runs/route.ts` — GET (list) + POST (create)
+- `app/api/research/runs/[id]/route.ts` — GET (detail) + DELETE (cancel)
+- Tests for all handlers
+
+**Step 4 — Trigger.dev task** (`tasks` submodule)
+- `src/tasks/autoresearchTask.ts` — the loop itself
+- Uses Claude `claude-sonnet-4-6` via Anthropic SDK
+- Context window = prior iteration log (keeps the "lab notebook" pattern)
+
+**Step 5 — MCP tools** (`api` submodule)
+- `lib/mcp/tools/research/registerStartResearchTool.ts`
+- `lib/mcp/tools/research/registerGetResearchResultsTool.ts`
+- Register in `lib/mcp/tools/index.ts`
+
+**Step 6 — Chat UI** (`chat` submodule)
+- Research runs as a new task type in the Tasks page
+- Shows iteration progress, best result, log of hypotheses tried
+
+**Step 7 — Skill** (`skills` submodule)
+- `autoresearch.md` skill for agents
+
+---
+
+### Why this is high-leverage
+
+- **Turns Pulse from a send tool into an optimize tool** — biggest single product improvement possible
+- **Compounds over time** — each artist's research history makes the next run smarter
+- **Overnight autonomy** — matches Karpathy's original insight: humans set direction, AI works while they sleep
+- **Fits existing infra perfectly** — Trigger.dev loops already exist, Claude API already used, Supabase already the persistence layer
+- **Low marginal cost** — each 20-iteration run costs ~$0.40 in LLM calls; can price as a premium feature
+
+---
+
+**Notes for next dev:**
+- Start with Step 1 (database migration) — unblocks all subsequent work
+- The Trigger.dev autoresearch loop is the hardest piece — the agent needs a well-structured system prompt that includes the full iteration history as the "lab notebook"
+- Consider rate-limiting: max 1 active research run per account to start
+- The `program.md` equivalent is the `objective` + `metric` fields — keep them simple and human-readable
+- Pulse is the killer first use case — wire it up so completed Pulse runs auto-trigger a background research iteration analyzing what worked
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
