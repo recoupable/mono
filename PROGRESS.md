@@ -1,7 +1,53 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-24 (updated same day)
+> Last updated: 2026-03-24
 > Purpose: Handoff notes for the next dev/agent picking up work.
+
+---
+
+## [2026-03-24] API — review PR #341 (REC-7)
+**Prompt:** Review PR https://github.com/recoupable/api/pull/341 and provide feedback
+**Status:** completed
+**Changes:**
+- none (review only)
+**PRs:** https://github.com/recoupable/api/pull/341 (reviewed, request changes)
+**Notes:** PR adds Recoup Content Agent Slack bot + `/api/launch` endpoint. Verdict: request changes. Blocking issue: ~90 unrelated JSDoc-only changes inflate PR from ~16 new feature files to 106. Feature code itself is clean. Also flagged naming collision between two `handleContentAgentCallback` files and suggested `crypto.timingSafeEqual` for callback secret. Review comment: https://github.com/recoupable/api/pull/341#issuecomment-4121681007
+
+---
+
+## [2026-03-24] Docs — fix PR #78 feedback (REC-6)
+**Prompt:** Fix feedback comments on docs PR #78 and update Slack thread
+**Status:** completed
+**Changes:**
+- docs: Linked `POST /api/content-agent/callback` to its API reference page in data flow and endpoints table
+- docs: Added missing `RECOUP_API_KEY` to environment variables table
+**PRs:** https://github.com/recoupable/docs/pull/78 (updated, commit `2149b60`)
+**Notes:** Posted summary to #code-review Slack thread. PR still open for review.
+
+---
+
+## [2026-03-24] Code Reviewer agent created (REC-4)
+**Prompt:** Create a new agent to review unmerged PRs in Recoup mono repo submodules
+**Status:** completed
+**Changes:**
+- Paperclip: Created "Code Reviewer" agent (QA role, claude-sonnet-4-6, reports to CTO)
+- Agent ID: 8dec924a-7c20-4280-985d-f3ea996e0c4e (urlKey: code-reviewer-2)
+- Approval: d2fbd753 (approved after revision to add CLEAN code principles)
+- mono: Created `agents/code-reviewer/AGENTS.md` with review instructions (SRP, OCP, DRY, YAGNI, security checklist)
+- Set instructions path via API
+**PRs:** none (instructions file created locally, not yet committed)
+**Notes:** Agent is idle and ready for tasks. First revision was requested by board to emphasize CLEAN coding principles — incorporated into capabilities and instructions. Old agent 815e3d4f (Code Reviewer 1) was from the rejected first hire attempt.
+
+---
+
+## [2026-03-24] Recoup Content Agent scaffold
+**Prompt:** Scaffold the content-agent Slack bot following the coding-agent pattern
+**Status:** completed
+**Changes:**
+- api: Added `content-agent` Slack bot (routes, handlers, bot singleton, callback) on `feature/content-agent` branch
+- tasks: Added `poll-content-run` Trigger.dev task on `feature/content-agent` branch
+**PRs:** Branches pushed — PRs need to be created manually (api → test, tasks → main)
+**Notes:** New env vars needed: `SLACK_CONTENT_BOT_TOKEN`, `SLACK_CONTENT_SIGNING_SECRET`, `CONTENT_AGENT_CALLBACK_SECRET`. Also needs `RECOUP_API_BASE_URL` in tasks env. Slack App must be created with `app_mentions:read` + `chat:write` scopes.
 
 ---
 
