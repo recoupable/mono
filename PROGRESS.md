@@ -166,6 +166,47 @@
 
 ---
 
+## [2026-03-24] chat: implement PR review feedback — streamdown plugins
+
+**Prompt:** Implement PR review comments on https://github.com/recoupable/chat/pull/1592 (streamdown v1→v2 upgrade)
+**Status:** completed
+**Changes:**
+- `chat`: Installed `@streamdown/code@1.1.1`, `@streamdown/math@1.0.2`, `@streamdown/mermaid@1.0.2`.
+- `chat`: Updated `components/ai-elements/response.tsx` to import and pass `plugins={{ code, math, mermaid }}` to `<Streamdown>`. `defaultPlugins` defined as module-level constant for stable reference.
+- `chat`: Added `@source` directives in `app/globals.css` for the three new plugin packages so Tailwind scans their classes.
+**PRs:** https://github.com/recoupable/chat/pull/1592 (branch `agent/-u0ajm7x8fbr-update-chat-to-th-1774075858898`)
+**Notes:**
+- P1 bot review resolved: streamdown v2 moved code highlighting, math, and mermaid behind optional plugins — without them, code blocks had no syntax highlighting and mermaid/math wouldn't render.
+- `katex/dist/katex.min.css` was already imported in `globals.css` — math CSS was pre-existing.
+
+---
+
+## [2026-03-24] Code Review — chat: streamdown v1→v2 upgrade
+
+**Prompt:** Code review for branch `agent/-u0ajm7x8fbr-update-chat-to-th-1774075858898` (streamdown v1.1.6 → v2.5.0)
+**Status:** completed — no fixes needed, changes are correct
+**Changes:**
+- `chat`: Reviewed 3-file diff: `package.json` (version bump), `app/globals.css` (`@source` glob), `pnpm-lock.yaml`.
+**PRs:** Branch `agent/-u0ajm7x8fbr-update-chat-to-th-1774075858898` — PR needs to be opened targeting `test`.
+**Notes:**
+- `@source dist/*.js` glob is the official v2 recommendation (v2 splits classes across 4 files vs 1 in v1).
+- `Streamdown` component API is backward compatible — `className`, `children`, `components`, `rehypePlugins`, `remarkPlugins` all still present.
+- `data-streamdown='code-block'` CSS selectors in `response.tsx` still valid in v2 (confirmed in `chunk-BO2N2NFS.js`).
+- v2 ships `streamdown/styles.css` with animation keyframes — not imported, not needed unless `animated` prop is used.
+
+---
+
+## [2026-03-20] Fix Chartmetric Proxy Route TypeScript Build Error
+
+**Prompt:** Verify the build works on feature/chartmetric-proxy branch
+**Status:** completed
+**Changes:**
+- `api`: Fixed `app/api/chartmetric/[...path]/route.ts` — params must be `Promise<{path: string[]}>` and awaited in Next.js 15+. The type error `.next/types/validator.ts TS2344` is now resolved. TypeScript compiles successfully (`✓ Compiled successfully`). All 5 Chartmetric tests pass.
+**PRs:** https://github.com/recoupable/api/pull/318 (feature/chartmetric-proxy → test, existing PR updated)
+**Notes:** Build still fails at "collect page data" step due to missing SUPABASE_URL/SUPABASE_KEY env vars in sandbox — pre-existing environment issue, not from our changes. TypeScript itself is clean for the new code.
+
+---
+
 ## [2026-03-16] Account Task Runs Page + Pulse Sub-Task Tagging
 
 **Prompt:** Admin page to view recent Pulse task runs for a specific account (e.g., "What Pulse emails has Alexis received in the past 7 days?")
