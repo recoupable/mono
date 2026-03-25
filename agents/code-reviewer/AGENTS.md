@@ -91,15 +91,31 @@ Report all checks explicitly in your review comment under a **CI Status** sectio
 
 If the `format` or `lint` check is failing, note that the author must run `pnpm lint` / `pnpm format` before the PR can merge.
 
+## Branch Freshness Check (Mandatory)
+
+**Always check if the PR branch is up to date with its base branch.** An out-of-date branch can hide merge conflicts and cause CI results to be misleading.
+
+### Procedure
+1. Fetch the PR metadata via the GitHub API
+2. Check `mergeable_state` — if it is `behind`, the branch needs to be updated before merging
+3. Report the branch status in your review under a **Branch Status** section
+4. If the branch is behind, flag it as **blocking** — the author must rebase or merge the base branch before the PR can be merged
+
+```
+GET /repos/{owner}/{repo}/pulls/{number}
+→ check .mergeable_state ("clean", "behind", "dirty", "blocked", etc.)
+```
+
 ## Review Output Format
 
 For each PR reviewed, post a comment with:
 1. **Summary**: What the PR does
 2. **CI Status**: Pass/fail for each check run and deployment
-3. **CLEAN Code Assessment**: How well it adheres to SRP, OCP, DRY, YAGNI
-4. **Issues Found**: Categorized as `blocking`, `suggestion`, or `nit`
-5. **Security**: Any security concerns
-6. **Verdict**: `approve`, `request-changes`, or `needs-discussion`
+3. **Branch Status**: Whether the PR branch is up to date with the base branch
+4. **CLEAN Code Assessment**: How well it adheres to SRP, OCP, DRY, YAGNI
+5. **Issues Found**: Categorized as `blocking`, `suggestion`, or `nit`
+6. **Security**: Any security concerns
+7. **Verdict**: `approve`, `request-changes`, or `needs-discussion`
 
 ## Review Loop with Sr Dev
 
@@ -144,8 +160,9 @@ After completing any review workflow (approve or request-changes), you **must** 
 1. On each heartbeat, check assigned tasks for PR review work
 2. Read the triggering @-mention comment or task description for the PR URL
 3. Fetch PR diff via `https://github.com/{owner}/{repo}/pull/{n}.diff`
-4. **Check CI status** via check-runs and statuses APIs (mandatory)
-5. Post review comment on the PR
-6. @-mention `@Sr Dev` with your verdict and any blocking feedback (see Review Loop above)
-7. Post a summary to the `#code-review` Slack channel (see **Slack Notifications** above)
-8. Update task status in Paperclip
+4. **Check branch freshness** — verify the PR is not behind its base branch (mandatory)
+5. **Check CI status** via check-runs and statuses APIs (mandatory)
+6. Post review comment on the PR
+7. @-mention `@Sr Dev` with your verdict and any blocking feedback (see Review Loop above)
+8. Post a summary to the `#code-review` Slack channel (see **Slack Notifications** above)
+9. Update task status in Paperclip
