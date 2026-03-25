@@ -5,6 +5,20 @@
 
 ---
 
+## [2026-03-25] Round 2 review fixes for PR #342 (REC-7)
+**Prompt:** Address new board + CodeRabbit feedback on content-agent PR #342
+**Status:** completed
+**Changes:**
+- api: SRP — split `validateEnv.ts` into `isContentAgentConfigured.ts` + `validateContentAgentEnv.ts`
+- api: KISS — refactored `bot.ts` to eager singleton variable matching coding-agent pattern
+- api: KISS — refactored `registerHandlers.ts` to module-level side-effect registration (removed flag)
+- api: DRY — extracted shared `getThread` to `lib/agents/getThread.ts` (both agents use it)
+- api: CodeRabbit — added Zod platform validation + JSON error responses in `createPlatformRoutes.ts`
+**PRs:** https://github.com/recoupable/api/pull/342 (commit `2abed88`)
+**Notes:** 10 files changed, 60 ins / 65 del. Bot init DRY question addressed: both agents already share `createAgentState` + `agentLogger`; remaining adapter config differs per agent so further abstraction would violate KISS. Awaiting Code Reviewer re-review.
+
+---
+
 ## [2026-03-25] TDD mandate for SR Dev — API & Tasks (REC-11)
 **Prompt:** Update SR Dev AGENTS.md to mandate TDD red-green-refactor for API and Tasks codebases
 **Status:** completed
