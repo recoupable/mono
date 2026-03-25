@@ -5,6 +5,54 @@
 
 ---
 
+## [2026-03-25] CLEAN code review fixes for PR #342 (REC-7)
+**Prompt:** Address 7 board feedback items on PR #342 (YAGNI, SRP, DRY, KISS, restructure)
+**Status:** completed
+**Changes:**
+- api: Removed unused `/api/launch` endpoint and `lib/launch/` (YAGNI)
+- api: Extracted `parseMentionArgs` to own file, renamed handler → `registerOnNewMention.ts` (SRP)
+- api: Created shared `lib/agents/createPlatformRoutes.ts` factory used by both coding-agent and content-agent (DRY)
+- api: Created shared `lib/agents/createAgentState.ts` for Redis/ioredis state (DRY)
+- api: Moved callback auth into handler to match coding-agent pattern (KISS)
+- api: Restructured `lib/content-agent/` → `lib/agents/content/`
+**PRs:** https://github.com/recoupable/api/pull/342
+**Notes:** 21 files changed, 206 ins, 511 del. Awaiting Code Reviewer re-review.
+
+---
+
+## [2026-03-25] QA Test PR #342 — content-agent & launch endpoints (REC-7)
+**Prompt:** Test the changes in PR #342 against Vercel deployment preview
+**Status:** completed
+**Changes:**
+- none (testing only)
+**PRs:** none
+**Notes:** Initial test run (11 cases) found 5 failures — content-agent endpoints returned 500 due to missing env vars crashing `getContentAgentBot()`. Sr Dev fixed with `isContentAgentConfigured()` guard and moved auth before bot init (commit `9da3aef`). Re-test: all 11 cases pass. Results posted on GitHub PR #342 and Slack #code-review thread. Task marked done.
+
+---
+
+## [2026-03-25] Hire QA Tester agent (REC-10)
+**Prompt:** Create a QA Tester agent that tests API PRs by running fetch requests against Vercel deployment previews
+**Status:** completed
+**Changes:**
+- mono: Created `agents/qa-tester/AGENTS.md` — full instructions for deployment preview testing, endpoint discovery from PR diffs, structured test reporting
+- mono: Updated `agents/code-reviewer/AGENTS.md` — added QA Tester Integration section (trigger QA Tester after approving API PRs)
+- mono: Updated `agents/sr-dev/AGENTS.md` — added QA Tester Feedback section (handle test failure reports)
+- Paperclip: Submitted hire request for QA Tester agent (f4d6bc75-b9ea-4fca-a456-4b889548ad83, claude-sonnet-4-6, reports to CTO)
+**PRs:** none (local instruction changes)
+**Notes:** Approval granted (d2fcb05e). Agent ID: f4d6bc75-b9ea-4fca-a456-4b889548ad83, urlKey: qa-tester. Agent workflow: Code Reviewer approves API PR → @-mentions QA Tester → QA Tester runs fetch tests against Vercel preview → reports on GitHub PR + Slack → routes failures to Sr Dev.
+
+---
+
+## [2026-03-24] API — review PR #342 (REC-7)
+**Prompt:** Review clean PR #342 (superseding #341) for content-agent feature, identify Vercel build failure cause
+**Status:** completed
+**Changes:**
+- none (review only)
+**PRs:** https://github.com/recoupable/api/pull/342 (approved after 1 review cycle)
+**Notes:** Initial review found 2 blocking issues: (1) module-level env validation crashed Vercel build, (2) fragile thread ID parsing. Sr Dev fixed both (commit `5ca4293`). Re-review confirmed fixes + all CI checks pass (test, format, Vercel). PR approved and ready to merge. Slack thread updated.
+
+---
+
 ## [2026-03-24] Connect Code Reviewer and Sr Dev review loop (REC-9)
 **Prompt:** Set up automated review loop between Sr Dev and Code Reviewer agents
 **Status:** completed
