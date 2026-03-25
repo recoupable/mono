@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-25] Round 5 lint + KISS fixes for PR #342 (REC-7)
+**Prompt:** Fix the failing checks on PR #342
+**Status:** completed
+**Changes:**
+- api: Deleted `lib/coding-agent/getThread.ts` wrapper (KISS nit from code reviewer) — callers now import `getThread` directly from `lib/agents/getThread` with type parameter
+- api: Fixed unused `message` parameter lint error in `registerOnNewMention.ts`
+- api: Updated test mocks to match new import paths
+**PRs:** https://github.com/recoupable/api/pull/342 (commit `694f201`)
+**Notes:** All CI checks (test, format, CodeRabbit, Vercel) were already passing. These fixes address the last code review nit and lint cleanliness. 6 files changed, 9 ins, 19 del.
+
+---
+
 ## [2026-03-25] Round 2 review fixes for PR #342 (REC-7)
 **Prompt:** Address new board + CodeRabbit feedback on content-agent PR #342
 **Status:** completed
