@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-24
+> Last updated: 2026-03-25
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -163,6 +163,17 @@
 **Status:** Stable. Basic admin dashboard with Privy auth, accounts table, admin check, and new Org Repos commits table.
 
 **What to know:** Added `/sandboxes/orgs` page showing a data table of commits per org sub-module. Key column is "Recent Commits" (latest_commit_messages array) showing up to 5 latest commit messages per repo. Data from `GET /api/admins/sandboxes/orgs`. New files: `types/sandbox.ts` (OrgRepoRow), `lib/fetchAdminSandboxOrgs.ts`, `hooks/useAdminSandboxOrgs.ts`, `components/SandboxOrgs/*`, `app/sandboxes/orgs/page.tsx`, `components/Home/OrgReposNavButton.tsx`. Nav button added to AdminDashboard.
+
+---
+
+## [2026-03-25] marketing: Clarify deployment domain and two-app structure in AGENTS.md
+
+**Prompt:** Apply code review feedback on branch `agent/-u0ajm7x8fbr-update-or-codebas-1774058502626` — answer Sweets' questions: what domain does marketing deploy to, and why are there multiple apps?
+**Status:** completed
+**Changes:**
+- `marketing`: Updated `AGENTS.md` — Deployment section now explicitly states public site deploys to `https://recoupable.com`. Added new "Why Two Apps?" section explaining `apps/web` (public site, SEO, blog) vs `apps/ops` (internal marketing ops tooling, private workflows). Pushed to existing branch.
+**PRs:** Branch `agent/-u0ajm7x8fbr-update-or-codebas-1774058502626` pushed to `recoupable/marketing` — PR targets `main`
+**Notes:** The marketing repo was already on this feature branch. AGENTS.md is symlinked as CLAUDE.md — both updated together automatically.
 
 ---
 
