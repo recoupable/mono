@@ -29,6 +29,20 @@ The Code Reviewer agent reviews your PRs. When they request changes:
   git checkout test && git pull origin test && git fetch origin main && git merge origin/main && git push origin test
   ```
 
+## Test-Driven Development (API & Tasks)
+
+When working in the **api** or **tasks** codebases, you MUST follow strict TDD red-green-refactor:
+
+1. **Red** — Write a failing test first that describes the expected behavior
+2. **Green** — Write the minimum code needed to make the test pass
+3. **Refactor** — Clean up the code while keeping all tests green
+
+Rules:
+- **No production code without a failing test first.** Every new function, endpoint, or task handler starts with a test.
+- **Run the test suite after each step** to confirm the red→green→refactor cycle is working.
+- **Commit at each phase** when practical (failing test, passing implementation, refactor) to keep the history reviewable.
+- This applies to bug fixes too: first write a test that reproduces the bug (red), then fix it (green), then refactor if needed.
+
 ## Code Standards
 
 Follow the CLAUDE.md conventions at the mono repo root:
@@ -93,6 +107,15 @@ After creating or updating a PR, post an update in the **#code-review** Slack ch
 3. If no thread exists — post a new top-level message to `#code-review` and save the returned `thread_ts` as a comment on the Paperclip task (format: `slack_thread_ts: <ts>`) so Code Reviewer and future runs can continue the same thread
 4. Include in the message: PR URL, submodule, summary of changes, and current status (new PR / fixes pushed / approved)
 
+## QA Tester Feedback
+
+For API PRs, after Code Reviewer approves, the QA Tester runs functional tests against the Vercel deployment preview. If tests fail:
+
+1. QA Tester will @-mention you with a list of failing endpoints and test details
+2. Read the full test results comment on the GitHub PR
+3. Fix the failing endpoints and push to the same branch
+4. @-mention `@Code Reviewer` for re-review (which will re-trigger QA Tester after approval)
+
 ## Workflow
 
 1. On each heartbeat, check assigned tasks
@@ -104,3 +127,4 @@ After creating or updating a PR, post an update in the **#code-review** Slack ch
 7. @-mention `@Code Reviewer` to trigger code review (see Review Loop above)
 8. Update task status in Paperclip
 9. When Code Reviewer requests changes, address feedback, push updates, post Slack update, and @-mention `@Code Reviewer` for re-review
+10. When QA Tester reports failures, fix endpoints and restart review loop (see QA Tester Feedback above)

@@ -155,6 +155,17 @@ After completing any review workflow (approve or request-changes), you **must** 
 
 > **Why**: All PR activity for Recoupable should be traceable in `#code-review`. Preserving the thread ID ensures Code Reviewer and Sr Dev both post updates in the same thread rather than creating duplicate threads.
 
+## QA Tester Integration (API PRs Only)
+
+After approving an API PR (submodule `api`), you **must** trigger the QA Tester to run functional tests against the Vercel deployment preview:
+
+1. After posting your approval review on GitHub, @-mention `@QA Tester` in a Paperclip task comment with:
+   - The PR URL
+   - The Vercel deployment preview URL (from the PR's deployment checks)
+   - A summary of which endpoints changed
+2. Do NOT mark the task as fully `done` until QA Tester confirms all tests pass
+3. If the PR is for a non-API submodule, skip this step — QA Tester only handles API endpoints
+
 ## Workflow
 
 1. On each heartbeat, check assigned tasks for PR review work
@@ -164,5 +175,6 @@ After completing any review workflow (approve or request-changes), you **must** 
 5. **Check CI status** via check-runs and statuses APIs (mandatory)
 6. Post review comment on the PR
 7. @-mention `@Sr Dev` with your verdict and any blocking feedback (see Review Loop above)
-8. Post a summary to the `#code-review` Slack channel (see **Slack Notifications** above)
-9. Update task status in Paperclip
+8. **For API PRs with `approve` verdict**: @-mention `@QA Tester` to trigger functional testing (see QA Tester Integration above)
+9. Post a summary to the `#code-review` Slack channel (see **Slack Notifications** above)
+10. Update task status in Paperclip

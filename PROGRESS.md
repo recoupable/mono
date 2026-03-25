@@ -5,6 +5,16 @@
 
 ---
 
+## [2026-03-25] TDD mandate for SR Dev — API & Tasks (REC-11)
+**Prompt:** Update SR Dev AGENTS.md to mandate TDD red-green-refactor for API and Tasks codebases
+**Status:** completed
+**Changes:**
+- agents/sr-dev/AGENTS.md: Added "Test-Driven Development (API & Tasks)" section mandating strict red-green-refactor cycle for all work in api and tasks codebases
+**PRs:** none (local instruction change)
+**Notes:** SR Dev must now write failing tests before any production code in api or tasks. Includes rules for bug fixes (reproduce first) and commit-per-phase guidance.
+
+---
+
 ## [2026-03-25] CLEAN code review fixes for PR #342 (REC-7)
 **Prompt:** Address 7 board feedback items on PR #342 (YAGNI, SRP, DRY, KISS, restructure)
 **Status:** completed
