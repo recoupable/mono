@@ -1,6 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-25
+> Last updated: 2026-03-26
 > Purpose: Handoff notes for the next dev/agent picking up work.
 
 ---
@@ -486,5 +486,18 @@ chat (frontend) → api (backend) → Supabase (database)
 - `mono/agents/sr-dev/AGENTS.md`: Created instructions file for the Sr Dev agent covering code standards, git workflow, build commands, and Code Reviewer integration
 **PRs:** none
 **Notes:** Hire approved by board. Sr Dev agent (81d2b822-486a-4d29-8d43-87d83d740239) is active and idle. Workflow: CTO delegates coding tasks → Sr Dev implements → Code Reviewer reviews → feedback tasks routed back to Sr Dev.
+
+---
+
+## [2026-03-26] Song Filtering for Content Creation Pipeline
+**Prompt:** Add optional songs filter to content creation pipeline so callers can limit generation to specific songs/EPs
+**Status:** completed
+**Changes:**
+- `tasks`: Added `songs?: string[]` to `contentCreationSchema`; `selectAudioClip` now filters by slug before random selection; `createContentTask` passes `payload.songs` through; 6 new tests passing
+- `api`: Added `songs?: string[]` to `TriggerCreateContentPayload` interface in `lib/trigger/triggerCreateContent.ts`
+**PRs:**
+- tasks: pending (branch: feature/song-filtering-for-content-pipeline)
+- api: pending (branch: agent/-u0ajm7x8fbr---song-filtering--1774495678034)
+**Notes:** Caller is responsible for translating user intent (e.g. "ADHD EP") into song slug arrays. Pipeline just filters — no release detection logic.
 
 ---
