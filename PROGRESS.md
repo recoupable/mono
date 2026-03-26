@@ -5,6 +5,47 @@
 
 ---
 
+## [2026-03-25] Purge YAGNI scaffolding from rostrum artists
+**Prompt:** Follow setup-artist skill and remove all unneeded scaffolding files/folders from rostrum artist directories (except gatsby-grace)
+**Status:** completed
+**Changes:**
+- rostrum/artists: Deleted scaffolding from 43 artist directories — removed `.env.example`, `README.md`, `apps/`, `config/`, `content/`, `memory/`, placeholder `context/` files (template artist.md, audience.md, era.json, tasks.md, images/README.md), `releases/README.md`, `songs/README.md`, and empty directories
+- rostrum/artists: Cleaned RECOUP.md body text for all 43 artists (kept frontmatter only, matching gatsby-grace format)
+- 38 artists now have only `RECOUP.md`; 5 artists retain real content alongside RECOUP.md (fat-beats: social-reports + weekly dashboard; gliiico: spotify tracking CSV; julius-black: tiktok tracking + snapshot; mac-miller: weekly news; spaceheater: competitor analysis report)
+- gatsby-grace left untouched (already follows the new skill structure)
+**PRs:** none — changes are local in `.local/records/rostrum/`
+**Notes:** Per the setup-artist skill: "Nothing gets created until there's real content to put in it." All deleted files were empty scaffolding or placeholder templates with `{curly brace tokens}`. Real content files (tracking CSVs, reports, analysis) were preserved. When an artist gets real context, create `context/artist.md` and other files per the setup-artist skill.
+
+---
+
+## [2026-03-25] Song filtering for content creation pipeline
+**Prompt:** Add optional `songs` array to content creation payload so the pipeline can restrict which songs it picks from
+**Status:** completed
+**Changes:**
+- tasks: Added `songs` field to `createContentPayloadSchema`, filtering logic in `selectAudioClip`, pass-through in `createContentTask`
+- api: Added `songs` to Zod validation (`validateCreateContentBody`), handler (`createContentHandler`), and trigger interface (`triggerCreateContent`)
+- docs: Added `songs` property to `ContentCreateRequest` schema in `openapi.json`
+- cli: Added `--songs <slugs>` comma-separated flag to `recoup content create` command
+**PRs:**
+- https://github.com/recoupable/tasks/pull/112 (base: main)
+- https://github.com/recoupable/api/pull/348 (base: test)
+- https://github.com/recoupable/docs/pull/80 (base: main)
+- https://github.com/recoupable/cli/pull/19 (base: main)
+**Notes:** Backward compatible — when `songs` is omitted, all songs remain eligible. Song slugs match filenames without extension (e.g. `hiccups` for `hiccups.mp3`). The caller (chat agent, Slack bot, CLI) is responsible for resolving user intent into song slugs. All existing tests pass (183 tasks, 1553 api).
+
+---
+
+## [2026-03-25] YAGNI setup-artist skill + consolidate Gatsby Grace
+**Prompt:** Simplify the setup-artist skill and consolidate three gatsby-grace directories into one
+**Status:** completed
+**Changes:**
+- skills/setup-artist: Rewrote SKILL.md (178→120 lines, 9→5 steps, 10→2 directories). Deleted all 6 reference files (memory-system.md, services-guide.md, env-template.md, directory-readmes.md, root-readme.md, context-files.md). Skill now only creates `context/` and `songs/` — other directories created by other skills when needed.
+- rostrum/gatsby-grace: Consolidated data from 3 directories. Merged filled `artist.md` (from local) + `brand.md` content. Replaced placeholder `audience.md` with filled version (from old). Copied 17 songs with proper `{slug}.mp3` naming + wav + lyrics.json + clips.json. Renamed `library/` → `research/`. Dropped stale `reports/`. Deleted all scaffolding (memory/, config/, content/, apps/, era.json, tasks.md, .env.example, 8 READMEs). Updated RECOUP.md with minimal "What's Here" + "Adding Things" guidance.
+**PRs:** none yet — changes are local, need to commit and push to rostrum repo and skills repo
+**Notes:** The tasks content pipeline only reads `context/artist.md`, `context/audience.md`, `context/images/face-guide.png`, and `songs/*.mp3` via GitHub API. No per-artist config needed — pipeline uses hardcoded defaults. Song naming matters: pipeline derives title from filename, so `{slug}.mp3` not `audio.mp3`. Old gatsby-grace directories (`.local/records/artists/gatsby-grace` and `gatsby-grace-old`) can be deleted after verifying pipeline works. Other rostrum artists still have the old bloated scaffolding — migrate separately.
+
+---
+
 ## [2026-03-25] Round 5 lint + KISS fixes for PR #342 (REC-7)
 **Prompt:** Fix the failing checks on PR #342
 **Status:** completed
