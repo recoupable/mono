@@ -474,6 +474,16 @@
 
 ---
 
+## [2026-03-26] Feature Suggestion — Song Release Planner
+
+**Prompt:** @U0AJM7X8FBR asked agent to read the codebase and suggest a new feature to build.
+**Status:** suggestion only — not yet implemented
+**Changes:** none (PROGRESS.md update only)
+**PRs:** none
+**Notes:** Suggested feature: **Song Release Planner with Automated Task Scheduling**. A visual release timeline in the chat app where artists/labels plan a release date, get an AI-generated pre/post-release activity schedule (teasers, press push, social posts, fan emails), and one-click convert it into real Trigger.dev tasks. Builds entirely on existing `tasks` + `catalogs` + `content` + `pulses` infrastructure. Scope: new `releases` Supabase table + `POST/GET /api/releases` endpoints + `lib/releases/` domain logic + `/releases` chat frontend page + `scheduleReleaseTasksTask` Trigger.dev task + OpenAPI docs. No new external dependencies required.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
