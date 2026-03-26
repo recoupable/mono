@@ -384,6 +384,20 @@
 
 ---
 
+## [2026-03-26] Song Filtering for Content Creation Pipeline
+
+**Prompt:** Add optional `songs` array to content creation payload so callers can restrict clip selection to specific songs (e.g., for an EP, a single, or a named album track).
+**Status:** completed
+**Changes:**
+- `tasks`: `src/schemas/contentCreationSchema.ts` — added `songs: z.array(z.string()).optional()`. `src/content/selectAudioClip.ts` — filters `songPaths` by slug before random pick; throws clear error if none found. `src/tasks/createContentTask.ts` — passes `payload.songs` to `selectAudioClip`. New `src/content/__tests__/selectAudioClip.test.ts` — 4 tests covering filter-to-one, filter-to-many, missing-song error, and no-filter (all-songs) cases. `src/schemas/__tests__/contentCreationSchema.test.ts` — 2 new tests for songs field.
+- `api`: `lib/trigger/triggerCreateContent.ts` — added `songs?: string[]` to `TriggerCreateContentPayload`.
+**PRs:** `gh` not available in sandbox — PRs need to be opened via GitHub:
+- tasks: `feature/song-filtering-for-content-pipeline` → main: https://github.com/recoupable/tasks/pull/new/feature/song-filtering-for-content-pipeline
+- api: changes committed to `test` branch directly (was already on test with many staged changes)
+**Notes:** Filtering is path-based: `path.includes('/songs/${slug}/')`. Callers (Slack bot, chat agent) are responsible for translating user intent (e.g., "ADHD EP") into song slugs before passing to the task. When `songs` is omitted, all songs remain eligible (backward-compatible).
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
