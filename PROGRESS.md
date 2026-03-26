@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-03-26] Web-researched artist.md profiles for all 44 rostrum artists
+**Prompt:** Do deep web research on every artist in the rostrum directory and create artist.md profiles
+**Status:** completed
+**Changes:**
+- rostrum/artists: Created `context/artist.md` for all 42 artists that were missing profiles (Alé Araya + Gatsby Grace already had them)
+- Each profile built from 2-3 web searches per artist with real biographical data, genre descriptions, aesthetic direction, brand voice, and sacred rules
+- Profiles cover: 7 hip-hop legends (Mac Miller, Wiz Khalifa, Jeezy, Raekwon, Mobb Deep, Sean Price, Smif-N-Wessun), 7 hip-hop artists (DC The Don, Jae Skeese, THE REAL RYU, Natural Elements, YUNGMORPHEUS, Like, Chip Fu), 7 labels/entities (Rostrum Records, Fat Beats, Cantora Records, Javotti Media, Spaceheater, Soul In The Horn, Murdermart), 7 emerging artists (Julius Black, Gliiico, Amxxr, Baro Sura, Neek, Nicole Bus, Niko Is), 7 bands/artists (Bear Hands, El Michels Affair, MGMT, Mod Sun, Theo Croker, TeamMate, Henri), 6 artists (Goosebytheway, Jada, Mike Taylor, No Love for the Middle Child, Rashad Thomas, Solene)
+**PRs:** none — pushed directly to rostrum repo main
+**Notes:** Two artists have thinner profiles due to limited public information: Neek (multiple "Neek" artists exist, couldn't confirm which one) and Jada (no public info found confirming which "Jada" is on Rostrum). These should be enriched when the label provides details. THE REAL RYU has two directories (the-real-ryu and the-real-ryu-19447895) — both received identical profiles. TeamMate correction: they're former romantic partners (not brother-sister as initially thought). 43 files, 3,558 lines of real research-backed content.
+
+---
+
 ## [2026-03-25] Purge YAGNI scaffolding from rostrum artists
 **Prompt:** Follow setup-artist skill and remove all unneeded scaffolding files/folders from rostrum artist directories (except gatsby-grace)
 **Status:** completed
@@ -436,6 +448,29 @@
 - tasks: `feature/song-filtering-for-content-pipeline` → main: https://github.com/recoupable/tasks/pull/new/feature/song-filtering-for-content-pipeline
 - api: changes committed to `test` branch directly (was already on test with many staged changes)
 **Notes:** Filtering is path-based: `path.includes('/songs/${slug}/')`. Callers (Slack bot, chat agent) are responsible for translating user intent (e.g., "ADHD EP") into song slugs before passing to the task. When `songs` is omitted, all songs remain eligible (backward-compatible).
+
+---
+
+## [2026-03-26] Artist profile creation — 6 Rostrum artists
+**Prompt:** Create context/artist.md profiles for 6 Rostrum artists using web research
+**Status:** completed (5 full profiles, 1 placeholder)
+**Changes:**
+- rostrum/artists: Created `context/artist.md` for goosebytheway (Drumwork/Conway the Machine rapper, Buffalo), mike-taylor (Philly pop-soul, "Feel Good" EP), no-love-for-the-middle-child (Andrew Migliore, multi-instrumentalist producer-artist), rashad-thomas (Columbus producer/rapper, "I Was Told There'd Be Gold" via Fat Beats), solene (cyber jazz pioneer, "Mother of Cyber Jazz", minthaze collaborator)
+- rostrum/artists: Created placeholder `context/artist.md` for jada — no public information found linking any "Jada" artist to Rostrum Records; profile marked for update when label provides details
+**PRs:** none — changes are local in `.local/records/rostrum/`
+**Notes:** Jada is the only artist with insufficient research results. Multiple search variations tried (Jada rapper, Jada musician Rostrum, Jada hip hop, etc.) — found Jada Kingdom (Republic Records), Jada Lee (Philly independent), and JADA (East London) but none confirmed on Rostrum. Profile written as honest placeholder rather than fabricated content. All other profiles built from confirmed web sources with real proof points.
+
+---
+
+## [2026-03-26] Artist Profile Creation — 7 Rostrum Artists
+**Prompt:** Create context/artist.md profiles for 7 Rostrum Records artists using web research and the established template format
+**Status:** completed
+**Changes:**
+- rostrum/artists: Created `context/artist.md` for mac-miller (legacy, deceased 2018), wiz-khalifa (Rostrum flagship), jeezy (trap pioneer), raekwon (Wu-Tang/mafioso rap), mobb-deep (Queensbridge duo, Prodigy deceased 2017), sean-price (Boot Camp Clik, deceased 2015), smif-n-wessun (Boot Camp Clik duo)
+- All 7 profiles follow the established template format (matching ale-araya's structure): personality, topics, genre, comparables, positioning, aesthetic, mood, colors, settings, fashion, voice, tone, sacred rules, avoid
+- Each profile built from web research with real biographical data, chart positions, album details, and cultural context — no placeholders or fabricated details
+**PRs:** none — changes are local in `.local/records/rostrum/`
+**Notes:** Three of the seven artists are legacy/catalog acts (Mac Miller d. 2018, Prodigy/Mobb Deep d. 2017, Sean Price d. 2015). Profiles for deceased artists are written to guide catalog/legacy content management. All profiles include extra sections (Signature Elements, Visual References) only when real information was available.
 
 ---
 
