@@ -484,6 +484,17 @@
 
 ---
 
+## [2026-03-31] Marketing — Install coreyhaines31/marketingskills
+
+**Prompt:** Install `npx skills add coreyhaines31/marketingskills` in the marketing repo.
+**Status:** completed
+**Changes:**
+- `marketing`: Ran `npx skills add coreyhaines31/marketingskills --yes` — installed all 34 skills from the package. Skills live in `.agents/skills/`, symlinked to `.claude/skills/` and `skills/`. `skills-lock.json` also created. Committed and pushed directly to `main`.
+**PRs:** none (pushed directly to `main`)
+**Notes:** Skills installed: ab-test-setup, ad-creative, ai-seo, analytics-tracking, churn-prevention, cold-email, competitor-alternatives, content-strategy, copy-editing, copywriting, customer-research, email-sequence, form-cro, free-tool-strategy, launch-strategy, lead-magnets, marketing-ideas, marketing-psychology, onboarding-cro, page-cro, paid-ads, paywall-upgrade-cro, popup-cro, pricing-strategy, product-marketing-context, programmatic-seo, referral-program, revops, sales-enablement, schema-markup, seo-audit, signup-flow-cro, site-architecture, social-content.
+
+---
+
 ## Known Issues / Next Steps
 
 - `SUBMODULE_CONFIG` in `tasks/src/sandboxes/submoduleConfig.ts` does **not** include `admin` or `marketing` — if the agent modifies those submodules, PRs won't be auto-created. Consider adding them.
