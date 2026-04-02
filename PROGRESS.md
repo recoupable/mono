@@ -1,6 +1,40 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-01
+> Last updated: 2026-04-02
+
+## [2026-04-02] Content creation V2 plan + caption bug investigation
+**Prompt:** Investigate caption bug (captions not based on song lyrics), then iterate on V2 modular plan for content creation pipeline
+**Status:** completed
+**Changes:**
+- tasks: Investigated caption generation bug by pulling Trigger.dev run data via SDK, triggered reproduction run with "Safe Boy Bestie" mp3. Confirmed lyrics DO flow through transcription → caption prompt. The template's caption-guide.json style rules overpower the lyrics context, but captions are loosely connected to the song — not a hard bug, more a prompt tuning issue.
+- plans: Updated `.local/plans/content-creation/plan.md` — V2 modular plan with: API endpoints nested under `/api/content/create/`, clear api vs tasks repo split, renamed "caption" → "text" (text = content + style including font), renamed "clip" → "audio", clarified face guide is artist-specific (not template-level), added text-style.json and fonts/ to template structure
+**PRs:** none (plan + investigation only)
+**Notes:** Key architectural decisions: (1) generate-text is inline in api (2-5s LLM call), all other primitives are Trigger.dev tasks. (2) Text primitive returns content + style (font, color, size), render just draws it. (3) Templates define scenes, artists provide faces — the two are independent. (4) createContentTask becomes an orchestrator calling individual tasks via triggerAndWait. Remaining gaps to address during implementation: artist context fetching, text object schema, template renaming, partial retry UX, docs updates.
+
+---
+
+## [2026-04-02] Two new skills from Alexis x Sid meeting transcript
+**Prompt:** Extract domain knowledge from Alexis x Sid meeting transcript (April 1) and create skills
+**Status:** completed
+**Changes:**
+- skills: Created `trend-to-song/SKILL.md` — pipeline for turning trending cultural moments into songs and test campaigns in 72 hours. Covers trend spotting, emotional DNA extraction, AI song generation, burner page distribution, and monitoring. Based on the Bravo reality TV example discussed in the meeting
+- skills: Created `artist-growth-threshold/SKILL.md` — playbook for getting new artists past streaming milestones (1K monthly listeners for Showcase, 5K for Marquee, Popularity 50 for algorithmic boosting). Includes three paths to 1K (playlist pitching, social-to-DSP ads, organic), real cost benchmarks ($500 playlist push, $0.34 CPC, ~30% click-to-listen), content strategy (relatable first lines, mouth movement for unmutes, posting cadence), and decision framework
+- skills: Updated `README.md` — added both skills to the skills table and directory structure
+**PRs:** none (local skill creation)
+**Notes:** Domain knowledge extracted from Alexis (Rostrum Records) sharing music marketing expertise during the Gatsby Grace growth planning discussion. Key data points are from real campaigns (playlist pitching benchmarks, Spotify Popularity mechanics, content engagement patterns). The trend-to-song workflow is novel — reverse engineering from cultural moment to song using AI generation, which Alexis described as something he "never thought in practice" would work but was excited about.
+
+## [2026-04-01] Financial docs for fundraise deck (cap table, P&L, projections)
+**Prompt:** Jules asked for cap table, historical financials, and projections for the investor deck. Build all three.
+**Status:** completed
+**Changes:**
+- strategy: Created `cap-table.md` — current ownership (Sid 99%, Jules 1% advisor), vesting schedule, pre-money valuation benchmarks, notes on LLC→C-Corp conversion for fundraise
+- strategy: Created `financials.md` — historical revenue by month (Jan 2025→Apr 2026), current expense breakdown ($11,277/mo), P&L summary showing cash-flow positive with Seeker, pipeline detail, two 12-month projection scenarios (organic: exit $68k MRR; post-raise: exit $108k MRR), use of funds breakdown for ~$1M raise
+- strategy: Updated `customers.md` — corrected MRR to ~$17,995 with full breakdown (added Atlantic $1k/mo, 300 $1k/mo, 5 B2C at $99/mo), added expense summary and net income
+- strategy: Updated `investor-memo.md` — corrected MRR to ~$18K, added cash-flow positive status and $0 external funding raised
+**PRs:** none (local strategy docs)
+**Notes:** Several items marked [?] in financials.md need Sid to fill in: exact start dates for Atlantic and 300 pilot payments, and any missing expenses. Two projection scenarios model organic growth (no raise, exit $68k MRR) and post-raise acceleration ($750K-$1.25M raise, exit $108k MRR). Key insight for deck: company reaches cash-flow positive the month Seeker closes — raise is for acceleration, not survival.
+
+---
 
 ## [2026-04-01] Strategy docs updated from Jules x Sid transcript (April 1)
 **Prompt:** Process Jules x Sid meeting transcript (April 1) and route insights to strategy docs per AGENTS.md classification rules (DECISION / IDEA / SIGNAL / CONTEXT)
