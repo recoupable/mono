@@ -1,7 +1,176 @@
 # PROGRESS.md
 
-> Last updated: 2026-03-26
+> Last updated: 2026-04-01
+
+## [2026-04-01] Strategy docs updated from Jules x Sid transcript (April 1)
+**Prompt:** Process Jules x Sid meeting transcript (April 1) and route insights to strategy docs per AGENTS.md classification rules (DECISION / IDEA / SIGNAL / CONTEXT)
+**Status:** completed
+**Changes:**
+- strategy: Saved structured transcript to `transcripts/jules-sid-2026-04-01.md` with 11 topic sections and action items table
+- strategy: `pmf-journal.md` — appended 13 classified entries: 7 IDEAS (YC for Creators model, warrants, SAFR instrument, agent org chart product, parent entity restructuring, prove-then-raise path, accelerator expansion), 2 SIGNALs (Broke Records signing AI artists, cohort hustle vs. talent divide), 4 CONTEXT entries (EA resource, NYC trip logistics, Meng situation, Jules role evolution)
+- strategy: `decisions-log.md` — appended 1 DECISION: keep initial artist signings lightweight (term sheet + email, no heavy legal)
+- strategy: `roster.md` — expanded Meng/Alma entry with company context and NYC plans; added accelerator cohort observations (Pear, Amanda); added "Potential Partners" section with Broke Records and Nashville musicians-fundable group
+- strategy: `roster.md` — rewrote "Acquired IP Deals" section to reflect evolving YC-for-creators model with warrants, SAFR, and prove-then-raise path (tagged as IDEA, not DECISION)
+- strategy: `deals/README.md` — added "Emerging Framing" section for YC model, warrants, SAFR; noted potential v0.3 evolution
+- strategy: `roadmap.md` — expanded label play table with 12 specific action items (advisor agreement, Slack invite, onboarding call, Claude setup, term sheets, podcast logistics, Broke Records meeting, NYC accelerator fall program)
+- strategy: `mission-and-vision.md` — added "Emerging Ideas (April 2026)" subsection flagging YC for Creators frame, parent entity restructuring, agent org chart product, Jules's potential formal role; added 3 new resonant phrases
+- strategy: `customers.md` — updated sales pipeline table with Jules agreement timeline, Broke Records intro, and NYC trip details
+**PRs:** none (local strategy docs)
+**Notes:** Per AGENTS.md rules: nothing from this transcript was treated as a firm decision except the lightweight legal approach for initial signings. All strategic shifts (YC model, warrants, SAFR, parent entity restructuring, agent org chart) are tagged [IDEA] in pmf-journal.md and flagged for human review in static docs. The transcript is a discussion, not a commitment. Key action items with deadlines: advisor agreement (this week), Jules onboarding (Apr 2), Broke Records coffee (Apr 7-8), podcast filming (Apr 22), NYC investor meetings (Apr 23).
+
+---
+
+## [2026-03-31] Deals template — Platform & Shopping Agreement for acquired IP
+**Prompt:** Create a deals directory with a template for signing acquired IP, based on the Gatsby Grace/Rostrum agreement. Iterated through studio model, YC model, and landed on a lightweight "platform + shopping rights" approach.
+**Status:** completed
+**Changes:**
+- strategy: Created `.local/strategy/deals/` directory with 3 files
+- strategy: `analysis-gatsby-grace.md` — extracted all key concepts, language, and structure from the Rostrum/Recoupable Gatsby Grace agreement
+- strategy: `template-ip-partnership.md` — v0.2 "Platform & Shopping Agreement." Two things: (1) onboard IP to Recoupable platform for content automation, (2) Recoupable gets exclusive right to shop the IP to upstream partners. Creator keeps ownership. No management obligations. No capital. If a deal lands, Recoupable gets an override and stays as platform provider.
+- strategy: `README.md` — overview of created IP (Gatsby Grace JV model) vs acquired IP (lightweight platform + shopping model)
+**PRs:** none (local strategy docs)
+**Notes:** Key strategic insight from iteration: signing external IP and promising to manage it creates obligations Recoupable can't fulfill at this stage (no team, no capital, no bandwidth for artist management). What Recoupable CAN do: automate content and shop the IP. v0.1 was a full 14-section label-style term sheet — too heavy. v0.2 is 8 sections, fits on 1-2 pages. The override % on upstream deals is TBD — needs to be decided per deal. Jules is the key person for actually facilitating upstream partnerships.
+
+---
 > Purpose: Handoff notes for the next dev/agent picking up work.
+
+---
+
+## [2026-03-31] Fix template files not loading in production (esbuild __dirname)
+**Prompt:** Debug why artist-bedroom-caption template pipeline produces wrong content via Slack content agent
+**Status:** completed
+**Changes:**
+- tasks: `src/content/loadTemplate.ts` — replaced hardcoded `__dirname`-relative path with `resolveTemplatesDir()` that tries `__dirname` first, then falls back to `process.cwd()`-relative path. esbuild changes `__dirname` to the build output directory at bundle time, so template files (style guide, caption guide, moods, movements, reference images) were silently failing to load in production. Added diagnostic logging and distinguished ENOENT from parse errors in `loadJsonFile`.
+**PRs:** https://github.com/recoupable/tasks/pull/117 (merged)
+**Notes:** Deployed to Trigger.dev production as version `20260331.3`. Verified fix: before = bright outdoor portrait ignoring all template rules; after = dark bedroom with purple LED, deadpan expression, proper caption style. Pre-existing SRP violation in `loadTemplate.ts` (4 exported functions) noted for follow-up PR. The `loadTemplate.ts` file also has `console.log` debug lines removed — only `logger` calls remain for Trigger.dev dashboard visibility.
+
+---
+
+## [2026-03-30] Marketing web: globals.css visual utilities
+**Prompt:** Append noise overlay, glass card, stagger animation delays, and scan lines utilities to `globals.css` without changing existing rules
+**Status:** completed
+**Changes:**
+- marketing/apps/web: `app/globals.css` — appended `.noise-overlay`, `.glass-card`, `.stagger-1`–`.stagger-5`, `.scan-lines` (film grain SVG, glassmorphism, CRT-style lines)
+**PRs:** none
+**Notes:** Use `.noise-overlay` / `.scan-lines` on a `position: relative` container so pseudo-elements layer correctly. Pair `.stagger-*` with animated elements (e.g. `fade-in-up`).
+
+---
+
+## [2026-03-30] Marketing: Marquee + FigureLabel components
+**Prompt:** Add brutalist keyword ticker (CSS marquee, inverted fg/bg) and Linear-style FIG labels for marketing web
+**Status:** completed
+**Changes:**
+- marketing/apps/web: `components/home/Marquee.tsx` — duplicated keyword row, `animate-marquee`, monospace `+` separators, `border-y border-(--border)`, `aria-hidden` decorative strip
+- marketing/apps/web: `components/ui/FigureLabel.tsx` — `FIG {number}`, monospace 10px, `tracking-widest`, `text-(--muted-foreground)` + `opacity-50`, `cn()` for `className`
+**PRs:** none
+**Notes:** Not imported on `app/page.tsx` yet — add `<Marquee />` / `<FigureLabel number="0.1" />` where needed. `pnpm build` from `marketing/` passed.
+
+---
+
+## [2026-03-30] Marketing home: VisionOverlay + StatusBar
+**Prompt:** Add two server components from moodboard — B&W HUD bounding box + terminal readout (CSS-only); thin status bar with SYS.STATUS, version, MCP tools; use #c8ff00, animate-blink on green dot, staggered keyframes like AgentChat
+**Status:** completed
+**Changes:**
+- marketing/apps/web: `components/home/VisionOverlay.tsx` — 60vh section, gradient “photo” mood, #c8ff00 frame + L-corner brackets, SUBJECT_08X pill, artist placeholder + silhouette SVG, staggered terminal lines + deployment badge
+- marketing/apps/web: `components/home/StatusBar.tsx` — max-w-7xl row, dividers, monospace 10–11px caps, ONLINE + blinking green dot, version + MCP copy; `pnpm build` from `marketing/` passed
+**PRs:** none
+**Notes:** Components are not wired into `app/page.tsx` yet — import when replacing hero/section placeholders.
+
+---
+
+## [2026-03-30] Marketing homepage + header polish
+**Prompt:** Hero border under proof; proof stat text glow; module card min-height + rounded; terminal label brand color + container rounding; segment left border; Blog nav plain link when no dropdown items; mobile nav comment; nav typing for empty learn items
+**Status:** completed
+**Changes:**
+- marketing/apps/web: `app/page.tsx` — `border-b border-[var(--border)]` on hero; proof number `drop-shadow-[0_0_30px_rgba(200,255,0,0.3)]`; modules `min-h-[320px] rounded-lg`; terminal eyebrow `text-[var(--brand)]`; segments `border-l-2 border-[var(--brand)]/30 pl-4`
+- marketing/apps/web: `components/layout/NavDropdown.tsx` — if `items.length === 0`, render a single `Link` (no empty hover panel)
+- marketing/apps/web: `lib/nav.ts` — explicit `NavSection` / `NavItem` types so `learn.items: []` is `readonly NavItem[]` (fixes `/learn` page + copy `never` errors vs `as const` empty tuple)
+- marketing/apps/web: `components/layout/Header.tsx` — mobile nav comment aligned to desktop order
+**PRs:** none
+**Notes:** `Terminal.tsx` root already has `rounded-lg overflow-hidden`. `/learn` index still renders zero cards while `nav.learn.items` is empty; add fallback links if that page should stay useful.
+
+---
+
+## [2026-03-30] Marketing home: AgentChat + SystemDiagram mockups
+**Prompt:** Add CSS-only product mockups — fake agent chat UI with staggered fade-in; three-node CONNECT/PROCESS/DEPLOY diagram with SVG arrows and brand glow
+**Status:** completed
+**Changes:**
+- marketing/apps/web: `components/home/AgentChat.tsx` — macOS chrome, Gatsby Grace sidebar, chat bubbles + 66% progress bar, scoped keyframes + animation-delay classes (no client JS)
+- marketing/apps/web: `components/home/SystemDiagram.tsx` — 01–03 nodes, horizontal SVG connectors (vertical on mobile), `var(--brand)` numbers/arrows, color-mix glow shadow
+**PRs:** none
+**Notes:** `pnpm build` from `marketing/` passed. Wire into `app/page.tsx` or other sections when replacing placeholders.
+
+---
+
+## [2026-03-30] Marketing homepage: fade-in-up, proof strip, terminal polish
+**Prompt:** Append globals.css utilities (view-timeline fade-in-up, glow-brand); refine Terminal colors and keyword highlighting; soften proof strip; add fade-in-up to major homepage sections
+**Status:** completed
+**Changes:**
+- marketing/apps/web: `app/globals.css` — `@keyframes fade-in-up`, `.fade-in-up` (animation-timeline view), `.glow-brand`
+- marketing/apps/web: `components/home/Terminal.tsx` — base text `#e5e5e5`, SUCCESS `#c8ff00`, error/warning tokens `#ff9f43`, `TerminalLine` split rendering
+- marketing/apps/web: `app/page.tsx` — proof section dark bg, yellow stat + `glow-brand`, brand-tint borders; `fade-in-up` on proof, modules, terminal, segments, subscribe sections
+**PRs:** none
+**Notes:** `pnpm build` from `marketing/` passed. Scroll-driven animation needs browsers with `animation-timeline: view()` support; others show static content.
+
+---
+
+## [2026-03-29] Docs overhaul — full rewrite with positioning and developer experience
+**Prompt:** Rewrite Recoup docs to properly communicate what the product is, inspired by Composio's clear documentation style
+**Status:** completed
+**Changes:**
+- docs: Rewrote `index.mdx` — positions Recoup as autonomous music infrastructure with three integration paths (API, MCP, CLI); shows "Who It's For" (Artists, Labels, Developers); uses brand positioning from `marketing/content/brand/`
+- docs: Rewrote `quickstart.mdx` — starts with Spotify search (works immediately, no data needed); shows CLI and MCP setup in same page; concise and value-focused
+- docs: Created `how-it-works.mdx` — explains three layers (Entry Points, Agent Layer, Context Layer); covers agents, sandboxes, data flow, and integration options; "What Makes Recoup Different" comparison table
+- docs: Rewrote `cli.mdx` — workflow-oriented structure (like Composio CLI docs); content creation workflow as primary path; command summary table at end
+- docs: Rewrote `mcp.mdx` — config snippets for Claude Desktop, Cursor, VS Code; full tool list (43 tools in 12 categories); usage examples; TypeScript SDK connection
+- docs: Rewrote `api-reference/introduction.mdx` — developer-focused with base URL, auth, response format, rate limits, and explore cards
+- docs: Created `authentication.mdx` — unified auth guide covering API keys, MCP Bearer tokens, CLI env vars, org access, and admin auth
+- docs: Restructured `docs.json` navigation — "Get Started" (Welcome, Quickstart, How It Works, Auth) + "Integrate" (MCP, CLI, Content Agent); updated anchors (Dashboard, API Keys, Website)
+**PRs:** Branch `feat/docs-overhaul` pushed to `recoupable/docs` — PR targets `main`
+**Notes:** Voice follows `marketing/content/brand/voice.md` — specific, no-BS, show-don't-tell. Positioning aligned with `marketing/content/brand/positioning.md` — "Run your music business with agents." Pre-existing broken nav references (admins/check, admins/sandboxes, etc.) were not introduced by this change.
+
+---
+
+## [2026-03-29] CodeRabbit: research POST Zod, playlists popularIndie, skill + CLI fixes
+**Prompt:** Zod inline validation on research POST handlers; `popularIndie` overridable in playlists handler; recoup-research SKILL angle brackets + YouTube audience vs metrics note; CLI parseInt NaN checks for web/people
+**Status:** completed
+**Changes:**
+- api: `postResearch{Web,Deep,People,Extract,Enrich}Handler.ts` — inline Zod body schemas + unified 400 handling; `getResearchPlaylistsHandler.ts` — `popularIndie` in explicit filter branch; minimal JSDoc `@returns` / param fixes where eslint required
+- skills/recoup-research: `SKILL.md` — replaced `--genre <id>` pattern; clarified `youtube_channel` applies to `metrics` only, `audience` uses `--platform youtube`
+- cli: `src/commands/research.ts` — validate `--max-results` / `--num-results` after `parseInt` (radix 10)
+**PRs:** none
+**Notes:** Extract `full_content` is strict boolean in Zod (no string coercion). Enrich `schema` uses `z.record(z.string(), z.unknown())` (object with string keys).
+
+---
+
+## [2026-03-29] MCP research tools: proxy status checks and platform validation
+**Prompt:** After `proxyToChartmetric`, return tool errors when `result.status !== 200`; add `VALID_PLATFORMS` where platform is interpolated; charts tool validates alphanumeric platform (no path injection)
+**Status:** completed
+**Changes:**
+- api: `lib/mcp/tools/research/registerResearch{Artist,Metrics,Audience,Cities,Similar,Playlists,Urls,InstagramPosts,Albums,Tracks,Career,Insights,Milestones,Venues,Rank,Lookup,Track,Playlist,Curator,Discover,Genres,Festivals,Charts,Radio}Tool.ts` — status guard before `getToolResultSuccess`; playlist/track search paths check proxy status too; `VALID_PLATFORMS` on playlists, playlist info, curator; charts uses `/^[a-zA-Z0-9]+$/` on `platform`
+**PRs:** none
+**Notes:** Ran `eslint --fix` on touched files. `registerResearchMilestonesTool` / `registerResearchRankTool` still have pre-existing `@typescript-eslint/no-explicit-any` on parsed bodies.
+
+---
+
+## [2026-03-29] Rename MCP research tool registerTool() names
+**Prompt:** Rename the first argument to `server.registerTool()` in all 27 research MCP tool files; update descriptions for discography/URLs/tracks overlap with other tools
+**Status:** completed
+**Changes:**
+- api: `lib/mcp/tools/research/registerResearch*.ts` — tool IDs now use `get_*` / `lookup_*` / `discover_*` / `find_*` / `extract_*` / `enrich_*` naming; `get_artist_tracks` description notes `get_spotify_artist_top_tracks`; albums and URLs descriptions were already aligned with the requested copy
+**PRs:** none
+**Notes:** JSDoc lines still mention old `research_*` names in some files; update separately if docs should match registered IDs. Any clients hardcoding old tool names must switch to the new strings.
+
+---
+
+## [2026-03-27] Create research-artist skill
+**Prompt:** Turn artist deep research prompt into a skill for the Recoupable platform, with design thinking about research method, static vs dynamic data, and downstream use
+**Status:** completed
+**Changes:**
+- skills/research-artist: Created `SKILL.md` — multi-source research pipeline that works in sandbox (MCP tools + Perplexity deep research) and Cursor/local (WebSearch + last30days). Produces timestamped research report with career-stage assessment, fan personas, competitive white-space, revenue opportunities. Respects artist-workspace static/dynamic context separation.
+- skills/research-artist/references: Created `report-template.md` (full output template with YAML frontmatter, confidence markers, 8 report sections) and `research-queries.md` (3 research strategies: Perplexity deep research, multi-query WebSearch, MCP platform APIs)
+**PRs:** none — local skill creation
+**Notes:** Key design decisions: (1) Uses `web_deep_research` MCP tool (Perplexity sonar-deep-research) as the ChatGPT deep research replacement in sandbox. (2) Static context (artist.md, audience.md) is created but never blindly overwritten — suggests updates for human review. (3) Dynamic context (research report) is timestamped in `research/`. (4) Optionally chains with last30days skill for Reddit/X social pulse. (5) Structured output with confidence markers ([confirmed], [estimated], [inferred], [gap]) so downstream agents know what to trust.
 
 ---
 
@@ -474,13 +643,28 @@
 
 ---
 
-## [2026-03-26] Feature Suggestion — Song Release Planner
+## [2026-03-29] Add 5 new research endpoints across all layers
+**Prompt:** Create milestones, venues, rank, charts, and radio research endpoints across API, MCP, docs, and CLI
+**Status:** completed
+**Changes:**
+- api: Created 5 handler files (`lib/research/getResearch{Milestones,Venues,Rank,Charts,Radio}Handler.ts`) — milestones/venues/rank use `handleArtistResearch` pattern, charts/radio use non-artist direct proxy pattern
+- api: Created 5 route files (`app/api/research/{milestones,venues,rank,charts,radio}/route.ts`)
+- api: Created 5 MCP tool files (`lib/mcp/tools/research/registerResearch{Milestones,Venues,Rank,Charts,Radio}Tool.ts`) and updated `index.ts` to register all 5
+- docs: Added 5 paths + 5 response schemas to `openapi.json`, created 5 MDX files, updated `docs.json` navigation, added CLI docs to `cli.mdx`
+- cli: Added 5 commands to `src/commands/research.ts` (milestones, venues, rank, charts, radio) with examples and help text
+**PRs:** none yet — changes on existing feature branches
+**Notes:** Artist-scoped endpoints (milestones, venues, rank) use `handleArtistResearch` shared handler. Non-artist endpoints (charts, radio) follow the genres/festivals pattern (auth + deductCredits + proxyToChartmetric). Charts requires `--platform` flag; radio has no params. All lint-clean.
 
-**Prompt:** @U0AJM7X8FBR asked agent to read the codebase and suggest a new feature to build.
-**Status:** suggestion only — not yet implemented
-**Changes:** none (PROGRESS.md update only)
-**PRs:** none
-**Notes:** Suggested feature: **Song Release Planner with Automated Task Scheduling**. A visual release timeline in the chat app where artists/labels plan a release date, get an AI-generated pre/post-release activity schedule (teasers, press push, social posts, fan emails), and one-click convert it into real Trigger.dev tasks. Builds entirely on existing `tasks` + `catalogs` + `content` + `pulses` infrastructure. Scope: new `releases` Supabase table + `POST/GET /api/releases` endpoints + `lib/releases/` domain logic + `/releases` chat frontend page + `scheduleReleaseTasksTask` Trigger.dev task + OpenAPI docs. No new external dependencies required.
+---
+
+## [2026-03-29] Fix response normalization in research handlers
+**Prompt:** Fix array-spreading bug in all research handlers — when Chartmetric returns an array as `obj`, the spread operator produces `{ "0": item, "1": item }` instead of wrapping under a named key
+**Status:** completed
+**Changes:**
+- api: Added `transformResponse` to 8 artist handlers via `handleArtistResearch()`: albums→`{albums}`, tracks→`{tracks}`, insights→`{insights}`, career→`{career}`, similar→`{artists, total}`, playlists→`{placements}`, cities→transforms city map to sorted array `{cities}`, urls→`{urls}`
+- api: Fixed 3 non-artist handlers (genres, festivals, discover) that manually spread `result.data` — replaced with named-key wrapping: `{genres}`, `{festivals}`, `{artists}`
+**PRs:** none yet
+**Notes:** `handleArtistResearch` already had the `transformResponse` parameter wired up (4th arg). Each handler now passes the appropriate transform. Cities handler is the most complex — converts Chartmetric's `{ "Chicago": [{timestp, code2, listeners}] }` map into a flat sorted array. Similar handler handles both `relatedartists` (returns array) and `by-configurations` (returns `{data, total}`).
 
 ---
 
