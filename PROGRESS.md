@@ -2,6 +2,30 @@
 
 > Last updated: 2026-04-02
 
+## [2026-04-02] CodeRabbit: remove unused TEXT_LENGTHS / TextLength
+**Prompt:** Fix CodeRabbit review — remove dead `TEXT_LENGTHS` and `TextLength` from content schemas; do not change createRenderTask (videoUrl is correct).
+**Status:** completed
+**Changes:**
+- tasks: Removed unused `TEXT_LENGTHS` constant and `TextLength` type from `src/schemas/contentPrimitiveSchemas.ts`. Tests had no references; no test file edits.
+**PRs:** none (follow-up on `feature/content-primitives`)
+**Notes:** `createRenderTask` / `renderFinalVideo` output shape left unchanged.
+
+## [2026-04-02] Content V2 modular refactor — all 4 phases implemented
+**Prompt:** Break monolithic content creation pipeline into standalone primitives across tasks, api, cli, and skills
+**Status:** completed
+**Changes:**
+- tasks: 5 new primitive tasks (`create-image`, `create-video`, `create-audio`, `create-render`, `create-upscale`) + Zod schemas + 21 tests. V1 `create-content` untouched.
+- api: 6 new endpoints under `POST /api/content/create/{image,video,text,audio,render,upscale}`. DRY shared factories (`triggerPrimitive`, `validatePrimitiveBody`, `createPrimitiveHandler`, `createPrimitiveRoute`) — 12 files instead of 23. Text endpoint is inline (no task). 17 tests.
+- cli: 6 new commands (`recoup content image/video/text/audio/render/upscale`). DRY `createPrimitiveCommand` factory — each command is ~10 lines. Build passes, 74 tests pass.
+- skills: Created `content-creation/SKILL.md` teaching LLM agents how to compose primitives step-by-step.
+**PRs:**
+- tasks: https://github.com/recoupable/tasks/pull/new/feature/content-primitives (target: main)
+- api: https://github.com/recoupable/api/pull/new/feature/content-primitive-endpoints (target: test)
+- cli: https://github.com/recoupable/cli/pull/new/feature/content-primitive-commands (target: main)
+**Notes:** V1 full pipeline (`POST /api/content/create` and `recoup content create`) is completely untouched — all changes are additive. PRs need to be created manually (gh token lacks PR creation permission). Tasks PR must merge first since API triggers the new task IDs.
+
+---
+
 ## [2026-04-02] Content creation V2 plan + caption bug investigation
 **Prompt:** Investigate caption bug (captions not based on song lyrics), then iterate on V2 modular plan for content creation pipeline
 **Status:** completed
