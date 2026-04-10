@@ -8,17 +8,19 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 
 | Submodule | Description | Key Tech |
 |-----------|-------------|----------|
-| `chat` | Main chat application | Next.js 16, React 19, Vercel AI SDK, Stagehand |
-| `api` | API service with payment middleware | Next.js 16, x402-next, Supabase |
-| `tasks` | Background job workers | Trigger.dev v4 |
-| `docs` | API documentation | Mintlify |
-| `database` | Database migrations | Supabase CLI |
-| `remotion` | Video generation | Remotion |
-| `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
-| `skills` | AI agent skills monorepo | Markdown, Git submodules |
-| `cli` | Command-line interface for the Recoupable platform | Commander.js, tsup, Node 22 |
-| `marketing` | Marketing website and landing pages | Next.js, React, Tailwind CSS |
-| `admin` | Internal admin dashboard for platform management | Next.js, React, Supabase |
+| `chat` | External, web app, AI chat interface for artists and labels | Next.js 16, React 19, Vercel AI SDK, Stagehand |
+| `api` | External, backend API with payment middleware | Next.js 16, x402-next, Supabase |
+| `marketing` | External, marketing website and landing pages | Next.js, React, Tailwind CSS |
+| `docs` | External, API documentation | Mintlify |
+| `cli` | External, CLI for the Recoupable platform | Commander.js, tsup, Node 22 |
+| `skills` | External, Recoupable's public skills repo, platform usage + domain knowledge for AI agents | Markdown |
+| `admin` | Internal, admin dashboard for platform management | Next.js, React, Supabase |
+| `tasks` | Internal, background job workers | Trigger.dev v4 |
+| `database` | Internal, database migrations | Supabase CLI |
+| `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
+| `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
+| `remotion` | Dormant, video generation | Remotion |
+| `bash` | Dormant, interactive bash demo with AI agent | Next.js 16, React 19, just-bash |
 
 ## Git Workflow
 
@@ -136,6 +138,26 @@ npx mintlify@latest dev          # Preview docs locally
 - YAGNI: Don't build for hypothetical future needs
 - TDD: API changes should include unit tests
 
+## Skills
+
+| Purpose | Location |
+|---------|----------|
+| **Build & publish** skills | `skills/` submodule (the `recoupable/skills` repo) |
+| **Install & use** skills | `.agents/skills/` via `npx skills add` |
+
+### Installing a skill
+
+```bash
+npx skills add recoupable/skills        # install our own skills
+npx skills add anthropics/skills        # install third-party skills
+```
+
+This puts skills into `.agents/skills/` (and `.cursor/skills/`, `.claude/skills/`, etc. depending on your tooling). All installed skills — ours and third-party — live in the same place.
+
+### Building a new skill
+
+Create a directory in the `skills/` submodule under `skills/` with a `SKILL.md`. See `skills/template/SKILL.md` for the format. Push to a feature branch, open a PR.
+
 ## Working Across Submodules
 
 When making changes that span multiple submodules:
@@ -146,7 +168,7 @@ When making changes that span multiple submodules:
 
 ## PROGRESS File (MANDATORY — Read Before & Write After Every Task)
 
-A `PROGRESS.md` file lives at the monorepo root. **This is not optional.**
+`PROGRESS.md` is the mono repo's persistent memory. It lives at the root and gives the next agent instant context without re-deriving it from git history. **This is not optional.**
 
 ### Before starting any work:
 1. Read `PROGRESS.md` to understand what has been done, what is in-flight, and what blockers exist
@@ -155,7 +177,7 @@ A `PROGRESS.md` file lives at the monorepo root. **This is not optional.**
 ### After completing any work (before taking a snapshot or exiting):
 1. Append a new entry to `PROGRESS.md` using this format:
 
-```
+```text
 ## [YYYY-MM-DD] <short task title>
 **Prompt:** <one-line summary of what was asked>
 **Status:** completed | partial | blocked
@@ -168,6 +190,14 @@ A `PROGRESS.md` file lives at the monorepo root. **This is not optional.**
 2. Commit `PROGRESS.md` changes in the same commit as your other changes, or in a separate commit if nothing else changed
 
 **If `PROGRESS.md` does not exist**, create it with an initial entry for the current task.
+
+### Style rules
+- Dates use ISO 8601: `YYYY-MM-DD`
+- One line per item — no prose paragraphs
+- Keep entries concise — recent completions, not a full changelog
+
+### How the file gets saved
+In sandbox environments, `pushAndCreatePRsViaAgent` pushes `PROGRESS.md` directly to `main` (no PR needed). You don't need to manually push — just edit it before the push step runs.
 
 > **Why this matters:** Every agent run starts cold. Without `PROGRESS.md`, work gets duplicated, PRs get re-opened, and context is lost. Reading and writing this file is as important as writing the code itself.
 
