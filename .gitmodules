@@ -31,3 +31,9 @@
 [submodule "admin"]
 	path = admin
 	url = https://github.com/recoupable/admin.git
+[submodule "gtm"]
+	path = gtm
+	url = https://github.com/recoupable/gtm.git
+[submodule "strategy"]
+	path = strategy
+	url = https://github.com/recoupable/strategy.git
