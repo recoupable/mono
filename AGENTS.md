@@ -22,6 +22,17 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `remotion` | Dormant, video generation | Remotion |
 | `bash` | Dormant, interactive bash demo with AI agent | Next.js 16, React 19, just-bash |
 
+## Design System
+
+**Read `DESIGN.md` before building or modifying any UI across any submodule.**
+
+It defines the shared visual language — colors, typography, spacing, components, depth, and motion — that all frontends (chat, marketing, admin) share. App-specific overrides are noted inline. Key points:
+
+- **Four-font system:** Geist Pixel Square (display headlines), Plus Jakarta Sans (UI), Geist Sans (body), Instrument Serif (editorial moments)
+- **Shadow-as-border:** Use `box-shadow` instead of CSS `border` on cards and containers
+- **Achromatic chrome:** UI stays black/white — color comes from content and status indicators
+- **Semantic CSS variables:** All colors defined as custom properties with light and dark values
+
 ## Git Workflow
 
 **Common rules across all submodules:**
