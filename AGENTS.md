@@ -179,7 +179,7 @@ When making changes that span multiple submodules:
 
 ## PROGRESS File (MANDATORY — Read Before & Write After Every Task)
 
-`PROGRESS.md` is the mono repo's persistent memory. It lives at the root and gives the next agent instant context without re-deriving it from git history. **This is not optional.**
+`PROGRESS.md` is the monorepo's persistent memory. It lives at the root and gives the next agent instant context without re-deriving it from git history. **This is not optional.**
 
 ### Before starting any work:
 1. Read `PROGRESS.md` to understand what has been done, what is in-flight, and what blockers exist
