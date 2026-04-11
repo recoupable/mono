@@ -181,6 +181,38 @@ When making changes that span multiple submodules:
 
 `PROGRESS.md` is the mono repo's persistent memory. It lives at the root and gives the next agent instant context without re-deriving it from git history. **This is not optional.**
 
+### ⚠️ PUBLIC FILE — No Private Information
+
+**`PROGRESS.md` is committed to a public open-source repository.** Every entry must be safe for anyone to read. Follow these rules:
+
+**DO NOT include:**
+- People's names (team members, customers, investors, partners)
+- Fundraise details (terms, valuations, investor pipeline, SAFE structures)
+- Customer deal values, contract amounts, or revenue figures
+- Internal competitive analysis or threat assessments
+- Strategic positioning, moat narratives, or VC pitch framing
+- Internal Slack user IDs, private channel names, or meeting specifics
+- Internal marketing angles or pricing strategy rationale
+
+**DO include:**
+- Technical changes: what code changed and why
+- File paths, PR URLs, branch names
+- Architecture decisions and implementation patterns
+- Bug descriptions, fixes, and test results
+- Roadmap items framed as feature descriptions (not competitive positioning)
+
+**For strategy/business entries:** Write a brief summary noting that internal docs were updated, and point to `.local/strategy/` or `strategy/` for details. Example:
+
+```text
+## [YYYY-MM-DD] Strategy Update — Topic
+**Prompt:** Process meeting transcript and update strategy docs
+**Status:** completed
+**Changes:**
+- `strategy`: Updated relevant docs with meeting insights
+**PRs:** none (strategy docs only)
+**Notes:** Internal strategy updates only — see `strategy/` submodule for details.
+```
+
 ### Before starting any work:
 1. Read `PROGRESS.md` to understand what has been done, what is in-flight, and what blockers exist
 2. Use this context to avoid duplicating work and to continue from the correct state
