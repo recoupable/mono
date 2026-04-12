@@ -1,6 +1,23 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-02
+> Last updated: 2026-04-12
+
+---
+
+## [2026-04-12] Admin — Agent Sign-Ups page (REC-56)
+**Prompt:** Add admin page for tracking agent API key signups with docs and API endpoint
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- docs: OpenAPI spec and MDX page for `GET /api/admins/agent-signups` endpoint
+- api: New admin endpoint querying `account_api_keys` joined with `account_emails` filtered by `agent+` email prefix, with period filtering
+- admin: New `/agent-signups` page with line chart, stats bar, data table following `/content` page pattern
+**PRs:**
+- https://github.com/recoupable/docs/pull/127
+- https://github.com/recoupable/api/pull/428
+- https://github.com/recoupable/admin/pull/26
+**Notes:** All 3 PRs created and pushed. TypeScript compiles cleanly. Awaiting Code Reviewer.
+
+---
 
 ## [2026-04-02] Content creation V2 plan + caption bug investigation
 **Prompt:** Investigate caption bug (captions not based on song lyrics), then iterate on V2 modular plan for content creation pipeline
