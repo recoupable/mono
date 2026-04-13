@@ -1,6 +1,20 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-12
+> Last updated: 2026-04-13
+
+---
+
+## [2026-04-13] Tasks — Editorial image detection in content pipeline (REC-59)
+**Prompt:** Detect editorial press photos in attachments and skip AI image generation when one is found
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- tasks: Added `detectEditorialImage.ts` + `createEditorialDetectionAgent.ts` for AI-based editorial photo classification
+- tasks: Updated `classifyImages`, `resolveFaceGuide`, `createContentTask` to support `editorialImageUrl`
+- tasks: When editorial image detected, pipeline skips image generation and uses it directly for video gen
+- tasks: 11 new tests, all 347 tests pass
+**PRs:**
+- https://github.com/recoupable/tasks/pull/131
+**Notes:** Follows same pattern as face detection (few-shot AI classification). Editorial detection only runs when `usesImageOverlay` is true.
 
 ---
 
@@ -833,3 +847,12 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** Caller is responsible for translating user intent (e.g. "ADHD EP") into song slug arrays. Pipeline just filters — no release detection logic.
 
 ---
+
+## [2026-04-12] REC-57: Admin - Content - Missing Tags
+**Prompt:** Fix /content page to show Content Agent mentions from Slack thread replies, not just top-level messages
+**Status:** in_progress (awaiting code review)
+**Changes:**
+- api: Extended `fetchBotMentions` to scan `conversations.replies` for thread mentions with cutoff filtering
+- api: Added 3 new test cases for thread mention scenarios
+**PRs:** https://github.com/recoupable/api/pull/429
+**Notes:** PR targets `test` branch. @Code Reviewer notified for review.
