@@ -4,6 +4,20 @@
 
 ---
 
+## [2026-04-13] API — Add View Task button to content agent Slack response (REC-60)
+**Prompt:** Add "View Task" button to content agent Slack response, matching coding agent behavior
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- api: Moved `buildTaskCard` from `lib/coding-agent/` to shared `lib/agents/` (DRY)
+- api: Added "View Task" button card to content agent `registerOnNewMention` handler
+- api: Updated coding agent imports to use shared location
+- api: 18 tests pass (2 new for buildTaskCard, 2 new for content agent View Task)
+**PRs:**
+- https://github.com/recoupable/api/pull/430
+**Notes:** Button links to `chat.recoupable.com/tasks/{runId}` using the first triggered run ID.
+
+---
+
 ## [2026-04-13] Tasks — Editorial image detection in content pipeline (REC-59)
 **Prompt:** Detect editorial press photos in attachments and skip AI image generation when one is found
 **Status:** in_progress (PR open, awaiting code review)
