@@ -4,6 +4,38 @@
 
 ---
 
+## [2026-04-13] API/Tasks — Default captions to none (REC-62)
+**Prompt:** Slack bot generates captions even when not requested; default should be no captions
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- api: Added `"none"` to `CAPTION_LENGTHS` enum, changed default from `"short"` to `"none"` across all schemas
+- api: Updated prompt agent to only set captions when explicitly requested by user
+- api: Updated 4 test files to reflect new defaults
+- tasks: Added `"none"` to content creation schema, changed default to `"none"`
+- tasks: Skip caption generation API call when `captionLength === "none"`, pass empty string to ffmpeg render
+- tasks: Added test for caption skip behavior
+**PRs:**
+- https://github.com/recoupable/api/pull/433
+- https://github.com/recoupable/tasks/pull/132
+**Notes:** API PR targets `test` branch. Tasks PR targets `main`. Both submodules must be deployed together.
+
+---
+
+## [2026-04-13] Admin/API — Track embedded Slack videos instead of URLs (REC-61)
+**Prompt:** Admin page tracks embedded videos from Slack bot instead of extracted video URLs
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- api: Replaced `extractVideoLinks` (URL text parsing) with `extractVideoFiles` (Slack file object extraction)
+- api: Replaced `fetchThreadVideoLinks` with `fetchThreadVideoFiles` to read `files` array on bot messages
+- api: 12 new tests for extraction logic
+- admin: Renamed "Video Links" column to "Videos", display friendly labels instead of raw URLs
+**PRs:**
+- https://github.com/recoupable/api/pull/432
+- https://github.com/recoupable/admin/pull/27
+**Notes:** API PR targets `test` branch. Admin PR targets `main`.
+
+---
+
 ## [2026-04-13] API — Add View Task button to content agent Slack response (REC-60)
 **Prompt:** Add "View Task" button to content agent Slack response, matching coding agent behavior
 **Status:** in_progress (PR open, awaiting code review)
