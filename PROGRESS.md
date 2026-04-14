@@ -4,6 +4,24 @@
 
 ---
 
+## [2026-04-14] Tasks/API — Editorial template static image (REC-65)
+**Prompt:** Editorial content template should return both video and a static image with playlist covers overlaid
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- tasks: New `buildStaticImageArgs.ts` — ffmpeg args for single-frame image render with overlays
+- tasks: New `renderStaticImage.ts` — downloads base + overlays, runs ffmpeg, uploads PNG to fal.ai
+- tasks: `createContentTask` renders static image when template uses overlay, returns `staticImageUrl`
+- tasks: `pollContentRuns` extracts `imageUrl` from task output
+- api: `contentRunResultSchema` accepts optional `imageUrl` field
+- api: `postVideoResults` downloads and posts static images before videos in Slack threads
+- 15 new tests across both submodules (all green)
+**PRs:**
+- https://github.com/recoupable/tasks/pull/136
+- https://github.com/recoupable/api/pull/438
+**Notes:** API PR targets `test` branch. Tasks PR targets `main`. Both submodules must be deployed together.
+
+---
+
 ## [2026-04-14] API — Slackbot default no artist (REC-64)
 **Prompt:** Remove hardcoded Gatsby Grace default from content agent Slack bot; require artist name in prompt
 **Status:** in_progress (PR open, awaiting code review)
