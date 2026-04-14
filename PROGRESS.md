@@ -4,6 +4,18 @@
 
 ---
 
+## [2026-04-14] API — Slackbot default no artist (REC-64)
+**Prompt:** Remove hardcoded Gatsby Grace default from content agent Slack bot; require artist name in prompt
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- api: Removed hardcoded `artistAccountId` from `registerOnNewMention.ts`
+- api: Added `artistName` to `contentPromptFlagsSchema` for AI extraction from prompts
+- api: New `selectAccountByNameInOrg.ts` for case-insensitive artist name lookup within an organization
+- api: Bot now prompts user if no artist specified, shows error if not found
+- api: 38 tests passing (20 registerOnNewMention + 13 parseContentPrompt + 5 selectAccountByNameInOrg)
+**PRs:** https://github.com/recoupable/api/pull/437
+**Notes:** Related to REC-40 (artist name param) which had an unmerged PR#382. REC-64 supersedes by making null the default instead of Gatsby Grace as fallback.
+
 ## [2026-04-14] API/Tasks/Docs — DSP logo overlay for editorial template (REC-63)
 **Prompt:** Add dsp enum parameter so editorial videos can include Spotify/Apple Music logo overlay
 **Status:** in_progress (PRs open, awaiting code review)
