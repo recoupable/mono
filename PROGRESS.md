@@ -4,6 +4,30 @@
 
 ---
 
+## [2026-04-14] Tasks — AI overlay position for editorial templates (REC-67)
+**Prompt:** Overlaid images always placed top-left; use AI to determine ideal corner
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- tasks: New `ToolLoopAgent` (`createOverlayPositionAgent`) analyzes editorial image to pick best overlay corner
+- tasks: New `overlayPosition.ts` with shared type and coordinate calculation for top-left/top-right/bottom-left/bottom-right
+- tasks: Updated `buildStaticImageArgs`, `buildFilterComplex`, `buildFfmpegArgs`, `renderFinalVideo`, `createContentTask` to accept `overlayPosition`
+- tasks: 14 new tests for position calculation and filter complex positioning
+**PRs:** https://github.com/recoupable/tasks/pull/138
+**Notes:** Backward-compatible — defaults to top-left when position not provided. Independent of REC-66 overlay size changes.
+
+---
+
+## [2026-04-14] Tasks — Larger playlist cover images (REC-66)
+**Prompt:** Playlist cover images overlaid on editorial template videos are too small for record label customers
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- tasks: Increased `OVERLAY_SIZE` from 150px to 250px in `buildStaticImageArgs.ts` and `buildFilterComplex.ts`
+- tasks: Updated tests in both test files to reflect new dimensions
+**PRs:** https://github.com/recoupable/tasks/pull/137
+**Notes:** Depends on REC-65 (PR #136) being merged first. PR branches from `feature/rec-65-editorial-static-image`.
+
+---
+
 ## [2026-04-14] Tasks/API — Editorial template static image (REC-65)
 **Prompt:** Editorial content template should return both video and a static image with playlist covers overlaid
 **Status:** in_progress (PRs open, awaiting code review)
