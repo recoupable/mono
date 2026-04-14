@@ -1,6 +1,25 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-13
+> Last updated: 2026-04-14
+
+---
+
+## [2026-04-14] API/Tasks/Docs — DSP logo overlay for editorial template (REC-63)
+**Prompt:** Add dsp enum parameter so editorial videos can include Spotify/Apple Music logo overlay
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- api: Added `dsp` enum (`none`/`spotify`/`apple`) to validation schema, trigger payload, content prompt agent, and Slack mention handler
+- api: New `dspValues.ts` constant file following `captionLengths.ts` pattern
+- api: 4 new tests for dsp validation and prompt extraction
+- tasks: Added `dsp` to content creation schema, new `resolveDspLogoUrl` utility
+- tasks: `createContentTask` appends DSP logo URL to overlay images for ffmpeg render
+- tasks: 5 new tests for DSP resolution and pipeline integration
+- docs: Added `dsp` field to OpenAPI spec and Content Agent Slack bot docs
+**PRs:**
+- https://github.com/recoupable/api/pull/436
+- https://github.com/recoupable/tasks/pull/135
+- https://github.com/recoupable/docs/pull/131
+**Notes:** API PR targets `test` branch. Tasks/docs PRs target `main`. DSP logo URLs are placeholders — actual images will be added by the user after PR merge. All three submodules must be deployed together.
 
 ---
 
