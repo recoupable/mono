@@ -840,3 +840,14 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** Caller is responsible for translating user intent (e.g. "ADHD EP") into song slug arrays. Pipeline just filters — no release detection logic.
 
 ---
+
+## [2026-04-16] Streamline featured models dropdown
+**Prompt:** Add Opus 4.7 to featured models replacing Opus 4.5; then reduce featured list to just Opus 4.7, Sonnet 4.6, GPT-5.4 Mini
+**Status:** completed
+**Changes:**
+- `chat`: Updated `lib/ai/featuredModels.ts` — promoted Claude Opus 4.7 to top, bumped Sonnet 4.5 → 4.6, removed GPT-5.2, Gemini 2.5 Flash, Gemini 3 Pro, and Grok 4 from featured list (they remain in full model list)
+**PRs:**
+- chat: https://github.com/recoupable/chat/pull/new/feature/featured-model-opus-4-7 (base: test, needs to be opened)
+**Notes:** New IDs `anthropic/claude-opus-4.7` and `anthropic/claude-sonnet-4.6` must exist in AI Gateway (`/api/ai/models`) or they'll be silently filtered from the dropdown by `organizeModels.ts`. User hit an error sending a test message — likely because one of those IDs isn't registered upstream yet; needs verification against `/api/ai/models` response.
+
+---
