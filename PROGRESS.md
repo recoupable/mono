@@ -851,3 +851,81 @@ chat (frontend) → api (backend) → Supabase (database)
 **Notes:** New IDs `anthropic/claude-opus-4.7` and `anthropic/claude-sonnet-4.6` must exist in AI Gateway (`/api/ai/models`) or they'll be silently filtered from the dropdown by `organizeModels.ts`. User hit an error sending a test message — likely because one of those IDs isn't registered upstream yet; needs verification against `/api/ai/models` response.
 
 ---
+
+## [2026-04-17] Retarget industry-research skill at the Research REST endpoints
+**Prompt:** industry-research skill is written around an unshipped `recoup research` CLI; retarget it to the `/api/research/*` endpoints shipped in docs, excluding chat endpoints
+**Status:** completed
+**Changes:**
+- `skills`: Rewrote `skills/industry-research/SKILL.md` around `https://recoup-api.vercel.app/api/research/*` HTTP calls using `x-api-key: $RECOUP_API_KEY`. Dropped the `recoup research` CLI surface. Added the endpoints that existed in docs but were missing from the skill: `charts`, `milestones`, `rank`, `radio`, `venues`, `track/playlists`, `/research` beta search (`beta=true`), and `POST /research/deep` (replaces the old `report` command). Called out the ID-vs-name gotchas for `/albums`, `/track`, `/playlist`, `/curator`, `/track/playlists` and narrowed the `/audience?platform=` enum to `instagram|tiktok|youtube`.
+- `skills`: Rewrote `skills/industry-research/references/workflows.md` so all 10 existing workflow chains use curl + the REST endpoints, and added workflow #11 (People Outreach) covering `POST /research/people` + `extract` + `enrich`.
+**PRs:** none (not pushed yet)
+**Notes:** `skills/getting-started/SKILL.md` still references `recoup research` and `recoup whoami` CLI commands — it's also outdated, but was out of scope for this task. Worth a separate pass once the CLI actually ships (or to rewrite around HTTP now if the CLI isn't coming soon).
+
+---
+
+## [2026-04-17] Retarget getting-started skill at REST + MCP
+**Prompt:** Update the getting-started skill too — same treatment as industry-research (drop the unshipped CLI)
+**Status:** completed
+**Changes:**
+- `skills`: Rewrote `skills/getting-started/SKILL.md` to remove the `npm install -g @recoupable/cli` + `recoup whoami` + `recoup research` CLI steps. Collapsed setup to two steps (get key, verify). Added a third signup path (Path C: dashboard at chat.recoupable.com/keys). Verified endpoint moved from `recoup whoami` to `GET /api/accounts/id` (confirmed in `docs/api-reference/openapi/accounts.json`). First-call example now hits `GET /api/research?q=...&beta=true` and `GET /api/research/profile` over curl. Kept the MCP config block (still accurate per `docs/mcp.mdx`) and removed the unverified "40+ tools" claim. Added an Auth gotchas section covering the `x-api-key` vs `Authorization: Bearer` exclusivity rule from `docs/authentication.mdx`.
+**PRs:** none (not pushed yet)
+**Notes:** Skill now matches the industry-research rewrite in tone + auth pattern. When the CLI eventually ships, these two skills will need a partial revert — the fastest way will be to add a "Prefer the CLI?" section at the top of each rather than rip the REST examples out.
+
+---
+
+## [2026-04-17] Rename industry-research → music-industry-research
+**Prompt:** Rename the skill to music-industry-research
+**Status:** completed
+**Changes:**
+- `skills`: `git mv skills/industry-research → skills/music-industry-research`, updated frontmatter `name:` field, updated the skill table entry in `README.md` and the directory-layout example in `AGENTS.md`. Also updated the two references inside the uncommitted `getting-started/SKILL.md` changes so they'll be consistent when that skill eventually ships. No references left in the repo after the rename (verified with grep). Pushed as a second commit on the same feature branch; updated the existing PR #12 title + body via `gh api PATCH` (the `gh pr edit` CLI path currently 500s on classic Projects GraphQL deprecation for this repo).
+**PRs:** https://github.com/recoupable/skills/pull/12 (updated, not merged yet)
+**Notes:** Downstream impact — anyone who had `industry-research` referenced by name in their agent config (e.g. `.claude-plugin/plugin.json`, Cursor skill pickers) will need to update it to `music-industry-research` after this merges. Checked `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` in the skills repo: neither lists skills by name, so nothing to update there.
+
+---
+
+## [2026-04-17] Harden music-industry-research with real response shapes
+**Prompt:** User was testing the skill; their agent hit nulls on /research/similar and misread `editorial=true` returning empty as a bug
+**Status:** completed
+**Changes:**
+- `skills`: Added a "Response shapes (what the fields actually are)" section to `skills/music-industry-research/SKILL.md` with real truncated JSON samples from live `/research/similar` and `/research/playlists` calls (verified against Drake + Joy Crookes). Explicitly document `recent_momentum` (not `trend`) and flat top-level platform counts (`sp_followers`, `ins_followers`, etc. — no `metrics` wrapper). Document the nested `{ playlist, track }` shape of `placements[]` and flag that `placement.playlist.followers` is usually 0. Added "nulls in /research/profile don't mean 'no data'" gotcha — profile returns nulls for less-covered artists but `/similar`, `/metrics`, `/cities`, `/playlists` often succeed. Added a rule: preflight playlist filter decisions against `/research/profile.num_sp_editorial_playlists` before assuming empty results are bugs. Added a "dump with jq '.<collection>[0] | keys' before parsing" rule to the What-Not-To-Do list.
+**PRs:** https://github.com/recoupable/skills/pull/12 (third commit: 7bd6af6)
+**Notes:** Empirical testing triggered by the user's own session — they caught two real gaps in the skill (guessed field names on /similar, misread empty editorial filter). This commit is entirely about closing field-name ambiguity so future agents don't have to grep the codebase or guess.
+
+---
+
+## [2026-04-17] music-industry-research: match_strength, URL lookup, latency, empty-OK gotchas
+**Prompt:** Second round of user testing feedback — match_strength rule, /profile URL handling, /milestones empty, /enrich 60-90s latency
+**Status:** completed
+**Changes:**
+- `skills`: Updated `skills/music-industry-research/SKILL.md` with four empirically-verified additions. **(1)** match_strength heuristic in the Search section: real matches score orders of magnitude >1 (Drake: 52,875; chillpill: 302), noise sits well under 1 (0.005-0.1) — treat top result <1 as "not found" and fall through to Graceful Degradation. Also extended the Graceful Degradation section to trigger on this case. **(2)** Added `/research/lookup?url=` as the canonical URL entry point. `/research/profile?artist=<URL>` works for some Spotify URL shapes but returns 404/406 for others; route URLs through `/lookup` first and chain the resolved name. **(3)** Added an "empty `/milestones` is legit" gotcha next to the profile-nulls and playlist-filter gotchas — Chillpill (global rank ~105k) returns `{ milestones: [] }` with 200 OK. **(4)** Latency note on all five POST endpoints: `/enrich` 60-90s, `/deep` 2+ minutes, others seconds-to-tens. Tell callers to set client timeouts to at least 3 minutes for enrich/deep.
+**PRs:** https://github.com/recoupable/skills/pull/12 (fourth commit: cc47f88)
+**Notes:** PR #12 now has four commits: rewrite (c293cf9), rename (86e00a0), response-shapes (7bd6af6), this one (cc47f88). All four are pure doc changes — no code or config impact. User tested empirically and fed back two rounds of real-world gotchas, which is exactly the virtuous loop this skill needed. Minor nit to verify before merge: the /profile 406 case the user originally reported; my own testing couldn't reproduce with a valid Spotify URL (got 200 or 404). Possible the 406 was transient upstream behavior. The `/lookup` recommendation is still correct either way — it's the canonical URL resolver and dodges the ambiguity entirely.
+
+---
+
+## [2026-04-17] music-industry-research: playlist filter semantics + pagination reality
+**Prompt:** Third round of user testing — filter flags are exclusive-when-set, limit cap=100, artist-level /playlists offset is ignored, aggregate-vs-detail gap
+**Status:** completed
+**Changes:**
+- `skills`: Added a dedicated "Playlist filter & pagination semantics" section to `skills/music-industry-research/SKILL.md`. This is the single highest-value fix on the skill — the filter flag behavior was obscured in the docs description and never explained in the skill, causing agents to assume `?editorial=true` was an additive filter rather than an exclusive-when-set one. **(1)** Documented the exclusive-when-set rule for both `/research/playlists` and `/research/track/playlists` with a query recipe table (editorial alone vs editorial + curator/indie vs everything). **(2)** Documented the hard `limit=100` cap on both endpoints (bisected empirically — 150/200/500 all 400). **(3)** Documented the pagination asymmetry: artist-level `/playlists` ignores `offset` (single-shot 100-max snapshot), track-level `/track/playlists` honors `offset` (paginate by 100s). Described the bulk-retrieval workaround: enumerate `/research/tracks`, then page per track. **(4)** Documented the aggregate-vs-detail gap: `profile.num_sp_playlists` can be millions while detail endpoints expose at most ~100 per call and often fewer per-track even with all 10 flags true. Told callers to use `sp_playlist_total_reach` / `sp_editorial_playlist_total_reach` from profile for ground-truth reach, and detail endpoints as sampled top placements. Cross-referenced the new section from four new "What Not to Do" bullets.
+**PRs:** https://github.com/recoupable/skills/pull/12 (fifth commit: d86d142)
+**Notes:** All findings verified live against the production API. PR #12 is now five commits deep, all doc-only. Still uncommitted locally: the getting-started rewrite, PROGRESS.md (this entry included).
+
+---
+
+## [2026-04-17] music-industry-research: progressive disclosure refactor
+**Prompt:** Audit the skill against skill-creator and writing-skills best practices, apply all 7 recommended optimizations
+**Status:** completed
+**Changes:**
+- `skills`: Audited against `~/.cursor/skills/skill-creator/SKILL.md` (Anthropic's official skill authoring guide) and `~/.cursor/skills/writing-skills/SKILL.md` (Superpowers TDD-for-skills guide). Skill was 6.9× over the recommended ≤500-word body target (467 lines / 3,449 words) with significant duplication across 13 top-level sections. Applied progressive disclosure: `SKILL.md` shrinks to 116 lines / 1,076 words / 740-char frontmatter (was 940 — 92% of the 1024-char cap, now comfortable margin). Replaced 7 sectioned bash example blocks with a quick-reference endpoint table linking to references. Created two new reference files: `references/endpoints.md` (241 lines — full curl examples, playlist filter/pagination semantics, latency budgets, platform source enums) and `references/response-shapes.md` (86 lines — real JSONC shapes, field-name gotchas, profile-nulls and empty-milestones gotchas). Extended `references/workflows.md` with new "Interpretation cheat sheet," "Cross-cutting synthesis patterns," and "Saving research" sections that used to live in SKILL.md. Consolidated 4 overlapping gotcha sections into one canonical "Critical gotchas" bullet list. No information lost — every old section is now either in SKILL.md or one of the three reference files. Lints clean.
+**PRs:** https://github.com/recoupable/skills/pull/12 (sixth commit: 7376f44)
+**Notes:** PR #12 is now six commits deep, all doc-only. Files in the skill: `SKILL.md` (always loaded), `references/endpoints.md`, `references/response-shapes.md`, `references/workflows.md` (loaded on demand). The skill now follows Anthropic's three-level loading model: metadata always in context (~95-word description), SKILL.md body loaded when the skill triggers (1,076 words), references loaded only when an agent needs them. Still uncommitted locally: the getting-started rewrite, PROGRESS.md.
+
+---
+## [2026-04-18] music-industry-research: teach chaining (workflows + tools + other skills)
+**Prompt:** The 11 workflows in workflows.md read as standalone recipes — add a section on how to compose them, chain to external tools (send_email), and hand off to other skills
+**Status:** completed
+**Changes:**
+- `skills`: Added a "Chaining workflows and tools" section to `skills/music-industry-research/references/workflows.md` (164 lines, inserted before "Building Your Own Workflows"). Covers: (1) the three chain patterns — Data→Data, Data→Action, Skill→Skill — with a table; (2) the tools + skills this skill chains into (`send_email` MCP tool, artist workspace writes, and the sibling skills `content-creation`, `release-management`, `streaming-growth`, `artist-workspace`, `trend-to-song`); (3) five chaining rules including a mandatory human-approval gate for external contacts; (4) three worked end-to-end examples using "Artist X" placeholders — (A) peer collab outreach (research → similar → people → draft → approval → `send_email`), (B) artist health + next move (snapshot → playlist gap → hand off to `streaming-growth` → hand off to `release-management`), (C) TikTok market scouting (charts + discover → TikTok-to-Spotify pipeline → optional `/deep` narrative → workspace write → hand off to `trend-to-song`); (5) a "when NOT to chain" caveat.
+**PRs:** https://github.com/recoupable/skills/pull/12 (seventh commit: 657017c)
+**Notes:** PR #12 is now seven commits deep, all doc-only. Reframes the skill from "pick one of 11 workflows" to "compose workflows until the question is answered." The explicit human-approval gate on `send_email` is the most important safety rail — cold outreach to real humans (managers, A&R) should never auto-fire from an agent. Uncommitted locally still: the `skills/getting-started/SKILL.md` rewrite from a prior session.
