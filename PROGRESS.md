@@ -975,3 +975,14 @@ chat (frontend) → api (backend) → Supabase (database)
 - api: Added 3 new test cases for thread mention scenarios
 **PRs:** https://github.com/recoupable/api/pull/429
 **Notes:** PR targets `test` branch. @Code Reviewer notified for review.
+
+---
+
+## [2026-04-18] Add open-agents submodule
+**Prompt:** Add the open-agents codebase as a submodule to the monorepo
+**Status:** completed
+**Changes:**
+- mono: Added `open-agents` submodule pointing to `https://github.com/recoupable/open-agents`
+- mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
+**PRs:** pending (branch: feat/add-open-agents-submodule)
+**Notes:** Submodule pinned to current `open-agents` main HEAD.

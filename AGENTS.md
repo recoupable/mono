@@ -14,6 +14,7 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `docs` | External, API documentation | Mintlify |
 | `cli` | External, CLI for the Recoupable platform | Commander.js, tsup, Node 22 |
 | `skills` | External, Recoupable's public skills repo, platform usage + domain knowledge for AI agents | Markdown |
+| `open-agents` | External, reference app for background coding agents on Vercel (web + agent workflow + sandbox) | Next.js, Turbo, Vercel Workflow, Vercel Sandbox |
 | `admin` | Internal, admin dashboard for platform management | Next.js, React, Supabase |
 | `tasks` | Internal, background job workers | Trigger.dev v4 |
 | `database` | Internal, database migrations | Supabase CLI |

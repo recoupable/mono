@@ -37,3 +37,6 @@
 [submodule "strategy"]
 	path = strategy
 	url = https://github.com/recoupable/strategy.git
+[submodule "open-agents"]
+	path = open-agents
+	url = https://github.com/recoupable/open-agents.git
