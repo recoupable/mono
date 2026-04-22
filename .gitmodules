@@ -40,3 +40,6 @@
 [submodule "open-agents"]
 	path = open-agents
 	url = https://github.com/recoupable/open-agents.git
+[submodule "blog"]
+	path = blog
+	url = https://github.com/recoupable/blog.git
