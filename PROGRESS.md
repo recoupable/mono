@@ -1203,7 +1203,7 @@ chat (frontend) → api (backend) → Supabase (database)
 **Status:** completed
 **Changes:**
 - `open-agents`: Simplified bootstrap prompt for existing artists to direct agent-driven `GET /api/artists` fetch via `recoup-api` docs; removed inline artist list logic and updated tests
-- `open-agents`: Removed `sessionStorage` bootstrap persistence; now passes `bootstrapPrompt` in URL query and strips it after first auto-submit
+- `open-agents`: Removed `sessionStorage` bootstrap persistence for auto-submit handoff
 - `open-agents`: Moved `fetchAccountArtists` call from `validateCreatePersonalSession` into `createPersonalSessionHandler` to keep validation focused
 **PRs:** none
 **Notes:** Ran `bun test lib/sessions/build-personal-session-bootstrap-prompt.test.ts` in `open-agents/apps/web` (3 passing).
