@@ -1,6 +1,215 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-14
+> Last updated: 2026-04-26
+
+---
+
+## [2026-04-26] skills + open-agents + docs — drive create-artist from a RECOUP.md checklist file
+**Prompt:** Latest create-artist workflow only ran 1–2 of the 8 steps sporadically. Fix with minimal architecture: make the artist's `RECOUP.md` the workflow state — scaffold with one checkbox per step, tick + persist values after each step, resume from the first unchecked item.
+**Status:** in_progress (3 PRs open, awaiting review)
+**Changes:**
+- skills: PR #17 — `skills/artist-workspace/SKILL.md` adds new "Creating a new artist" section (Step-0 scaffold template with kebab-case slug + frontmatter slots for `artistId`/`spotifyArtistId`/`spotifyProfileUrl`/`imageUrl`, per-step tick + persist rule, resume-from-first-unchecked rule), broadens description triggers to fire on create/onboard/add intents, updates path intro and inventory commands to handle org-scoped layout (`orgs/$RECOUP_ORG_ID/artists/{slug}/`); `recoup-api/SKILL.md` rewrites the multi-step workflows section so the create-artist row points at artist-workspace as the driver and adds an explicit "invoke artist-workspace first" instruction.
+- open-agents: PR #18 — `apps/web/lib/recoup-api-skill-prompt.ts` extends the always-on system-prompt nudge so create-artist intents ("create artist", "onboard X", "add an artist", "set up a new artist") route through `artist-workspace` first before falling through to `recoup-api`. JSDoc updated. `bun run check` + `bun run --cwd apps/web typecheck` pass.
+- docs: PR #166 — `workflows/create-artist.mdx` rewritten so RECOUP.md is the workflow state: new "Step 0: Scaffold the workspace BEFORE any API call" section with the full template, new "Resuming a partial setup" section right under it, per-step "After this step" reminders on steps 1–8 (what to persist into frontmatter / Notes + which checkbox to tick), Step 8 appends KB report into the same `RECOUP.md` under `## Knowledge base`, "What this workflow doesn't enforce" rewritten to reflect honor-system reality + 3 constraints.
+**PRs:** https://github.com/recoupable/skills/pull/17, https://github.com/recoupable/open-agents/pull/18, https://github.com/recoupable/docs/pull/166
+**Notes:** Architecture choice ruled in/out before landing: (a) chose file-as-state over a Vercel Workflow because the chain is honor-system pure HTTP and the workflow engine is overkill for a 7–8 step chain; (b) chose to keep the checklist in the existing artist-workspace skill rather than a new `create-artist` skill because artist-workspace already owns the `RECOUP.md` filesystem contract; (c) deliberately kept changes inside skill content + the static recoupApiSkillPrompt nudge and did NOT touch `buildSystemPrompt`, `ensureSetupSandbox`, or add a new MCP tool — those are heavier escalations if the file-state approach drifts. Merge order matters: skills #17 first (load-bearing), then open-agents #18 (nudge that points at the new behavior), docs #166 last/parallel (reference material). Trace-of-the-day: open-agents has its own `apps/web/app/api/chat/route.ts`; skill *content* only reaches the model when `skillTool` is invoked by name (sandbox.readFile at invoke time), so getting the routing nudge right is the only open-agents-side leverage point. Tradeoff accepted: agent still has to truthfully tick its own boxes — if drift persists, upgrade path is a Vercel Workflow with enforced step ordering. Branch state (skills/open-agents/docs submodules switched back to main locally — feature branches live on the remotes only).
+
+## [2026-04-25] docs + skills — create-new-artist workflow playbook
+**Prompt:** Step 2 of the migration plan — write the multi-step create-artist playbook in docs and update the recoup-api skill to point at it, so a sandbox can execute the same chain the chat agent runs internally
+**Status:** completed (docs squash-merged to main as `b092f5d`; skills squash-merged to main as `1e5c7ae`)
+**Changes:**
+- docs: PR #165 — new `workflows/create-artist.mdx` (curl-by-curl playbook covering POST /api/artists → Spotify match → 4-in-1 PATCH for profile + socials → deep + web research → Spotify catalog → KB synthesis to `orgs/$RECOUP_ORG_ID/artists/$ARTIST_ID/RECOUP.md` per artist-workspace conventions); skips youtube_login (Composio handles it). New "Workflows" group at the top of the Artists nav tab. Every step links to the corresponding endpoint reference. Also fixes a defect from PR #164: `profileUrls` example keys are now uppercase (`SPOTIFY`, `INSTAGRAM`, …) since `getSocialPlatformByLink` returns uppercase and `updateArtistSocials` matches case-sensitively — lowercase keys would have created duplicate socials instead of replacing existing entries.
+- skills: PR #16 — `recoup-api/SKILL.md` adds a "Multi-step workflows" section linking the new docs page; broadens description triggers to fire on "create new artist", "create artist", "onboard artist", "add artist" (same pattern as PRs #14/#15/#16 broadenings).
+**PRs:** https://github.com/recoupable/docs/pull/165 (merged `b092f5d`), https://github.com/recoupable/skills/pull/16 (merged `1e5c7ae`)
+**Notes:** Review iterations on docs #165: tightened frontmatter description (KISS), dropped Skipped/YouTube and Optional/KB-persist sections (KISS+YAGNI — the workflow's output is updated artist directories on the filesystem, no API knowledges PATCH needed), step 2 now exports SPOTIFY_ARTIST_ID/SPOTIFY_PROFILE_URL/SPOTIFY_IMAGE_URL with a runnable jq selector + guard (cubic P2 about undefined var), exact-name matches sort by popularity before picking first (cubic P2 about ambiguous match), `// empty` on jq -r extractions so guard catches null (cubic P1). Step 2 of three in the create-artist migration plan. Step 1 was PR #164 (`PATCH /api/artists/{id}` doc). Step 3 (optional) is adding `urls: string[]` to `validateUpdateArtistRequest` in api so the sandbox doesn't have to do URL→platform mapping itself — left as follow-up. Tradeoffs we accepted: no `prepareStep`-style determinism (the agent has to follow the doc in order), no per-step model switching, no per-step custom system prompts. The skills PR's published URL `developers.recoupable.com/workflows/create-artist` resolves now that docs has merged.
+
+## [2026-04-25] docs — document PATCH /api/artists/{id}
+**Prompt:** Working out how to bring open-agents' create-new-artist flow to chat-level quality via the skill+docs path; first prerequisite is closing the gap where the workhorse PATCH endpoint shipped in api but was never documented
+**Status:** completed (squash-merged to main as `1486245`)
+**Changes:**
+- docs: PR #164 — adds the `PATCH /api/artists/{id}` operation to `api-reference/openapi/releases.json` (covers name, image, label, instruction, knowledges, profileUrls map, pinned), six new schemas (`UpdateArtistRequest`, `UpdateArtistResponse`, `UpdateArtistErrorResponse`, `UpdatedArtist`, `UpdatedArtistSocial`, `ArtistKnowledge`), frontmatter-only `api-reference/artists/update.mdx`, and a nav entry under the Artists group between create and pin. Tightened PATCH description per review (`48c69ec`): "Update mutable fields on an artist accessible to the authenticated account." → "Update an artist."
+**PRs:** https://github.com/recoupable/docs/pull/164 (merged `14862453`)
+**Notes:** The endpoint already exists in code (`api/app/api/artists/[id]/route.ts` → `updateArtistHandler` → shared `updateArtistSocials` + `upsertArtistInfoFields`) and is JWT-callable via `validateAuthContext` + `checkAccountArtistAccess`. The chat tool chain treats updates as ~4 separate MCP tools (`update_artist_socials` ×2, `update_account_info` ×2 for profile + knowledges) but they all collapse to this one PATCH. Open-agents/sandbox can already call it — only the public-docs visibility was missing, which the `recoup-api` skill needs to surface it. Body schema enforces "at least one field provided" (Zod `.refine` in `validateUpdateArtistRequest.ts`); doc'd as `minProperties: 1` + description note. Response shape matches `getFormattedArtist` exactly: `{ artist: { account_id, name, image, instruction, label, knowledges, account_socials: [{ id, profile_url, username, link, type }], pinned } }`. Did NOT add a `urls: string[]` adapter to mirror the MCP tool's URL→platform inference — left as a follow-up if agents struggle with the platform-mapping step.
+
+## [2026-04-24] skills + open-agents — sandbox-scoped artist inventory
+**Prompt:** "What artists do I have" returned a cross-org list from the user-scoped API instead of the sandbox's `orgs/*/artists/*/RECOUP.md` tree — fix the filesystem-first behavior AND org-scope API calls when they do happen
+**Status:** completed (both PRs open, awaiting review)
+**Changes:**
+- skills: PR #15 — expand `skills/artist-workspace/SKILL.md` description to trigger on inventory phrasings ("what artists do I have", "list my artists", "which orgs am I in"); add "Listing what's in the sandbox" section with `ls -d orgs/*/artists/*/` + `find orgs -type f -name RECOUP.md`; document `RECOUP_ORG_ID` in a new "Org scoping" section of `recoup-api/SKILL.md` with the `/api/organizations/{id}/...` + `--org $RECOUP_ORG_ID` patterns (no endpoint changes, skill guidance only)
+- open-agents: PR #16 — new `apps/web/lib/recoupable/extract-org-id.ts` (tail-match UUID-v4 from repo name / clone URL; Recoupable repos are `org-<slug>-<uuid-v4>` so no schema change needed); derive `recoupOrgId` from `sessionRecord.cloneUrl` in `apps/web/app/api/chat/route.ts` and thread through `experimental_context` mirroring the `recoupAccessToken` plumbing; `packages/agent/tools/build-recoup-exec-env.ts` now merges both into the exec env as `RECOUP_ACCESS_TOKEN` + `RECOUP_ORG_ID`; add `artist-workspace` to `apps/web/lib/skills/default-global-skills.ts` so it auto-installs alongside `recoup-api`; rewrite `apps/web/lib/recoup-api-skill-prompt.ts` nudge to route by intent (artist-workspace for inventory, recoup-api for live data, scope list endpoints to `$RECOUP_ORG_ID`)
+**PRs:** https://github.com/recoupable/skills/pull/15, https://github.com/recoupable/open-agents/pull/16
+**Notes:** Design rationale we ruled in/out before landing: no new skill (artist-workspace already owns the filesystem contract — the fix was auto-install + broaden description trigger); no DB schema column for organizationId (clone URL already encodes the org UUID in the trailing 36 chars — derive on the fly); kept `recoup-api` portable by putting RECOUP_ORG_ID in its Environment section as an API-scoping concern (non-sandbox consumers just have it unset). Pre-existing `apps/web/app/api/pr/route.test.ts` failures (server-only import + 403) still reproduce on unmodified main — unrelated.
+
+## [2026-04-24] open-agents — broaden recoup-api skill nudge
+**Prompt:** Debug why first-prompt "What tasks do I have?" didn't load the recoup-api skill; implement the broadened-trigger fix and open a PR
+**Status:** completed
+**Changes:**
+- open-agents: PR #15 opened against `main` — widens `apps/web/lib/recoup-api-skill-prompt.ts` keyword list (adds tasks, chats, pulses, notifications, subscriptions), shifts trigger from "platform data" to "anything belonging to their Recoup account", and explicitly steers ambiguous phrasings ("my tasks / my artists / my notifications") away from repo-TODO interpretations. Cost stays ~1 sentence; skill body still lazy-loaded via `skillTool`.
+**PRs:** https://github.com/recoupable/open-agents/pull/15
+**Notes:** Root cause of the repro — "tasks" was not in the original nudge's noun list from PR #14, and "tasks" is heavily overloaded (TODOs, issues, background jobs), so the generic prior won turn 1. Only "check recoup" unblocked it. Follow-up: `recoupable/skills/recoup-api/SKILL.md` trigger-phrase list also omits "tasks" — worth a matching widening for the skill-auto-discovery path. Pre-existing `apps/web/app/api/pr/route.test.ts` failures reproduce on unmodified main and are unrelated.
+
+## [2026-04-23] docs + api + chat — GET /api/songs migration promoted + synced
+**Prompt:** Review/test/merge the songs migration across docs, api, and chat; promote each to main and resync test branches
+**Status:** completed
+**Changes:**
+- docs: PR #154 squash-merged to `main` (`f45b4893`) — top-level `servers` in `releases.json` updated to `recoup-api.vercel.app`; `/api/songs` OpenAPI entry migrated. Left 21 per-operation `servers` overrides pointing at `api.recoupable.com` untouched per user's scope-narrow ask (7 in releases.json, 14 in social.json) — tracked as a separate cleanup if it becomes visible in UI.
+- api: PR #466 squash-merged to `test` (`f185fa5f`) — new `app/api/songs/route.ts` + `getSongsHandler` + `validateGetSongsRequest`; auth-only (no `checkAccountArtistAccess`) since song metadata is DSP-public per validator docstring
+- api: PR #474 opened & merged (`test` → `main`, `60f22f34`); `test` fast-forwarded to match `main` and pushed
+- chat: PR #1693 squash-merged to `test` (`22b30956`) — `useSongsByIsrc` now gated on `authenticated` and passes `Authorization: Bearer <Privy JWT>`; `getSongsByIsrc` replaces hardcoded `api.recoupable.com` with `getClientApiBaseUrl()`
+- chat: PR #1700 opened & merged (`test` → `main`, `86bd427c`); `test` fast-forwarded to match `main` and pushed
+**PRs:** https://github.com/recoupable/docs/pull/154, https://github.com/recoupable/api/pull/466, https://github.com/recoupable/api/pull/474, https://github.com/recoupable/chat/pull/1693, https://github.com/recoupable/chat/pull/1700
+**Notes:** Preview-verified api #466 with 9 cases (401/400/404/403/200 + populated-row shape + unfiltered 1000-row cap flag) — https://github.com/recoupable/api/pull/466#issuecomment-4307823592. Chat #1693 verified end-to-end via Chrome DevTools MCP on preview — request goes to `test-recoup-api.vercel.app/api/songs` with Bearer header, returns the expected row shape — https://github.com/recoupable/chat/pull/1693#issuecomment-4307932763. Cubic's `song_artists!inner` concern (orphan songs excluded) noted but skipped per user. On docs #154: copy-button on localhost was showing `api.recoupable.com` because Mintlify was reading per-operation `servers` overrides (POST /api/songs had one pointing at the old host); the narrow-scope fix would only strip the POST override but user chose to ship as-is.
+
+## [2026-04-23] api + chat — GET /api/accounts/{id}/catalogs migration promoted + synced
+**Prompt:** Review/test/merge the catalogs-migration PRs across api and chat; promote test→main and resync test on both
+**Status:** completed
+**Changes:**
+- api: PR #464 squash-merged to `test` (`46a8e06`) — new `app/api/accounts/[id]/catalogs/route.ts` + `getCatalogsHandler` + `validateGetCatalogsRequest` pattern; MCP tool + evals updated; shrunk `selectAccountCatalogs`
+- api: PR #473 opened & merged (`test` → `main`, `67bddf64`); `test` fast-forwarded to match `main` and pushed
+- chat: PR #1691 squash-merged to `test` (`99a7feb6`) — `useCatalogs` gated on auth readiness; `lib/catalog/getCatalogs.ts` hits the new account-scoped endpoint
+- chat: PR #1699 opened & merged (`test` → `main`, `ec68f618`); `test` fast-forwarded to match `main` and pushed
+**PRs:** https://github.com/recoupable/api/pull/464, https://github.com/recoupable/api/pull/473, https://github.com/recoupable/chat/pull/1691, https://github.com/recoupable/chat/pull/1699
+**Notes:** Preview-verified #464 at commit `79dd6ac` — 5-case smoke test (401/400/404/200 confirmed; 403 relied on arpit's earlier verification at `fe1e030` since I didn't have a second real account UUID). Cubic's two original findings (auth-context override making access check a self-check; raw exception in 500 body) had already been fixed by arpit in `d0900a8` and `e50913e` before I picked it up. The new access-check pipeline (`validateAuthContext` → `checkAccountAccess(callerId, targetId)`) is the intended security fix over the legacy `/api/catalogs?account_id=X` route which had no access check. Docs PR #153 (merged earlier today) is the third leg of the migration.
+
+## [2026-04-23] docs — PR #153 merged (catalogs endpoint migration)
+**Prompt:** Check out and merge docs PR #153
+**Status:** completed
+**Changes:**
+- docs: migrate GET catalogs docs to `/api/accounts/{id}/catalogs`; delete the standalone POST/DELETE `catalogs-create.mdx` and `catalogs-delete.mdx` pages; shrink `releases.json` OpenAPI surface (+14/−71); drop two entries from `docs.json`
+**PRs:** https://github.com/recoupable/docs/pull/153 (squash-merged as `a4ecdb8` on `main`)
+**Notes:** Mintlify deploy check skipped (normal for docs-only PRs). Local branch deleted; local main is behind origin by 2 commits (the squash commit + whatever else landed) — normal until the next `git pull`.
+
+## [2026-04-23] skills + open-agents — recoup-api skill + customInstructions nudge
+**Prompt:** Make the agent always know to search the Recoup API docs when calling the Recoupable API, so the user doesn't have to include docs each time
+**Status:** completed
+**Changes:**
+- skills: new `recoup-api/SKILL.md` (plain directory, matches precedent of `trend-to-song` / `skill-creator`) with playbook — base URL `recoup-api.vercel.app/api`, `RECOUP_ACCESS_TOKEN` Bearer auth, mandatory `/llms-full.txt` docs fetch as step 1, token-scope warnings, troubleshooting table, and a "when NOT to use" section so it doesn't shadow chartmetric/filesystem work
+- skills: `README.md` skills table updated with the new entry
+- open-agents: new `apps/web/lib/recoup-api-skill-prompt.ts` with a single-sentence nudge
+- open-agents: `apps/web/app/api/chat/route.ts` composes both prompts (`[assistantFileLinkPrompt, recoupApiSkillPrompt].join("\n\n")`) into `customInstructions`; test expectation updated to match
+**PRs:** https://github.com/recoupable/skills/pull/14 (squash-merged as `28f508f` on `main`), https://github.com/recoupable/open-agents/pull/14 (squash-merged as `e8b8f7f` on `main`)
+**Notes:** Chose skill + nudge over inlining docs in the system prompt: full docs would always-on cost and not scale as we add more domain bundles (chartmetric, etc.), while a skill is loaded on demand via `skillTool`. The nudge is the belt-and-suspenders that makes sure oblique prompts still trigger the skill. Skill body explicitly reiterates the per-prompt token scope from PR #13 (no disk persist, no detached processes, no inline printing) so the two changes stay coherent. Sandboxes pick up the skill via `npx skills add recoupable/skills` at setup time — existing sandboxes would need a re-install or a fresh org base snapshot (PR #9) to see it.
+
+## [2026-04-23] open-agents — per-prompt Privy access token forwarded into sandbox exec env
+**Prompt:** Add authorization so the sandbox can call the Recoup API; pass the Privy access token per-prompt instead of minting a custom sandbox key
+**Status:** completed
+**Changes:**
+- open-agents: `packages/sandbox/interface.ts` + `vercel/sandbox.ts` — `Sandbox.exec` / `execDetached` accept an optional per-call `env`; new `mergeCommandEnv` merges per-call entries on top of the persistent sandbox env (per-call wins)
+- open-agents: `packages/agent/types.ts` + `open-harness-agent.ts` — `AgentContext` / `callOptionsSchema` accept `recoupAccessToken`; forwarded onto `experimental_context`
+- open-agents: `packages/agent/tools/utils.ts` — new `getRecoupAccessToken` / `buildRecoupExecEnv` helpers
+- open-agents: `bashTool` + `webFetchTool` inject `RECOUP_ACCESS_TOKEN` into their own exec env only (grep/glob/etc. never see it); new test asserts both `exec` and `execDetached` paths
+- open-agents: `/api/chat` body accepts `recoupAccessToken` and plumbs into `agentOptions`; client transport uses `usePrivy().getAccessToken()` in a ref so the transport memo stays stable
+**PRs:** https://github.com/recoupable/open-agents/pull/13 (squash-merged as `b170596` on `main`)
+**Notes:** Picked this shape after ruling out minting a custom sandbox-scoped Recoup API key — Privy tokens are already short-lived (~1h) and auto-expire, p95 prompt <30min, so a fresh token per prompt always outlives the prompt that uses it. No DB schema, no mint/revoke endpoints, no cleanup workflow. Token lives in a single exec process env and dies with the command; idle sandboxes hold no credential. Server-side token verification intentionally skipped — Recoup API is the validation boundary. Client TTL pre-check (refresh if <35min remaining) deferred as follow-up. Pre-existing `apps/web/app/api/pr/route.test.ts` failures on `main` are unrelated.
+
+## [2026-04-22] open-agents — PR #7 review: drop /api/orgs passthrough
+**Prompt:** Check out PR #7, review the comments I left, and apply them
+**Status:** completed
+**Changes:**
+- open-agents: Deleted `apps/web/app/api/orgs/route.ts` (internal Next.js route only forwarded the Privy access token)
+- open-agents: `useOrgs` now calls `fetchAccountOrgs(accessToken)` directly against the Recoup API; `Org` re-exported as alias of `RecoupableOrg` so `OrgSelector` is unchanged
+**PRs:** https://github.com/recoupable/open-agents/pull/7 (commit 4f97af1 on `feat/org-selector-faster-sandbox`)
+**Notes:** `RECOUPABLE_API_BASE_URL` already uses `NEXT_PUBLIC_VERCEL_ENV`, so the client can reach it directly — no CORS or env changes needed. Lint + typecheck clean.
+
+## [2026-04-22] open-agents — PR #7: clone org repo directly, drop account-repo path
+**Prompt:** Selected org should change which github repo is cloned (current PR was wrong shape)
+**Status:** completed
+**Changes:**
+- open-agents: New `lib/recoupable/build-org-repo-url.ts` builds `https://github.com/recoupable/org-<kebab(name)>-<organization_id>` (e.g. `org-rostrum-pacific-cebcc866-...`)
+- open-agents: `OrgSelector.onSelectOrg(cloneUrl)` emits the constructed URL; `createBlankSession` persists it to existing `sessions.cloneUrl` (no new column)
+- open-agents: Sandbox handler always uses service `GITHUB_TOKEN` (all repos are owned by `recoupable` per user instruction); removed user-token gating
+- open-agents: Deleted `resolve-account-repo-source.ts`, `extract-bearer-token.ts`, `fetch-account-github-repo.ts` (+ test)
+- open-agents: Rolled back the `org_slug` column and migration 0031 (deleted `0031_*.sql`, `0031_snapshot.json`, removed entry from `_journal.json`); `db:check` confirms migrations are in sync
+- open-agents: Stripped `orgSlug` from `initSubmodules`, `Source` type, and `VercelSandboxConfig`
+- open-agents: Sidebar `+` button now navigates to `/sessions` (org picker) instead of trying to create a blank session
+**PRs:** https://github.com/recoupable/open-agents/pull/7 (commit ebb1af2 on `feat/org-selector-faster-sandbox`)
+**Notes:** Net diff -1800/+72 lines. Per CLAUDE.md, every preview deploy forks a fresh Neon branch from production, so deleting the migration files (vs. adding a rollback) is safe — orphan column on the current preview DB is harmless. User confirmed: always service token, never check repo owner.
+
+## [2026-04-21] open-agents — clone org submodules into sandbox
+**Prompt:** Update open-agents so org submodules in each account github repo are also cloned into the sandbox
+**Status:** completed
+**Changes:**
+- open-agents: New `packages/sandbox/vercel/init-submodules.ts` helper runs `git submodule update --init --recursive` after any git-sourced clone; when a token is present, uses a per-invocation `-c url."...".insteadOf="..."` rewrite so private `.gitmodules` URLs authenticate without mutating global git config
+- open-agents: `packages/sandbox/vercel/sandbox.ts` calls `initSubmodules` once after the clone block — covers both SDK-managed clone (no `baseSnapshotId`) and manual post-snapshot clone paths
+- open-agents: 3 new unit tests; throws on non-zero exit so sandbox create fails loudly
+**PRs:** https://github.com/recoupable/open-agents/pull/6 (merged as squash commit 8091630 on main)
+**Notes:** Account repos layout: org submodules mounted at `.openclaw/workspace/orgs/<slug>`, all private repos in `recoupable/*` org (same access as the parent), so the existing server `GITHUB_TOKEN` fallback suffices. Did not backfill existing sandboxes via `snapshot-refresh` — scope was just submodule init on new sandbox create (confirmed with user). Verified end-to-end on the preview deploy before merge: `ls` showed populated `.openclaw/workspace/orgs/recoup/` with `.git` gitlink + `.gitignore` + `artists/`, `git submodule status` showed all 6 submodules initialized with SHAs and `heads/main` refs, per-org listing confirmed content pulled from the private recoupable/org-* repos via the per-invocation `insteadOf` rewrite.
+
+## [2026-04-21] open-agents — REC-70 PR #5 review: privy token + fallback guards + zod
+**Prompt:** Check out PR #5, triage comments, apply the recommended fixes (skip AbortController)
+**Status:** completed
+**Changes:**
+- open-agents: Replaced `RECOUPABLE_API_KEY` env var with the caller's Privy access token in `fetchAccountGithubRepo`; send as `Authorization: Bearer`
+- open-agents: Added `accessToken` to `Session` type and surfaced it from `getSessionFromCookie` so the sandbox route can forward it
+- open-agents: Applied `parseGitHubUrl` + `githubToken` guards to the account-repo fallback in `POST /api/sandbox`, matching the explicit-repoUrl path
+- open-agents: Validated Recoupable `/api/sandboxes` response shape with a Zod schema (rejects non-string `github_repo`)
+- open-agents: Tests updated for Bearer header + invalid-shape case; kebab-case filename kept per `unicorn/filename-case` lint rule
+**PRs:** https://github.com/recoupable/open-agents/pull/5 (commits 76eb3dc + d1e5d85 + fe757ad on `feature/rec-70-clone-github-repo`)
+
+Follow-up structural commit (fe757ad) per additional review: POST `/api/sandbox` body extracted to `lib/sandbox/create-sandbox-handler.ts`; client `createSandbox` helper moved from the chats page folder to `lib/sandbox/create-sandbox.ts`; `handleCreateNewSandbox` + `ensureSandboxReady` + their shared state extracted into `hooks/use-sandbox-create.ts`.
+**Notes:** Owner's inline camelCase-filename request was deferred — repo CLAUDE.md and oxlint both enforce kebab-case (confirmed with user). AbortController timeout suggestion was explicitly skipped by user. Auth-token handoff was initially implemented via server-side cookie read; after discussion, reverted the `Session.accessToken` plumbing and switched to an explicit `Authorization: Bearer` header — frontend pulls the token via `usePrivy().getAccessToken()` and passes it to `createSandbox`, route reads it off the request. Token path is now visible end-to-end (client → our backend → Recoupable) with no implicit cookie forwarding.
+
+---
+
+## [2026-04-20] api — Merged REC-69 to main + synced test
+**Prompt:** Merge PR #458, promote test→main, sync test with main
+**Status:** completed
+**Changes:**
+- api: PR #458 squash-merged into `test` (commit `e62622d`)
+- api: PR #460 opened & merged (`test` → `main`, merge commit `f276a5a`)
+- api: `test` branch fast-forwarded to match `main` and pushed
+**PRs:** https://github.com/recoupable/api/pull/458, https://github.com/recoupable/api/pull/460
+**Notes:** Shared Google fallback + multi-owner routing now on main. Repaired the previously-broken artist connector execute path as a side-effect. Preview verification recorded at https://github.com/recoupable/api/pull/458#issuecomment-4284850953.
+
+---
+
+## [2026-04-20] api — Multi-owner Composio tool routing + shared Google fallback (PR #458)
+**Prompt:** Address PR review; test shared fallback end-to-end; fix when it didn't work
+**Status:** completed
+**Changes:**
+- api: Hardcoded shared Composio account ID `recoup-shared-767f498e-e1e9-43c6-a152-a96ae3bd8d07` (removed `COMPOSIO_SHARED_ENTITY_ID` env var)
+- api: Wired `COMPOSIO_GOOGLE_{SHEETS,DOCS,DRIVE}_AUTH_CONFIG_ID` into `buildAuthConfigs()` so custom Google OAuth configs resolve
+- api: Rewrote tool-router to multi-owner model — customer session (meta-tools only), artist tools via `composio.tools.get(artistId, {toolkits})`, shared tools via `composio.tools.get(SHARED_ACCOUNT_ID, {toolkits})`. Priority: customer > artist > shared, enforced by toolkit filtering in `resolveSessionToolkits`
+- api: Defensive try/catch in `getSharedAccountConnections`; error log preserved, info log removed after validation
+- api: Deleted obsolete `createToolRouterSession.ts` (singular), `createToolRouterSessions.ts`, `getArtistConnectionsFromComposio.ts` — all superseded
+**PRs:** https://github.com/recoupable/api/pull/458
+**Notes:** Key finding: Composio Tool Router V2 `session.tools()` only returns the 6 meta-tools — never explicit toolkit tools. `connectedAccounts` override at session-create is accepted but execute-time ownership check rejects cross-account connections. Solution: use `composio.tools.get(ownerId, ...)` instead. This also fixes the pre-existing artist connector flow which was silently broken at execute time. Verified e2e on preview: read a Google Doc (LIKE / "Today Sounds Good" project brief) via shared fallback ✓; routed TIKTOK_GET_USER_STATS against artist connection ✓ (TikTok returned 401 due to expired token, but our routing worked). 92 composio tests + 2137 total passing.
+
+---
+
+## [2026-04-18] tasks — Cut getArtistSocials over to /api/artists/{id}/socials
+**Prompt:** Checkout and merge tasks PR #143
+**Status:** completed
+**Changes:**
+- tasks: PR #143 squash-merged into `main` (commit `da35314`); helper now uses `NEW_API_BASE_URL` path-style endpoint with `x-api-key` header
+**PRs:** https://github.com/recoupable/tasks/pull/143
+**Notes:** Skipped the CodeRabbit/cubic nitpick to wrap `artistAccountId` in `encodeURIComponent()` — artist IDs are UUIDs, so no practical risk. Depends on api PR #456 (admin-key artist access) already merged to main today.
+
+---
+
+## [2026-04-18] api — Admin key bypass for artist access + promote test→main
+**Prompt:** Test PR #456 on preview, merge it, then promote test→main and resync test
+**Status:** completed
+**Changes:**
+- api: PR #456 squash-merged into `test` (RECOUP_ORG members bypass artist membership in `checkAccountArtistAccess`)
+- api: PR #457 opened & merged (`test` → `main`)
+- api: `test` branch fast-forwarded to match `main` and pushed
+**PRs:** https://github.com/recoupable/api/pull/456, https://github.com/recoupable/api/pull/457
+**Notes:** Preview-verified with admin `x-api-key` against `/api/artists/{id}/socials` — returned 200 for an artist with no direct or shared-org access. 401 still enforced for unauth requests.
+
+---
+
+## [2026-04-18] open-agents — Scaffold Privy auth alongside Vercel OAuth (PR #1 of auth migration)
+**Prompt:** Update open-agents to use same auth as chat/admin (Privy), replacing Vercel auth; keep scope small per PR
+**Status:** completed (PR open)
+**Changes:**
+- open-agents: Added `@privy-io/react-auth` + `@privy-io/node` deps in `apps/web`
+- open-agents: New `components/providers/privy-provider.tsx` — no-ops when `NEXT_PUBLIC_PRIVY_APP_ID` unset
+- open-agents: New `lib/privy/{config,client,verify-token}.ts` server helpers for future token verification
+- open-agents: New `components/auth/privy-login-button.tsx` — test login button rendered alongside existing Vercel button on signed-out hero
+- open-agents: Wrapped `app/providers.tsx` with `PrivyProvider`
+**PRs:** https://github.com/recoupable/open-agents/pull/2
+**Notes:** Zero behavior change — Vercel OAuth untouched. Agreed migration sequence: PR#2 adds `privy` to users schema, PR#3 upserts Privy users, PR#4 demotes Vercel OAuth to "connect Vercel" linking flow, PR#5 swaps direct DB lookups for Recoup API calls (developers.recoupable.com), PR#6 flips default sign-in to Privy, PR#7 removes Vercel-as-primary-identity.
 
 ---
 
@@ -986,3 +1195,27 @@ chat (frontend) → api (backend) → Supabase (database)
 - mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
 **PRs:** pending (branch: feat/add-open-agents-submodule)
 **Notes:** Submodule pinned to current `open-agents` main HEAD.
+
+---
+
+## [2026-04-29] Open-agents PR #23 review comment fixes
+**Prompt:** Check latest PR comments and fix them locally for open-agents PR #23
+**Status:** completed
+**Changes:**
+- `open-agents`: Simplified bootstrap prompt for existing artists to direct agent-driven `GET /api/artists` fetch via `recoup-api` docs; removed inline artist list logic and updated tests
+- `open-agents`: Removed `sessionStorage` bootstrap persistence; now passes `bootstrapPrompt` in URL query and strips it after first auto-submit
+- `open-agents`: Moved `fetchAccountArtists` call from `validateCreatePersonalSession` into `createPersonalSessionHandler` to keep validation focused
+**PRs:** none
+**Notes:** Ran `bun test lib/sessions/build-personal-session-bootstrap-prompt.test.ts` in `open-agents/apps/web` (3 passing).
+
+---
+
+## [2026-04-29] Open-agents bootstrap transport simplification
+**Prompt:** Replace bootstrapPrompt URL param flow with existing client→server message mechanism
+**Status:** completed
+**Changes:**
+- `open-agents`: `useCreatePersonalSession` now sends the bootstrap user message to `/api/chat` immediately after session/chat creation, then navigates to chat
+- `open-agents`: Removed `useSearchParams`/bootstrap auto-submit wiring from `session-chat-content`
+- `open-agents`: Deleted unused `use-personal-session-bootstrap` hook file now that URL-param handoff is gone
+**PRs:** none
+**Notes:** Verified with `bun test lib/sessions/build-personal-session-bootstrap-prompt.test.ts` and `bun run typecheck` in `open-agents/apps/web`.
