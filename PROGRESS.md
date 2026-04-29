@@ -1,54 +1,6 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-29
-
----
-
-## [2026-04-29] Rename catalog plugin to deal review
-
-**Prompt:** Rename the plugin fully to `music-catalog-deal-review`.
-**Status:** completed
-**Changes:**
-
-- plugins: Renamed the nested plugin submodule path from `music-catalogs` to `music-catalog-deal-review`.
-- plugins: Updated Claude and Codex marketplace entries to install `music-catalog-deal-review`.
-- plugins/music-catalog-deal-review: Updated Claude and Codex plugin manifests with the new plugin name, repository reference, and display copy.
-- plugins: Updated registry and plugin README files to use the new name.
-
-**PRs:** https://github.com/recoupable/plugins/pull/1
-**Notes:** The registry PR was merged after the dedicated `recoupable/music-catalog-deal-review` plugin repo was pushed.
-
----
-
-## [2026-04-29] Music catalogs plugin platform foundation
-
-**Prompt:** Implement the music-catalogs plugin platform plan: deeper research, deal workspace conventions, workflow skills, commands, agents, scripts, templates, and evals.
-**Status:** completed
-**Changes:**
-
-- plugins/music-catalog-deal-review: Added research references for diligence workflow, tooling landscape, red flags, and deal workspace conventions.
-- plugins/music-catalog-deal-review: Added reusable deal workspace templates for assumptions, evidence ledger, findings, missing files, IC memo, seller cleanup report, and financing pack.
-- plugins/music-catalog-deal-review: Expanded the skill suite with kickoff, rights diligence, royalty audit, seller prep, financing underwriting, IC memo packaging, and post-close admin workflows.
-- plugins/music-catalog-deal-review: Added commands, specialist agents, deterministic Python scripts, golden fixtures, and eval scenarios.
-- plugins/music-catalog-deal-review: Tested royalty normalization against the generated Neon River synthetic data room; eight raw statement sources normalized to 3,188 rows matching the clean ledger count.
-
-**PRs:** none
-**Notes:** Verification in the plugin repo passed unit tests, golden fixture tests, JSON checks, script help checks, normalized ledger validation, Neon River smoke tests, and lints before the plugin was pushed.
-
----
-
-## [2026-04-29] Music catalogs plugin repos and submodules
-
-**Prompt:** Create GitHub repos and nested submodules for a dedicated music catalogs plugin.
-**Status:** completed
-**Changes:**
-
-- GitHub: Created public repos `recoupable/plugins`, `recoupable/music-catalogs`, and later `recoupable/music-catalog-deal-review`.
-- plugins: Added `music-catalog-deal-review` as the registry submodule.
-- mono: Added `plugins` as a top-level submodule.
-
-**PRs:** https://github.com/recoupable/plugins/pull/1
-**Notes:** The mono PR points `plugins` at the merged registry `main` commit.
+> Last updated: 2026-04-14
 
 ---
 
