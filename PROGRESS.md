@@ -2,6 +2,8 @@
 
 > Last updated: 2026-04-29
 
+---
+
 ## [2026-04-29] Rename catalog plugin to deal review
 
 **Prompt:** Rename the plugin fully to `music-catalog-deal-review`.
@@ -13,35 +15,10 @@
 - plugins/music-catalog-deal-review: Updated Claude and Codex plugin manifests with the new plugin name, repository reference, and display copy.
 - plugins: Updated registry and plugin README files to use the new name.
 
-**PRs:** none
-**Notes:** The local manifests and docs now use `music-catalog-deal-review`. GitHub already has a public `recoupable/music-catalog-deal-review` repo, so the attempted repo rename was rejected as "name already exists"; the local nested submodule remote now points at that existing repo.
+**PRs:** https://github.com/recoupable/plugins/pull/1
+**Notes:** The registry PR was merged after the dedicated `recoupable/music-catalog-deal-review` plugin repo was pushed.
 
-## [2026-04-29] Curated plugin marketplace manifests
-
-**Prompt:** Implement the curated plugin marketplace plan for Claude Code and Codex.
-**Status:** completed
-**Changes:**
-
-- plugins: Added `.claude-plugin/marketplace.json` so Claude Code can discover the `music-catalogs` plugin from the registry repo.
-- plugins: Added `.agents/plugins/marketplace.json` so Codex can discover the same curated plugin source.
-- plugins/music-catalogs: Added `.codex-plugin/plugin.json` to package the existing skills directory for Codex.
-- plugins: Updated registry and plugin README files with install guidance, Codex support boundaries, and release checklist requirements.
-
-**PRs:** none
-**Notes:** Verification run from the mono root parsed all new JSON manifests, confirmed Claude and Codex relative source paths resolve to `plugins/music-catalogs`, confirmed the Codex skills path resolves to `plugins/music-catalogs/skills`, and `ReadLints` reported no linter errors for the edited marketplace and README files.
-
-## [2026-04-29] Synthetic music catalog sale data room
-
-**Prompt:** Create a sloppy, realistic synthetic data room for a music catalog company trying to sell.
-**Status:** completed
-**Changes:**
-
-- mono: Generated `.local/synthetic-data-rooms/neon-river-catalog-sale/` with 77 fake data-room files for Neon River Music Holdings LLC.
-- mono: Included messy raw seller folders for process docs, overview, catalog inventory, royalty statements, legal chain of title, registrations, recoupment, analytics, audio asset indexes, diligence issues, and valuation.
-- mono: Included `99_Clean_Ingest_Output/` with normalized `canonical-catalog.csv`, `royalty-ledger.csv`, `rights-map.csv`, `source-lineage.csv`, `data-room-inventory.csv`, `missing-files.md`, and `data-quality-report.md`.
-
-**PRs:** none
-**Notes:** The generated room is intentionally fake and intentionally messy. Verification: `validate-normalized-ledger.py` returned `status: ok` for 3,188 ledger rows; generated 18 assets, 7 `.xlsx` workbooks, 10 placeholder `.wav` files, and a valuation workbook with formulas. `.local/` is gitignored, so only this progress note affects tracked repo state.
+---
 
 ## [2026-04-29] Music catalogs plugin platform foundation
 
@@ -49,97 +26,177 @@
 **Status:** completed
 **Changes:**
 
-- plugins/music-catalogs: Added research references for diligence workflow, tooling landscape, red flags, and deal workspace conventions.
-- plugins/music-catalogs: Added reusable deal workspace templates for assumptions, evidence ledger, findings, missing files, IC memo, seller cleanup report, and financing pack.
-- plugins/music-catalogs: Expanded the skill suite with `diligence-kickoff`, `rights-diligence`, `royalty-audit`, `seller-prep`, `financing-underwrite`, `ic-memo-package`, and `post-close-admin`, and strengthened `catalog-ingest` / `catalog-analysis`.
-- plugins/music-catalogs: Added user-facing commands for kickoff, ingest, analysis, QC, and packaging.
-- plugins/music-catalogs: Added specialist agents for rights review, royalty audit, metadata reconciliation, valuation sensitivity, and diligence QC.
-- plugins/music-catalogs: Added deterministic Python scripts for file manifests, workspace validation, evidence-ledger validation, normalized ledger validation, concentration analysis, and NPS/NLS bridge calculations.
-- plugins/music-catalogs: Added `normalize-royalty-statement.py` and golden-fixture tests for first-pass ASCAP, BMI, MLC, distributor, YouTube Content ID, and Curve-style CSV normalization.
-- plugins/music-catalogs: Added synthetic golden fixtures under `fixtures/golden/` plus `fixtures/external-sources.md` documenting public schemas and official docs used to shape the fixtures.
-- plugins/music-catalogs: Tested `normalize-royalty-statement.py` against the generated Neon River synthetic data room. Added aliases/profiles for Neon River-style distributor, publisher admin, ASCAP, BMI, MLC, SoundExchange, YouTube Content ID, and direct sync exports.
-- plugins/music-catalogs: Added top-level eval scenarios for messy data rooms, missing chain of title, PRO bonus spikes, recoupment cliffs, concentration risk, seller prep, and financing collateral packages.
+- plugins/music-catalog-deal-review: Added research references for diligence workflow, tooling landscape, red flags, and deal workspace conventions.
+- plugins/music-catalog-deal-review: Added reusable deal workspace templates for assumptions, evidence ledger, findings, missing files, IC memo, seller cleanup report, and financing pack.
+- plugins/music-catalog-deal-review: Expanded the skill suite with kickoff, rights diligence, royalty audit, seller prep, financing underwriting, IC memo packaging, and post-close admin workflows.
+- plugins/music-catalog-deal-review: Added commands, specialist agents, deterministic Python scripts, golden fixtures, and eval scenarios.
+- plugins/music-catalog-deal-review: Tested royalty normalization against the generated Neon River synthetic data room; eight raw statement sources normalized to 3,188 rows matching the clean ledger count.
 
 **PRs:** none
-**Notes:** Verification run from `plugins/music-catalogs`: normalizer unit tests passed (`Ran 3 tests ... OK`), golden fixture tests passed (`Ran 1 test ... OK`), JSON validation passed for plugin/templates/evals, expected fixture ledgers passed `validate-normalized-ledger.py`, Neon River raw statement normalization produced 3,188 rows across eight sources matching the generated clean ledger count, every script responded to `--help`, and `ReadLints` reported no linter errors for the plugin. Changes are not committed. `plugins` submodule now shows modified nested `music-catalogs`; mono still has pre-existing unrelated dirty submodule state.
+**Notes:** Verification in the plugin repo passed unit tests, golden fixture tests, JSON checks, script help checks, normalized ledger validation, Neon River smoke tests, and lints before the plugin was pushed.
+
+---
 
 ## [2026-04-29] Music catalogs plugin repos and submodules
 
-**Prompt:** Create a mono branch, GitHub repos, and nested submodules for a dedicated music catalogs plugin.
+**Prompt:** Create GitHub repos and nested submodules for a dedicated music catalogs plugin.
 **Status:** completed
 **Changes:**
 
-- mono: Created branch `feature/music-catalogs-plugin-submodules`.
-- GitHub: Created public repos `recoupable/plugins` and `recoupable/music-catalogs`.
-- music-catalogs: Initial plugin commit with `.claude-plugin/plugin.json`, `README.md`, and the `catalog-ingest` / `catalog-analysis` skills plus references and eval prompts.
-- plugins: Initial registry commit with `music-catalogs` as a nested submodule.
-- mono: Added `plugins` as a top-level submodule and initialized nested `plugins/music-catalogs`.
-- skills: Removed the duplicate uncommitted catalog skill drafts from the existing `skills` submodule so `music-catalogs` is the source of truth.
+- GitHub: Created public repos `recoupable/plugins`, `recoupable/music-catalogs`, and later `recoupable/music-catalog-deal-review`.
+- plugins: Added `music-catalog-deal-review` as the registry submodule.
+- mono: Added `plugins` as a top-level submodule.
 
-**PRs:** none
-**Notes:** `recoupable/music-catalogs` is at commit `91540e7`; `recoupable/plugins` is at commit `78a29c6`. The mono branch is not committed or pushed yet. The mono working tree still has substantial pre-existing unrelated dirty state across other submodules.
+**PRs:** https://github.com/recoupable/plugins/pull/1
+**Notes:** The mono PR points `plugins` at the merged registry `main` commit.
 
-## [2026-04-29] Catalog deals skills research and architecture
+---
 
-**Prompt:** Research, plan, and create `catalog-ingest` and `catalog-analysis` skills for ingesting music catalog data rooms, cleaning royalty/catalog data, and projecting catalog value.
-**Status:** superseded by plugin repo setup
+## [2026-04-14] Tasks — AI overlay position for editorial templates (REC-67)
+**Prompt:** Overlaid images always placed top-left; use AI to determine ideal corner
+**Status:** in_progress (PR open, awaiting code review)
 **Changes:**
+- tasks: New `ToolLoopAgent` (`createOverlayPositionAgent`) analyzes editorial image to pick best overlay corner
+- tasks: New `overlayPosition.ts` with shared type and coordinate calculation for top-left/top-right/bottom-left/bottom-right
+- tasks: Updated `buildStaticImageArgs`, `buildFilterComplex`, `buildFfmpegArgs`, `renderFinalVideo`, `createContentTask` to accept `overlayPosition`
+- tasks: 14 new tests for position calculation and filter complex positioning
+**PRs:** https://github.com/recoupable/tasks/pull/138
+**Notes:** Backward-compatible — defaults to top-left when position not provided. Independent of REC-66 overlay size changes.
 
-- mono: Created `.local/plans/catalog-deals-skills/research.md` with music catalog valuation, data-room, PRO bonus-system, recoupment, normalization, and diligence research.
-- mono: Created `.local/plans/catalog-deals-skills/skill-architecture.md` recommending two skills (`catalog-ingest` and `catalog-analysis`) instead of one large skill, with a proposed hand-off contract.
-- mono: Created `.local/plans/catalog-deals-skills/build-plan.md`, `evals.json`, and `baseline-observations.md` with eval prompts and baseline behavior notes.
-- music-catalogs: The skill drafts were moved into the dedicated `recoupable/music-catalogs` plugin repo in the next entry.
+---
 
-**PRs:** none
-**Notes:** The LinkedIn article "PRO Bonus System: Ticking Time Bomb" was accessible and its core takeaway is important: performance royalties must be decomposed by PRO, use type, format, territory, and bonus/premium participation before valuation. User approved the recommended two-skill architecture covering both publishing and master catalogs.
-
-## [2026-04-28] Content API artist launch Remotion video
-
-**Prompt:** Make a video about the shipped Content V2 primitives feature, framed as the Content API generating content for music artists.
-**Status:** completed
+## [2026-04-14] Tasks — Larger playlist cover images (REC-66)
+**Prompt:** Playlist cover images overlaid on editorial template videos are too small for record label customers
+**Status:** in_progress (PR open, awaiting code review)
 **Changes:**
+- tasks: Increased `OVERLAY_SIZE` from 150px to 250px in `buildStaticImageArgs.ts` and `buildFilterComplex.ts`
+- tasks: Updated tests in both test files to reflect new dimensions
+**PRs:** https://github.com/recoupable/tasks/pull/137
+**Notes:** Depends on REC-65 (PR #136) being merged first. PR branches from `feature/rec-65-editorial-static-image`.
 
-- remotion: Added `ContentApiArtistLaunch` composition, typed launch data, split scene components, and `npm run build:content-api`.
-- remotion: Rendered `remotion/out/content-api-artist-launch.mp4` (1080x1080, 30fps, 681 frames, 22.76s) and created `.local/reference/content-api-artist-launch/contact-sheet.jpg` for visual review.
-- docs: Added the approved design spec and implementation plan under `docs/superpowers/`.
-- mono: Added `.superpowers/` to `.gitignore` for local visual companion files.
+---
 
-**PRs:** none
-**Notes:** Verification run: red render failed before implementation because `ContentApiArtistLaunch` was missing; `npx tsc --noEmit` then passed; `npm run build:content-api` rendered successfully. Remotion still prints pre-existing package version mismatch warnings for `@remotion/fonts` and `zod`, but the render completed.
-
-## [2026-04-28] Higgsfield reference extraction + agentic launch video skill
-
-**Prompt:** Download the Higgsfield X video, extract it frame-by-frame, and create a Remotion skill to mimic its style and storytelling for product feature launches.
-**Status:** completed
+## [2026-04-14] Tasks/API — Editorial template static image (REC-65)
+**Prompt:** Editorial content template should return both video and a static image with playlist covers overlaid
+**Status:** in_progress (PRs open, awaiting code review)
 **Changes:**
-
-- mono: Downloaded the source X video to `.local/reference/higgsfield-feature-launch/source/original.mp4`, extracted 701 frame images, and created 1fps plus 0.5s labeled contact sheets under `.local/reference/higgsfield-feature-launch/analysis/`.
-- mono: Created `.agents/skills/agentic-launch-video/` with a lean `SKILL.md`, four reference files covering frame study, visual language, storytelling blueprints, and Remotion implementation, plus three starter eval prompts.
-
-**PRs:** none
-**Notes:** The skill captures reusable motion/storytelling patterns but does not bundle the original video frames or copy Higgsfield assets. Source frames remain in ignored `.local/` for local analysis only.
-
-## [2026-04-02] CodeRabbit: remove unused TEXT_LENGTHS / TextLength
-**Prompt:** Fix CodeRabbit review — remove dead `TEXT_LENGTHS` and `TextLength` from content schemas; do not change createRenderTask (videoUrl is correct).
-**Status:** completed
-**Changes:**
-- tasks: Removed unused `TEXT_LENGTHS` constant and `TextLength` type from `src/schemas/contentPrimitiveSchemas.ts`. Tests had no references; no test file edits.
-**PRs:** none (follow-up on `feature/content-primitives`)
-**Notes:** `createRenderTask` / `renderFinalVideo` output shape left unchanged.
-
-## [2026-04-02] Content V2 modular refactor — all 4 phases implemented
-**Prompt:** Break monolithic content creation pipeline into standalone primitives across tasks, api, cli, and skills
-**Status:** completed
-**Changes:**
-- tasks: 5 new primitive tasks (`create-image`, `create-video`, `create-audio`, `create-render`, `create-upscale`) + Zod schemas + 21 tests. V1 `create-content` untouched.
-- api: 6 new endpoints under `POST /api/content/create/{image,video,text,audio,render,upscale}`. DRY shared factories (`triggerPrimitive`, `validatePrimitiveBody`, `createPrimitiveHandler`, `createPrimitiveRoute`) — 12 files instead of 23. Text endpoint is inline (no task). 17 tests.
-- cli: 6 new commands (`recoup content image/video/text/audio/render/upscale`). DRY `createPrimitiveCommand` factory — each command is ~10 lines. Build passes, 74 tests pass.
-- skills: Created `content-creation/SKILL.md` teaching LLM agents how to compose primitives step-by-step.
+- tasks: New `buildStaticImageArgs.ts` — ffmpeg args for single-frame image render with overlays
+- tasks: New `renderStaticImage.ts` — downloads base + overlays, runs ffmpeg, uploads PNG to fal.ai
+- tasks: `createContentTask` renders static image when template uses overlay, returns `staticImageUrl`
+- tasks: `pollContentRuns` extracts `imageUrl` from task output
+- api: `contentRunResultSchema` accepts optional `imageUrl` field
+- api: `postVideoResults` downloads and posts static images before videos in Slack threads
+- 15 new tests across both submodules (all green)
 **PRs:**
-- tasks: https://github.com/recoupable/tasks/pull/new/feature/content-primitives (target: main)
-- api: https://github.com/recoupable/api/pull/new/feature/content-primitive-endpoints (target: test)
-- cli: https://github.com/recoupable/cli/pull/new/feature/content-primitive-commands (target: main)
-**Notes:** V1 full pipeline (`POST /api/content/create` and `recoup content create`) is completely untouched — all changes are additive. PRs need to be created manually (gh token lacks PR creation permission). Tasks PR must merge first since API triggers the new task IDs.
+- https://github.com/recoupable/tasks/pull/136
+- https://github.com/recoupable/api/pull/438
+**Notes:** API PR targets `test` branch. Tasks PR targets `main`. Both submodules must be deployed together.
+
+---
+
+## [2026-04-14] API — Slackbot default no artist (REC-64)
+**Prompt:** Remove hardcoded Gatsby Grace default from content agent Slack bot; require artist name in prompt
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- api: Removed hardcoded `artistAccountId` from `registerOnNewMention.ts`
+- api: Added `artistName` to `contentPromptFlagsSchema` for AI extraction from prompts
+- api: New `selectAccountByNameInOrg.ts` for case-insensitive artist name lookup within an organization
+- api: Bot now prompts user if no artist specified, shows error if not found
+- api: 38 tests passing (20 registerOnNewMention + 13 parseContentPrompt + 5 selectAccountByNameInOrg)
+**PRs:** https://github.com/recoupable/api/pull/437
+**Notes:** Related to REC-40 (artist name param) which had an unmerged PR#382. REC-64 supersedes by making null the default instead of Gatsby Grace as fallback.
+
+## [2026-04-14] API/Tasks/Docs — DSP logo overlay for editorial template (REC-63)
+**Prompt:** Add dsp enum parameter so editorial videos can include Spotify/Apple Music logo overlay
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- api: Added `dsp` enum (`none`/`spotify`/`apple`) to validation schema, trigger payload, content prompt agent, and Slack mention handler
+- api: New `dspValues.ts` constant file following `captionLengths.ts` pattern
+- api: 4 new tests for dsp validation and prompt extraction
+- tasks: Added `dsp` to content creation schema, new `resolveDspLogoUrl` utility
+- tasks: `createContentTask` appends DSP logo URL to overlay images for ffmpeg render
+- tasks: 5 new tests for DSP resolution and pipeline integration
+- docs: Added `dsp` field to OpenAPI spec and Content Agent Slack bot docs
+**PRs:**
+- https://github.com/recoupable/api/pull/436
+- https://github.com/recoupable/tasks/pull/135
+- https://github.com/recoupable/docs/pull/131
+**Notes:** API PR targets `test` branch. Tasks/docs PRs target `main`. DSP logo URLs are placeholders — actual images will be added by the user after PR merge. All three submodules must be deployed together.
+
+---
+
+## [2026-04-13] API/Tasks — Default captions to none (REC-62)
+**Prompt:** Slack bot generates captions even when not requested; default should be no captions
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- api: Added `"none"` to `CAPTION_LENGTHS` enum, changed default from `"short"` to `"none"` across all schemas
+- api: Updated prompt agent to only set captions when explicitly requested by user
+- api: Updated 4 test files to reflect new defaults
+- tasks: Added `"none"` to content creation schema, changed default to `"none"`
+- tasks: Skip caption generation API call when `captionLength === "none"`, pass empty string to ffmpeg render
+- tasks: Added test for caption skip behavior
+**PRs:**
+- https://github.com/recoupable/api/pull/433
+- https://github.com/recoupable/tasks/pull/132
+**Notes:** API PR targets `test` branch. Tasks PR targets `main`. Both submodules must be deployed together.
+
+---
+
+## [2026-04-13] Admin/API — Track embedded Slack videos instead of URLs (REC-61)
+**Prompt:** Admin page tracks embedded videos from Slack bot instead of extracted video URLs
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- api: Replaced `extractVideoLinks` (URL text parsing) with `extractVideoFiles` (Slack file object extraction)
+- api: Replaced `fetchThreadVideoLinks` with `fetchThreadVideoFiles` to read `files` array on bot messages
+- api: 12 new tests for extraction logic
+- admin: Renamed "Video Links" column to "Videos", display friendly labels instead of raw URLs
+**PRs:**
+- https://github.com/recoupable/api/pull/432
+- https://github.com/recoupable/admin/pull/27
+**Notes:** API PR targets `test` branch. Admin PR targets `main`.
+
+---
+
+## [2026-04-13] API — Add View Task button to content agent Slack response (REC-60)
+**Prompt:** Add "View Task" button to content agent Slack response, matching coding agent behavior
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- api: Moved `buildTaskCard` from `lib/coding-agent/` to shared `lib/agents/` (DRY)
+- api: Added "View Task" button card to content agent `registerOnNewMention` handler
+- api: Updated coding agent imports to use shared location
+- api: 18 tests pass (2 new for buildTaskCard, 2 new for content agent View Task)
+**PRs:**
+- https://github.com/recoupable/api/pull/430
+**Notes:** Button links to `chat.recoupable.com/tasks/{runId}` using the first triggered run ID.
+
+---
+
+## [2026-04-13] Tasks — Editorial image detection in content pipeline (REC-59)
+**Prompt:** Detect editorial press photos in attachments and skip AI image generation when one is found
+**Status:** in_progress (PR open, awaiting code review)
+**Changes:**
+- tasks: Added `detectEditorialImage.ts` + `createEditorialDetectionAgent.ts` for AI-based editorial photo classification
+- tasks: Updated `classifyImages`, `resolveFaceGuide`, `createContentTask` to support `editorialImageUrl`
+- tasks: When editorial image detected, pipeline skips image generation and uses it directly for video gen
+- tasks: 11 new tests, all 347 tests pass
+**PRs:**
+- https://github.com/recoupable/tasks/pull/131
+**Notes:** Follows same pattern as face detection (few-shot AI classification). Editorial detection only runs when `usesImageOverlay` is true.
+
+---
+
+## [2026-04-12] Admin — Agent Sign-Ups page (REC-56)
+**Prompt:** Add admin page for tracking agent API key signups with docs and API endpoint
+**Status:** in_progress (PRs open, awaiting code review)
+**Changes:**
+- docs: OpenAPI spec and MDX page for `GET /api/admins/agent-signups` endpoint
+- api: New admin endpoint querying `account_api_keys` joined with `account_emails` filtered by `agent+` email prefix, with period filtering
+- admin: New `/agent-signups` page with line chart, stats bar, data table following `/content` page pattern
+**PRs:**
+- https://github.com/recoupable/docs/pull/127
+- https://github.com/recoupable/api/pull/428
+- https://github.com/recoupable/admin/pull/26
+**Notes:** All 3 PRs created and pushed. TypeScript compiles cleanly. Awaiting Code Reviewer.
 
 ---
 
@@ -958,124 +1015,22 @@ chat (frontend) → api (backend) → Supabase (database)
 
 ---
 
-## [2026-04-16] Streamline featured models dropdown
-**Prompt:** Add Opus 4.7 to featured models replacing Opus 4.5; then reduce featured list to just Opus 4.7, Sonnet 4.6, GPT-5.4 Mini
-**Status:** completed
+## [2026-04-12] REC-57: Admin - Content - Missing Tags
+**Prompt:** Fix /content page to show Content Agent mentions from Slack thread replies, not just top-level messages
+**Status:** in_progress (awaiting code review)
 **Changes:**
-- `chat`: Updated `lib/ai/featuredModels.ts` — promoted Claude Opus 4.7 to top, bumped Sonnet 4.5 → 4.6, removed GPT-5.2, Gemini 2.5 Flash, Gemini 3 Pro, and Grok 4 from featured list (they remain in full model list)
-**PRs:**
-- chat: https://github.com/recoupable/chat/pull/new/feature/featured-model-opus-4-7 (base: test, needs to be opened)
-**Notes:** New IDs `anthropic/claude-opus-4.7` and `anthropic/claude-sonnet-4.6` must exist in AI Gateway (`/api/ai/models`) or they'll be silently filtered from the dropdown by `organizeModels.ts`. User hit an error sending a test message — likely because one of those IDs isn't registered upstream yet; needs verification against `/api/ai/models` response.
+- api: Extended `fetchBotMentions` to scan `conversations.replies` for thread mentions with cutoff filtering
+- api: Added 3 new test cases for thread mention scenarios
+**PRs:** https://github.com/recoupable/api/pull/429
+**Notes:** PR targets `test` branch. @Code Reviewer notified for review.
 
 ---
 
-## [2026-04-17] Retarget industry-research skill at the Research REST endpoints
-**Prompt:** industry-research skill is written around an unshipped `recoup research` CLI; retarget it to the `/api/research/*` endpoints shipped in docs, excluding chat endpoints
+## [2026-04-18] Add open-agents submodule
+**Prompt:** Add the open-agents codebase as a submodule to the monorepo
 **Status:** completed
 **Changes:**
-- `skills`: Rewrote `skills/industry-research/SKILL.md` around `https://recoup-api.vercel.app/api/research/*` HTTP calls using `x-api-key: $RECOUP_API_KEY`. Dropped the `recoup research` CLI surface. Added the endpoints that existed in docs but were missing from the skill: `charts`, `milestones`, `rank`, `radio`, `venues`, `track/playlists`, `/research` beta search (`beta=true`), and `POST /research/deep` (replaces the old `report` command). Called out the ID-vs-name gotchas for `/albums`, `/track`, `/playlist`, `/curator`, `/track/playlists` and narrowed the `/audience?platform=` enum to `instagram|tiktok|youtube`.
-- `skills`: Rewrote `skills/industry-research/references/workflows.md` so all 10 existing workflow chains use curl + the REST endpoints, and added workflow #11 (People Outreach) covering `POST /research/people` + `extract` + `enrich`.
-**PRs:** none (not pushed yet)
-**Notes:** `skills/getting-started/SKILL.md` still references `recoup research` and `recoup whoami` CLI commands — it's also outdated, but was out of scope for this task. Worth a separate pass once the CLI actually ships (or to rewrite around HTTP now if the CLI isn't coming soon).
-
----
-
-## [2026-04-17] Retarget getting-started skill at REST + MCP
-**Prompt:** Update the getting-started skill too — same treatment as industry-research (drop the unshipped CLI)
-**Status:** completed
-**Changes:**
-- `skills`: Rewrote `skills/getting-started/SKILL.md` to remove the `npm install -g @recoupable/cli` + `recoup whoami` + `recoup research` CLI steps. Collapsed setup to two steps (get key, verify). Added a third signup path (Path C: dashboard at chat.recoupable.com/keys). Verified endpoint moved from `recoup whoami` to `GET /api/accounts/id` (confirmed in `docs/api-reference/openapi/accounts.json`). First-call example now hits `GET /api/research?q=...&beta=true` and `GET /api/research/profile` over curl. Kept the MCP config block (still accurate per `docs/mcp.mdx`) and removed the unverified "40+ tools" claim. Added an Auth gotchas section covering the `x-api-key` vs `Authorization: Bearer` exclusivity rule from `docs/authentication.mdx`.
-**PRs:** none (not pushed yet)
-**Notes:** Skill now matches the industry-research rewrite in tone + auth pattern. When the CLI eventually ships, these two skills will need a partial revert — the fastest way will be to add a "Prefer the CLI?" section at the top of each rather than rip the REST examples out.
-
----
-
-## [2026-04-17] Rename industry-research → music-industry-research
-**Prompt:** Rename the skill to music-industry-research
-**Status:** completed
-**Changes:**
-- `skills`: `git mv skills/industry-research → skills/music-industry-research`, updated frontmatter `name:` field, updated the skill table entry in `README.md` and the directory-layout example in `AGENTS.md`. Also updated the two references inside the uncommitted `getting-started/SKILL.md` changes so they'll be consistent when that skill eventually ships. No references left in the repo after the rename (verified with grep). Pushed as a second commit on the same feature branch; updated the existing PR #12 title + body via `gh api PATCH` (the `gh pr edit` CLI path currently 500s on classic Projects GraphQL deprecation for this repo).
-**PRs:** https://github.com/recoupable/skills/pull/12 (updated, not merged yet)
-**Notes:** Downstream impact — anyone who had `industry-research` referenced by name in their agent config (e.g. `.claude-plugin/plugin.json`, Cursor skill pickers) will need to update it to `music-industry-research` after this merges. Checked `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` in the skills repo: neither lists skills by name, so nothing to update there.
-
----
-
-## [2026-04-17] Harden music-industry-research with real response shapes
-**Prompt:** User was testing the skill; their agent hit nulls on /research/similar and misread `editorial=true` returning empty as a bug
-**Status:** completed
-**Changes:**
-- `skills`: Added a "Response shapes (what the fields actually are)" section to `skills/music-industry-research/SKILL.md` with real truncated JSON samples from live `/research/similar` and `/research/playlists` calls (verified against Drake + Joy Crookes). Explicitly document `recent_momentum` (not `trend`) and flat top-level platform counts (`sp_followers`, `ins_followers`, etc. — no `metrics` wrapper). Document the nested `{ playlist, track }` shape of `placements[]` and flag that `placement.playlist.followers` is usually 0. Added "nulls in /research/profile don't mean 'no data'" gotcha — profile returns nulls for less-covered artists but `/similar`, `/metrics`, `/cities`, `/playlists` often succeed. Added a rule: preflight playlist filter decisions against `/research/profile.num_sp_editorial_playlists` before assuming empty results are bugs. Added a "dump with jq '.<collection>[0] | keys' before parsing" rule to the What-Not-To-Do list.
-**PRs:** https://github.com/recoupable/skills/pull/12 (third commit: 7bd6af6)
-**Notes:** Empirical testing triggered by the user's own session — they caught two real gaps in the skill (guessed field names on /similar, misread empty editorial filter). This commit is entirely about closing field-name ambiguity so future agents don't have to grep the codebase or guess.
-
----
-
-## [2026-04-17] music-industry-research: match_strength, URL lookup, latency, empty-OK gotchas
-**Prompt:** Second round of user testing feedback — match_strength rule, /profile URL handling, /milestones empty, /enrich 60-90s latency
-**Status:** completed
-**Changes:**
-- `skills`: Updated `skills/music-industry-research/SKILL.md` with four empirically-verified additions. **(1)** match_strength heuristic in the Search section: real matches score orders of magnitude >1 (Drake: 52,875; chillpill: 302), noise sits well under 1 (0.005-0.1) — treat top result <1 as "not found" and fall through to Graceful Degradation. Also extended the Graceful Degradation section to trigger on this case. **(2)** Added `/research/lookup?url=` as the canonical URL entry point. `/research/profile?artist=<URL>` works for some Spotify URL shapes but returns 404/406 for others; route URLs through `/lookup` first and chain the resolved name. **(3)** Added an "empty `/milestones` is legit" gotcha next to the profile-nulls and playlist-filter gotchas — Chillpill (global rank ~105k) returns `{ milestones: [] }` with 200 OK. **(4)** Latency note on all five POST endpoints: `/enrich` 60-90s, `/deep` 2+ minutes, others seconds-to-tens. Tell callers to set client timeouts to at least 3 minutes for enrich/deep.
-**PRs:** https://github.com/recoupable/skills/pull/12 (fourth commit: cc47f88)
-**Notes:** PR #12 now has four commits: rewrite (c293cf9), rename (86e00a0), response-shapes (7bd6af6), this one (cc47f88). All four are pure doc changes — no code or config impact. User tested empirically and fed back two rounds of real-world gotchas, which is exactly the virtuous loop this skill needed. Minor nit to verify before merge: the /profile 406 case the user originally reported; my own testing couldn't reproduce with a valid Spotify URL (got 200 or 404). Possible the 406 was transient upstream behavior. The `/lookup` recommendation is still correct either way — it's the canonical URL resolver and dodges the ambiguity entirely.
-
----
-
-## [2026-04-17] music-industry-research: playlist filter semantics + pagination reality
-**Prompt:** Third round of user testing — filter flags are exclusive-when-set, limit cap=100, artist-level /playlists offset is ignored, aggregate-vs-detail gap
-**Status:** completed
-**Changes:**
-- `skills`: Added a dedicated "Playlist filter & pagination semantics" section to `skills/music-industry-research/SKILL.md`. This is the single highest-value fix on the skill — the filter flag behavior was obscured in the docs description and never explained in the skill, causing agents to assume `?editorial=true` was an additive filter rather than an exclusive-when-set one. **(1)** Documented the exclusive-when-set rule for both `/research/playlists` and `/research/track/playlists` with a query recipe table (editorial alone vs editorial + curator/indie vs everything). **(2)** Documented the hard `limit=100` cap on both endpoints (bisected empirically — 150/200/500 all 400). **(3)** Documented the pagination asymmetry: artist-level `/playlists` ignores `offset` (single-shot 100-max snapshot), track-level `/track/playlists` honors `offset` (paginate by 100s). Described the bulk-retrieval workaround: enumerate `/research/tracks`, then page per track. **(4)** Documented the aggregate-vs-detail gap: `profile.num_sp_playlists` can be millions while detail endpoints expose at most ~100 per call and often fewer per-track even with all 10 flags true. Told callers to use `sp_playlist_total_reach` / `sp_editorial_playlist_total_reach` from profile for ground-truth reach, and detail endpoints as sampled top placements. Cross-referenced the new section from four new "What Not to Do" bullets.
-**PRs:** https://github.com/recoupable/skills/pull/12 (fifth commit: d86d142)
-**Notes:** All findings verified live against the production API. PR #12 is now five commits deep, all doc-only. Still uncommitted locally: the getting-started rewrite, PROGRESS.md (this entry included).
-
----
-
-## [2026-04-17] music-industry-research: progressive disclosure refactor
-**Prompt:** Audit the skill against skill-creator and writing-skills best practices, apply all 7 recommended optimizations
-**Status:** completed
-**Changes:**
-- `skills`: Audited against `~/.cursor/skills/skill-creator/SKILL.md` (Anthropic's official skill authoring guide) and `~/.cursor/skills/writing-skills/SKILL.md` (Superpowers TDD-for-skills guide). Skill was 6.9× over the recommended ≤500-word body target (467 lines / 3,449 words) with significant duplication across 13 top-level sections. Applied progressive disclosure: `SKILL.md` shrinks to 116 lines / 1,076 words / 740-char frontmatter (was 940 — 92% of the 1024-char cap, now comfortable margin). Replaced 7 sectioned bash example blocks with a quick-reference endpoint table linking to references. Created two new reference files: `references/endpoints.md` (241 lines — full curl examples, playlist filter/pagination semantics, latency budgets, platform source enums) and `references/response-shapes.md` (86 lines — real JSONC shapes, field-name gotchas, profile-nulls and empty-milestones gotchas). Extended `references/workflows.md` with new "Interpretation cheat sheet," "Cross-cutting synthesis patterns," and "Saving research" sections that used to live in SKILL.md. Consolidated 4 overlapping gotcha sections into one canonical "Critical gotchas" bullet list. No information lost — every old section is now either in SKILL.md or one of the three reference files. Lints clean.
-**PRs:** https://github.com/recoupable/skills/pull/12 (sixth commit: 7376f44)
-**Notes:** PR #12 is now six commits deep, all doc-only. Files in the skill: `SKILL.md` (always loaded), `references/endpoints.md`, `references/response-shapes.md`, `references/workflows.md` (loaded on demand). The skill now follows Anthropic's three-level loading model: metadata always in context (~95-word description), SKILL.md body loaded when the skill triggers (1,076 words), references loaded only when an agent needs them. Still uncommitted locally: the getting-started rewrite, PROGRESS.md.
-
----
-## [2026-04-18] music-industry-research: teach chaining (workflows + tools + other skills)
-**Prompt:** The 11 workflows in workflows.md read as standalone recipes — add a section on how to compose them, chain to external tools (send_email), and hand off to other skills
-**Status:** completed
-**Changes:**
-- `skills`: Added a "Chaining workflows and tools" section to `skills/music-industry-research/references/workflows.md` (164 lines, inserted before "Building Your Own Workflows"). Covers: (1) the three chain patterns — Data→Data, Data→Action, Skill→Skill — with a table; (2) the tools + skills this skill chains into (`send_email` MCP tool, artist workspace writes, and the sibling skills `content-creation`, `release-management`, `streaming-growth`, `artist-workspace`, `trend-to-song`); (3) five chaining rules including a mandatory human-approval gate for external contacts; (4) three worked end-to-end examples using "Artist X" placeholders — (A) peer collab outreach (research → similar → people → draft → approval → `send_email`), (B) artist health + next move (snapshot → playlist gap → hand off to `streaming-growth` → hand off to `release-management`), (C) TikTok market scouting (charts + discover → TikTok-to-Spotify pipeline → optional `/deep` narrative → workspace write → hand off to `trend-to-song`); (5) a "when NOT to chain" caveat.
-**PRs:** https://github.com/recoupable/skills/pull/12 (seventh commit: 657017c)
-**Notes:** PR #12 is now seven commits deep, all doc-only. Reframes the skill from "pick one of 11 workflows" to "compose workflows until the question is answered." The explicit human-approval gate on `send_email` is the most important safety rail — cold outreach to real humans (managers, A&R) should never auto-fire from an agent. Uncommitted locally still: the `skills/getting-started/SKILL.md` rewrite from a prior session.
-## [2026-04-18] music-industry-research: drop send_email from chaining section
-**Prompt:** Agents without the Recoup MCP server don't have send_email, and no REST equivalent ships yet — remove email-sending from the skill so it stays portable over plain REST
-**Status:** completed
-**Changes:**
-- `skills`: Edited `skills/music-industry-research/references/workflows.md` to remove all references to the `send_email` MCP tool. Four surgical changes: **(1)** Chain-pattern table: renamed "Data → Action" to "Data → Draft"; the skill no longer claims to execute external actions. **(2)** "Tools this skill chains into" section renamed "What this skill produces" — drafts (outreach, pitches, press blurbs) for the user to send themselves, workspace writes, and handoffs to other skills. **(3)** Chaining rule #3 rewritten from "External-facing actions require a human-approval gate" to "Draft, don't execute, for external-facing actions" — the approval gate is now moot because no execution happens. **(4)** Example A renamed "Peer collab outreach draft"; Steps 5 (approval gate) and 6 (send_email call) removed; Step 4 extended to explicitly say the agent presents the draft and the user sends manually. "When NOT to chain" section retargeted the external-facing-action bullet to workspace writes. Examples B and C were unaffected (neither used send_email). Net: -20 lines, +14 lines.
-**PRs:** https://github.com/recoupable/skills/pull/12 (eighth commit: 4930f08)
-**Notes:** Gap identified by user during review: the rest of the skill is deliberately MCP-independent (direct `/api/research/*` curl calls with `x-api-key`) but the chaining section assumed the Recoup MCP server was available for send_email. No `POST /api/emails/send` REST endpoint exists today — only `POST /api/emails/inbound` (Resend webhook) and `GET /api/admins/emails` (admin-only reader). Open follow-up: add `POST /api/emails/send` to the api submodule as a DRY wrapper around `processAndSendEmail`, then a tiny follow-up commit to the skill can restore the Data→Action pattern pointing at the REST endpoint instead of the MCP tool. Until that ships, the skill drafts and the user sends.
-## [2026-04-18] music-industry-research: resolve all cubic-dev-ai review comments on PR #12
-**Prompt:** cubic-dev-ai flagged four issues on PR #12 (one P1, three P2) — verify each, fix the real ones, reply to close the threads
-**Status:** completed
-**Changes:**
-- `skills` commit `a74206d` (fix: add /research prefix to POST routes in decision tree): Addressed **P1 #3104618745** and **P2 #3104618749**. The decision tree in `SKILL.md` had dropped the `/research/` prefix on four POST routes — lines 25-27 (`POST /people`, `POST /enrich`, `POST /deep`, `POST /extract`) and line 32 (`POST /web`). Any agent copying those commands would have hit 404s. Bot flagged lines 25-27 as one comment and line 32 as a separate comment; fixed all four in the same commit. Endpoint table below and all curl examples already used correct paths — only the decision tree was broken.
-- `skills` commit `7bc7390` (fix: clean up two P2 residue issues flagged by cubic-dev-ai): Addressed **P2 #3104419851** and **P2 #3104442230**. Both originally pointed at lines in `SKILL.md` that were refactored out during the progressive-disclosure pass (`7376f44`), but the same issues had carried over into the reference files. **(1)** `references/workflows.md` line 42: `/research/playlist?id=` was missing the required `platform=` query param — corrected to `/research/playlist?platform=spotify&id=` to match the curl example in `endpoints.md`. **(2)** `references/endpoints.md` line 203: default-flag description for `/research/track/playlists` contradicted the very next line and the SKILL.md exclusive-when-set rule — said editorial was a default, but editorial is OFF by default. Corrected to `indie + majorCurator + popularIndie = true` and added a one-line reminder that passing `?editorial=true` replaces these defaults rather than adding to them.
-- `skills`: Posted a reply on each of the four cubic-dev-ai review threads (IDs 3104854382, 3104854389, 3104854402, 3104854420) pointing to the fix commits. This closes the review loop so the PR history shows each comment as resolved rather than leaving the threads dangling.
-**PRs:** https://github.com/recoupable/skills/pull/12 (commits 9 and 10 of 10)
-**Notes:** PR #12 is now 10 commits deep, all doc-only. Review activity on this PR so far: 2 coderabbitai suggestions (unaddressed — typo "Sao Paulo" → "São Paulo" on line 63, missing code-fence language specifier on line 77, both P3/minor) and 4 cubic-dev-ai issues (all addressed as of today). Worth a quick pass on the two coderabbit ones before merge — they're trivial and doc-only. The pattern of "bot flagged X, refactor moved X into reference file, X persisted in new location" happened twice in this batch — tells me the progressive-disclosure commit `7376f44` should have grep'd for the bot-flagged patterns before landing; noting as a lesson for future large refactors of this skill.
-## [2026-04-18] music-industry-research: fix fabricated "Workflow 0" reference
-**Prompt:** cubic-dev-ai flagged "Workflow 0" in Example A Step 1 as AI slop — workflows are numbered 1-11, there is no Workflow 0
-**Status:** completed
-**Changes:**
-- `skills` commit `f68a743`: Replaced `Step 1 — Research the artist (Workflow 0: full sweep)` with `Step 1 — Research the artist (full sweep per SKILL.md decision tree)` in `references/workflows.md` line 448. Went slightly beyond the bot's suggested fix of `(Full sweep)` to point readers at where the pattern actually lives — the "Research [artist] for me" recipe in the SKILL.md decision tree — rather than leaving it as an unsourced parenthetical. Grep'd the rest of workflows.md for other `Workflow N` references; all of them (Workflows 1, 2, 9, 11) point at real numbered workflows. Only Workflow 0 was fabricated.
-- `skills`: Replied to cubic-dev-ai review comment `3104853437` with the fix commit hash and a note that the rest of the cross-references are clean.
-**PRs:** https://github.com/recoupable/skills/pull/12 (eleventh commit: f68a743)
-**Notes:** This is the second P1 the bot caught on PR #12 today. Both were the same class of error — "AI wrote a plausible-looking pointer that doesn't actually resolve." First was decision-tree POST routes missing the `/research/` prefix; this one was a fabricated workflow number. cubic-dev-ai's "flag AI slop and fabricated changes" rule is earning its keep. Lesson for future writing on this skill: when adding examples that reference workflows, grep for the actual workflow numbers (`grep -c "^## [0-9]" workflows.md`) before using them, and either cite real ones or say "see decision tree" explicitly. Don't invent placeholder numbers. PR #12 is now 11 commits deep.
-## [2026-04-18] music-industry-research: fix Example B Step 1 + Example A enrich schema
-**Prompt:** cubic-dev-ai flagged two more P2 issues on PR #12 — Example B Step 2 referenced profile fields that Step 1 didn't fetch, and Example A's enrich pseudocode omitted the required type:object wrapper
-**Status:** completed
-**Changes:**
-- `skills` commit `c9b9e13` (Example B Step 1 chain consistency): Step 2 said "Input: profile.num_sp_editorial_playlists from Step 1" but Step 1's call list was only /research/metrics + /research/cities + /research/insights + /research/milestones. None of those return num_sp_editorial_playlists or sp_playlist_total_reach — both live on /research/profile.cm_statistics. Fixed by (1) adding /research/profile to Step 1's calls (it's the correct baseline for a "state of the artist" snapshot anyway — matches Example A's opening pattern), (2) restructuring Step 1's output as a bulleted list naming which endpoint produces which fields (profile → aggregate counts; metrics → trend; cities → geographic concentration), and (3) updating Step 2 to reference profile.cm_statistics explicitly with correct field names (sp_playlist_total_reach instead of the shorthand total_reach). Every cross-step reference in Example B now resolves to real output of the step it cites.
-- `skills` commit `6ed6722` (Example A enrich schema): Line 463 showed `POST /research/enrich  {input, schema: {name, role, email, recent_signings}}` — missing the top-level `{type: "object", properties: {...}}` wrapper. SKILL.md's gotcha list explicitly says /research/enrich rejects schemas without type:object at the top level, so the example contradicted the skill's own documented contract. Fixed in one line. Grep'd the rest of the file for other enrich examples — the two earlier enrich curl commands (lines 345-346 in Workflow 9, 399-400 in Workflow 11) already had the correct schema shape; only the new Example A pseudocode broke the contract.
-- `skills`: Replied to cubic-dev-ai comments `3104853441` and `3104853442` with the fix commit hashes.
-**PRs:** https://github.com/recoupable/skills/pull/12 (commits 12 and 13 of 13)
-**Notes:** PR #12 is now 13 commits deep. All 7 cubic-dev-ai review comments on this PR are now resolved (audited with `gh api repos/recoupable/skills/pulls/12/comments` + reply-chain analysis — every top-level cubic comment has a reply). Pattern I keep making with this skill: **pseudocode pattern examples that don't respect the real endpoint contracts documented elsewhere in the same skill**. Three of the seven cubic issues today were this exact failure mode (missing `/research` prefix on POST routes, fabricated Workflow 0, missing type:object wrapper on enrich schema). Writing lesson for future example chains: (1) grep for the real contract in endpoints.md before inventing pseudocode, (2) when in doubt, show a real curl command rather than a schema-shaped sketch, (3) cross-check new examples against the Critical Gotchas list in SKILL.md.
+- mono: Added `open-agents` submodule pointing to `https://github.com/recoupable/open-agents`
+- mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
+**PRs:** pending (branch: feat/add-open-agents-submodule)
+**Notes:** Submodule pinned to current `open-agents` main HEAD.
