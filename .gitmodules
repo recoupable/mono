@@ -34,3 +34,6 @@
 [submodule "gtm"]
 	path = gtm
 	url = https://github.com/recoupable/gtm.git
+[submodule "plugins"]
+	path = plugins
+	url = https://github.com/recoupable/plugins.git

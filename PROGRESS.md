@@ -1,6 +1,123 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-02
+> Last updated: 2026-04-29
+
+## [2026-04-29] Rename catalog plugin to deal review
+
+**Prompt:** Rename the plugin fully to `music-catalog-deal-review`.
+**Status:** completed
+**Changes:**
+
+- plugins: Renamed the nested plugin submodule path from `music-catalogs` to `music-catalog-deal-review`.
+- plugins: Updated Claude and Codex marketplace entries to install `music-catalog-deal-review`.
+- plugins/music-catalog-deal-review: Updated Claude and Codex plugin manifests with the new plugin name, repository reference, and display copy.
+- plugins: Updated registry and plugin README files to use the new name.
+
+**PRs:** none
+**Notes:** The local manifests and docs now use `music-catalog-deal-review`. GitHub already has a public `recoupable/music-catalog-deal-review` repo, so the attempted repo rename was rejected as "name already exists"; the local nested submodule remote now points at that existing repo.
+
+## [2026-04-29] Curated plugin marketplace manifests
+
+**Prompt:** Implement the curated plugin marketplace plan for Claude Code and Codex.
+**Status:** completed
+**Changes:**
+
+- plugins: Added `.claude-plugin/marketplace.json` so Claude Code can discover the `music-catalogs` plugin from the registry repo.
+- plugins: Added `.agents/plugins/marketplace.json` so Codex can discover the same curated plugin source.
+- plugins/music-catalogs: Added `.codex-plugin/plugin.json` to package the existing skills directory for Codex.
+- plugins: Updated registry and plugin README files with install guidance, Codex support boundaries, and release checklist requirements.
+
+**PRs:** none
+**Notes:** Verification run from the mono root parsed all new JSON manifests, confirmed Claude and Codex relative source paths resolve to `plugins/music-catalogs`, confirmed the Codex skills path resolves to `plugins/music-catalogs/skills`, and `ReadLints` reported no linter errors for the edited marketplace and README files.
+
+## [2026-04-29] Synthetic music catalog sale data room
+
+**Prompt:** Create a sloppy, realistic synthetic data room for a music catalog company trying to sell.
+**Status:** completed
+**Changes:**
+
+- mono: Generated `.local/synthetic-data-rooms/neon-river-catalog-sale/` with 77 fake data-room files for Neon River Music Holdings LLC.
+- mono: Included messy raw seller folders for process docs, overview, catalog inventory, royalty statements, legal chain of title, registrations, recoupment, analytics, audio asset indexes, diligence issues, and valuation.
+- mono: Included `99_Clean_Ingest_Output/` with normalized `canonical-catalog.csv`, `royalty-ledger.csv`, `rights-map.csv`, `source-lineage.csv`, `data-room-inventory.csv`, `missing-files.md`, and `data-quality-report.md`.
+
+**PRs:** none
+**Notes:** The generated room is intentionally fake and intentionally messy. Verification: `validate-normalized-ledger.py` returned `status: ok` for 3,188 ledger rows; generated 18 assets, 7 `.xlsx` workbooks, 10 placeholder `.wav` files, and a valuation workbook with formulas. `.local/` is gitignored, so only this progress note affects tracked repo state.
+
+## [2026-04-29] Music catalogs plugin platform foundation
+
+**Prompt:** Implement the music-catalogs plugin platform plan: deeper research, deal workspace conventions, workflow skills, commands, agents, scripts, templates, and evals.
+**Status:** completed
+**Changes:**
+
+- plugins/music-catalogs: Added research references for diligence workflow, tooling landscape, red flags, and deal workspace conventions.
+- plugins/music-catalogs: Added reusable deal workspace templates for assumptions, evidence ledger, findings, missing files, IC memo, seller cleanup report, and financing pack.
+- plugins/music-catalogs: Expanded the skill suite with `diligence-kickoff`, `rights-diligence`, `royalty-audit`, `seller-prep`, `financing-underwrite`, `ic-memo-package`, and `post-close-admin`, and strengthened `catalog-ingest` / `catalog-analysis`.
+- plugins/music-catalogs: Added user-facing commands for kickoff, ingest, analysis, QC, and packaging.
+- plugins/music-catalogs: Added specialist agents for rights review, royalty audit, metadata reconciliation, valuation sensitivity, and diligence QC.
+- plugins/music-catalogs: Added deterministic Python scripts for file manifests, workspace validation, evidence-ledger validation, normalized ledger validation, concentration analysis, and NPS/NLS bridge calculations.
+- plugins/music-catalogs: Added `normalize-royalty-statement.py` and golden-fixture tests for first-pass ASCAP, BMI, MLC, distributor, YouTube Content ID, and Curve-style CSV normalization.
+- plugins/music-catalogs: Added synthetic golden fixtures under `fixtures/golden/` plus `fixtures/external-sources.md` documenting public schemas and official docs used to shape the fixtures.
+- plugins/music-catalogs: Tested `normalize-royalty-statement.py` against the generated Neon River synthetic data room. Added aliases/profiles for Neon River-style distributor, publisher admin, ASCAP, BMI, MLC, SoundExchange, YouTube Content ID, and direct sync exports.
+- plugins/music-catalogs: Added top-level eval scenarios for messy data rooms, missing chain of title, PRO bonus spikes, recoupment cliffs, concentration risk, seller prep, and financing collateral packages.
+
+**PRs:** none
+**Notes:** Verification run from `plugins/music-catalogs`: normalizer unit tests passed (`Ran 3 tests ... OK`), golden fixture tests passed (`Ran 1 test ... OK`), JSON validation passed for plugin/templates/evals, expected fixture ledgers passed `validate-normalized-ledger.py`, Neon River raw statement normalization produced 3,188 rows across eight sources matching the generated clean ledger count, every script responded to `--help`, and `ReadLints` reported no linter errors for the plugin. Changes are not committed. `plugins` submodule now shows modified nested `music-catalogs`; mono still has pre-existing unrelated dirty submodule state.
+
+## [2026-04-29] Music catalogs plugin repos and submodules
+
+**Prompt:** Create a mono branch, GitHub repos, and nested submodules for a dedicated music catalogs plugin.
+**Status:** completed
+**Changes:**
+
+- mono: Created branch `feature/music-catalogs-plugin-submodules`.
+- GitHub: Created public repos `recoupable/plugins` and `recoupable/music-catalogs`.
+- music-catalogs: Initial plugin commit with `.claude-plugin/plugin.json`, `README.md`, and the `catalog-ingest` / `catalog-analysis` skills plus references and eval prompts.
+- plugins: Initial registry commit with `music-catalogs` as a nested submodule.
+- mono: Added `plugins` as a top-level submodule and initialized nested `plugins/music-catalogs`.
+- skills: Removed the duplicate uncommitted catalog skill drafts from the existing `skills` submodule so `music-catalogs` is the source of truth.
+
+**PRs:** none
+**Notes:** `recoupable/music-catalogs` is at commit `91540e7`; `recoupable/plugins` is at commit `78a29c6`. The mono branch is not committed or pushed yet. The mono working tree still has substantial pre-existing unrelated dirty state across other submodules.
+
+## [2026-04-29] Catalog deals skills research and architecture
+
+**Prompt:** Research, plan, and create `catalog-ingest` and `catalog-analysis` skills for ingesting music catalog data rooms, cleaning royalty/catalog data, and projecting catalog value.
+**Status:** superseded by plugin repo setup
+**Changes:**
+
+- mono: Created `.local/plans/catalog-deals-skills/research.md` with music catalog valuation, data-room, PRO bonus-system, recoupment, normalization, and diligence research.
+- mono: Created `.local/plans/catalog-deals-skills/skill-architecture.md` recommending two skills (`catalog-ingest` and `catalog-analysis`) instead of one large skill, with a proposed hand-off contract.
+- mono: Created `.local/plans/catalog-deals-skills/build-plan.md`, `evals.json`, and `baseline-observations.md` with eval prompts and baseline behavior notes.
+- music-catalogs: The skill drafts were moved into the dedicated `recoupable/music-catalogs` plugin repo in the next entry.
+
+**PRs:** none
+**Notes:** The LinkedIn article "PRO Bonus System: Ticking Time Bomb" was accessible and its core takeaway is important: performance royalties must be decomposed by PRO, use type, format, territory, and bonus/premium participation before valuation. User approved the recommended two-skill architecture covering both publishing and master catalogs.
+
+## [2026-04-28] Content API artist launch Remotion video
+
+**Prompt:** Make a video about the shipped Content V2 primitives feature, framed as the Content API generating content for music artists.
+**Status:** completed
+**Changes:**
+
+- remotion: Added `ContentApiArtistLaunch` composition, typed launch data, split scene components, and `npm run build:content-api`.
+- remotion: Rendered `remotion/out/content-api-artist-launch.mp4` (1080x1080, 30fps, 681 frames, 22.76s) and created `.local/reference/content-api-artist-launch/contact-sheet.jpg` for visual review.
+- docs: Added the approved design spec and implementation plan under `docs/superpowers/`.
+- mono: Added `.superpowers/` to `.gitignore` for local visual companion files.
+
+**PRs:** none
+**Notes:** Verification run: red render failed before implementation because `ContentApiArtistLaunch` was missing; `npx tsc --noEmit` then passed; `npm run build:content-api` rendered successfully. Remotion still prints pre-existing package version mismatch warnings for `@remotion/fonts` and `zod`, but the render completed.
+
+## [2026-04-28] Higgsfield reference extraction + agentic launch video skill
+
+**Prompt:** Download the Higgsfield X video, extract it frame-by-frame, and create a Remotion skill to mimic its style and storytelling for product feature launches.
+**Status:** completed
+**Changes:**
+
+- mono: Downloaded the source X video to `.local/reference/higgsfield-feature-launch/source/original.mp4`, extracted 701 frame images, and created 1fps plus 0.5s labeled contact sheets under `.local/reference/higgsfield-feature-launch/analysis/`.
+- mono: Created `.agents/skills/agentic-launch-video/` with a lean `SKILL.md`, four reference files covering frame study, visual language, storytelling blueprints, and Remotion implementation, plus three starter eval prompts.
+
+**PRs:** none
+**Notes:** The skill captures reusable motion/storytelling patterns but does not bundle the original video frames or copy Higgsfield assets. Source frames remain in ignored `.local/` for local analysis only.
 
 ## [2026-04-02] CodeRabbit: remove unused TEXT_LENGTHS / TextLength
 **Prompt:** Fix CodeRabbit review — remove dead `TEXT_LENGTHS` and `TextLength` from content schemas; do not change createRenderTask (videoUrl is correct).
