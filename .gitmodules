@@ -43,3 +43,6 @@
 [submodule "blog"]
 	path = blog
 	url = https://github.com/recoupable/blog.git
+[submodule "plugins"]
+	path = plugins
+	url = https://github.com/recoupable/plugins.git
