@@ -24,6 +24,24 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `remotion` | Dormant, video generation | Remotion |
 | `bash` | Dormant, interactive bash demo with AI agent | Next.js 16, React 19, just-bash |
 
+## Working With Plugins
+
+`plugins` is a marketplace/registry repo, not the home for every skill. Each
+plugin inside it is its own submodule and can bundle skills, commands, agents,
+scripts, templates, MCP config, and install metadata.
+
+Use `skills` for broad standalone workflows. Use a plugin when a category grows
+into a product-like bundle, typically 3+ related skills or any need for
+commands, agents, scripts, templates, or marketplace install UX. This follows
+the Anthropic/OpenAI pattern: skills are reusable workflows, plugins are
+installable bundles, and marketplaces are catalogs of plugins.
+
+When adding a plugin: create/update the plugin repo first, update the `plugins`
+registry pointer/marketplace manifests second, then update the mono `plugins`
+submodule pointer last. Do not move existing public skills into plugins without
+an explicit migration plan, because agents and sandboxes may depend on current
+`skills` repo paths.
+
 ## Design System
 
 **Read `DESIGN.md` before building or modifying any UI across any submodule.**
