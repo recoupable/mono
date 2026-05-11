@@ -1,5 +1,38 @@
 # PROGRESS.md
 
+> Last updated: 2026-05-10
+
+## [2026-05-10] `getting-started` skill upgraded to onboarding orchestrator
+
+**Prompt:** Turn `getting-started` into a real onboarding orchestrator — add state detection (auth, orgs, artists, workspace filesystem) and a routing handoff to `setup-sandbox`, `create-artist`, or `artist-workspace` based on the detected state.
+**Status:** completed (pushed to `feat/unified-marketplace` as commit `d2d33ef`)
+**Changes:**
+
+- skills (`feat/unified-marketplace`): rewrote `skills/getting-started/SKILL.md` (256 lines, +183/-54) into a 5-step orchestrator. Step 0 detects env + auth + CLI + filesystem; Steps 1-2 install the CLI + create an API key only when needed; Step 3 verifies auth via `/api/whoami`; Step 4 fetches roster (orgs + artists per org) and inspects scaffold state; Step 5 routes to one of `create-artist`, `setup-sandbox`, `artist-workspace`, or asks the user when ambiguous. Also adds a throwaway-account warning when `$EMAIL` matches `agent+*@recoupable.com` (mirrors the caveat in `create-artist`).
+
+**PRs:** branch updated at <https://github.com/recoupable/skills/tree/feat/unified-marketplace> — same PR URL as the unified-marketplace branch.
+**Notes:** No new env vars, endpoints, or infrastructure. Uses existing `RECOUP_API_KEY` / `RECOUP_ACCESS_TOKEN` / `RECOUP_ACCOUNT_ID` / `RECOUP_ORG_ID` env contract from `recoup-api` and `setup-sandbox`, and existing `/api/whoami`, `/api/organizations`, `/api/organizations/{id}/artists` endpoints. Handles both target user journeys: BYOA (`developers.recoupable.com` paste-prompt onboarding) and Recoup-hosted (`chat.recoupable.com` injected-token sandbox). Validator (`scripts/validate-manifests.py`) passes.
+
+## [2026-05-10] Unified recoupable/skills marketplace (research + branch)
+
+**Prompt:** Consolidate `recoupable/skills`, `recoupable/plugins`, and `recoupable/music-catalog-diligence` into one manageable repo (`recoupable/skills`) that serves as a multi-agent marketplace for Claude Code, Codex, and Cursor.
+**Status:** completed (research + branch published; merge + legacy-repo archival are follow-ups)
+**Changes:**
+
+- mono: Added `SCRATCHPAD.md` with full research + refactor plan (`anthropics/skills`, `anthropics/claude-plugins-official`, `mvanhorn/last30days-skill`, Codex plugin docs).
+- skills (`feat/unified-marketplace` branch, commit `3fc497a`): Converted the repo into a unified marketplace + plugin host.
+  - Added `marketplace.source.json` single source of truth.
+  - Added `scripts/generate-marketplaces.py` (zero-dep Python) that generates `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, and `.cursor-plugin/marketplace.json`.
+  - Added `scripts/validate-manifests.py` and `.github/workflows/validate.yml` so CI verifies marketplace parity, plugin paths, plugin manifests, and skill frontmatter on every PR.
+  - Merged `recoupable/music-catalog-diligence` in via `git subtree add --prefix=plugins/music-catalog-diligence` (full history preserved at `a95f3dc`).
+  - Removed legacy root `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json` — superseded by the `recoupable-skills` virtual plugin entry in the marketplace.
+  - Rewrote `README.md`, `AGENTS.md`, and `contributing.md`; added `CHANGELOG.md`.
+
+**PRs:** branch pushed to <https://github.com/recoupable/skills/tree/feat/unified-marketplace> — open with `https://github.com/recoupable/skills/pull/new/feat/unified-marketplace`.
+**Notes:** No skill paths under `skills/` changed, so existing manual-clone consumers keep working. Hybrid pattern used: virtual plugin (`recoupable-skills` over `./skills/*`, Anthropic `anthropics/skills` style) + self-contained plugin (`music-catalog-diligence` under `./plugins/`, Anthropic `claude-plugins-official` style). After merging, follow-ups are: (1) archive `recoupable/plugins` and `recoupable/music-catalog-diligence`, (2) drop the `plugins` submodule from `mono/.gitmodules`, (3) update sandbox/Trigger.dev installers to point at `recoupable/skills`. The mono submodule pointer for `skills` was NOT touched — current `mono/skills/` still points at the pre-branch `main` commit.
+
+---
+
 > Last updated: 2026-04-14
 
 ---
