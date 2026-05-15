@@ -1,6 +1,23 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-14
+> Last updated: 2026-05-15
+
+---
+
+## [2026-05-15] Plugins/Marketplace — rename submodule to recoup-catalog-deals, registry to recoup-marketplace, version bump 0.2.0
+**Prompt:** Rename plugin GitHub repo (twice — to catalog-deals-plugin then to recoup-catalog-deals), rename registry GitHub repo to marketplace, bump plugin version, align all naming touchpoints
+**Status:** completed
+**Changes:**
+- recoup-catalog-deals (formerly music-catalog-diligence): pulled in upstream rebrand (new recoup-catalog-* commands, dashboard/report skills, validators, golden fixtures, hooks); fixed `repository` URLs in 3 plugin manifests + README; bumped version 0.1.0 → 0.2.0
+- marketplace (formerly plugins): renamed submodule folder + `.gitmodules` section, both marketplace JSONs, README install commands, AGENTS.md; bumped owner/author from "Recoupable" → "Recoup" and `developerName`; marketplace `name` field "recoupable-plugins" → "recoup-marketplace"; bumped plugin entry version to 0.2.0; submodule pointer bumped d91c4cf → c0e3d8d through three sequential PRs
+- mono: renamed `plugins/` folder → `marketplace/`, updated `.gitmodules` (section, path, URL), fixed internal git plumbing (.git/modules/plugins → .git/modules/marketplace and sub-submodule worktree paths), bumped marketplace submodule pointer ccaf610 → c0e3d8d
+**PRs:**
+- https://github.com/recoupable/recoup-catalog-deals/pull/1 (URL hygiene, merged)
+- https://github.com/recoupable/recoup-catalog-deals/pull/2 (version bump, merged)
+- https://github.com/recoupable/marketplace/pull/3 (submodule + Recoupable→Recoup rename, merged)
+- https://github.com/recoupable/marketplace/pull/4 (registry rename + version bump, merged)
+- This PR: mono superrepo folder rename + pointer bump
+**Notes:** Existing Cowork/Claude Code installs of the old `recoupable-plugins` marketplace will need to remove + re-add as `recoupable/marketplace` and reinstall the plugin (both marketplace identity and plugin name changed). All five aligned-naming touchpoints from the plugins repo's AGENTS.md now consistent on `recoup-catalog-deals` and `recoup-marketplace`. LICENSE inside recoup-catalog-deals still says "Recoupable Inc." — left intact pending confirmation that the legal entity name actually changed (vs. just the brand).
 
 ---
 
