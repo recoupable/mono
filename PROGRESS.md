@@ -1003,3 +1003,17 @@ chat (frontend) → api (backend) → Supabase (database)
 - mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
 **PRs:** pending (branch: feat/add-open-agents-submodule)
 **Notes:** Submodule pinned to current `open-agents` main HEAD.
+
+---
+
+## [2026-05-15] Rename catalog plugin to recoup-catalogs-plugin
+**Prompt:** Track upstream GitHub rename of recoup-catalog-deals → recoup-catalogs-plugin across the marketplace and plugin submodule
+**Status:** completed
+**Changes:**
+- `marketplace/recoup-catalogs-plugin` (plugin submodule): String-replaced `recoup-catalog-deals` → `recoup-catalogs-plugin` in 3 plugin manifests, README, hooks prompt, _helpers docstring, requirements header, and demo data-room README
+- `marketplace`: Renamed submodule via `git mv`, updated `.gitmodules` section name + URL, fixed both registry JSONs (`.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json`) and root README; advanced submodule pointer to plugin's new commit
+- `marketplace` git internals: Renamed `.git/modules/marketplace/modules/recoup-catalog-deals` → `recoup-catalogs-plugin`, updated gitlink, removed stale `[submodule "recoup-catalog-deals"]` section from `.git/modules/marketplace/config`, ran `git remote set-url origin` inside the submodule
+**PRs:**
+- plugin: https://github.com/recoupable/recoup-catalogs-plugin/pull/3
+- marketplace: bundled into existing PR #8 on branch `feat/add-recoup-research-plugin` (commit cc1c140)
+**Notes:** Plugin PR must merge before marketplace PR so the recorded submodule SHA exists on plugin's main. Untracked skill copies inside `recoup-content-plugin` and `recoup-research-plugin` submodules are unrelated WIP and were intentionally left out of this commit.
