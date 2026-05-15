@@ -1017,3 +1017,16 @@ chat (frontend) → api (backend) → Supabase (database)
 - plugin: https://github.com/recoupable/recoup-catalogs-plugin/pull/3
 - marketplace: bundled into existing PR #8 on branch `feat/add-recoup-research-plugin` (commit cc1c140)
 **Notes:** Plugin PR must merge before marketplace PR so the recorded submodule SHA exists on plugin's main. Untracked skill copies inside `recoup-content-plugin` and `recoup-research-plugin` submodules are unrelated WIP and were intentionally left out of this commit.
+
+---
+
+## [2026-05-15] recoup-content-plugin quick wins (0.2.0)
+**Prompt:** Make the content plugin better — propose ROI-ranked improvements and execute the top tier
+**Status:** completed
+**Changes:**
+- `marketplace/recoup-content-plugin` (plugin submodule): Added anchor command `commands/recoup-content-create.md`; created `references/short-video-manual.md` and `references/song-sourcing.md`; trimmed `skills/short-video/SKILL.md` from ~265 lines to ~85 (progressive disclosure into references); rewrote README — dropped "starter skeleton" framing, added Commands/Skills tables, Getting started example, honest layout + roadmap; bumped version 0.1.0 → 0.2.0 in all three manifests; removed dangling `agents` key from `.cursor-plugin/plugin.json`
+- `marketplace`: Bumped recoup-content-plugin version 0.1.0 → 0.2.0 in both registry JSONs and advanced submodule pointer
+**PRs:**
+- plugin: https://github.com/recoupable/recoup-content-plugin/pull/1
+- marketplace: bundled into existing PR #8 on branch `feat/add-recoup-research-plugin` (commit 26915c3)
+**Notes:** Behavior unchanged — pure surface-area + organization work. Plugin PR must merge before marketplace PR so the registry's submodule SHA exists on plugin's main. Roadmap items left for follow-ups: `/recoup-content-templates`, `/recoup-content-demo`, env + completion hooks.
