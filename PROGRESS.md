@@ -1,6 +1,23 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-14
+> Last updated: 2026-05-15
+
+---
+
+## [2026-05-15] Plugins/Marketplace — rename submodule to recoup-catalog-deals, registry to recoup-marketplace, version bump 0.2.0
+**Prompt:** Rename plugin GitHub repo (twice — to catalog-deals-plugin then to recoup-catalog-deals), rename registry GitHub repo to marketplace, bump plugin version, align all naming touchpoints
+**Status:** completed
+**Changes:**
+- recoup-catalog-deals (formerly music-catalog-diligence): pulled in upstream rebrand (new recoup-catalog-* commands, dashboard/report skills, validators, golden fixtures, hooks); fixed `repository` URLs in 3 plugin manifests + README; bumped version 0.1.0 → 0.2.0
+- marketplace (formerly plugins): renamed submodule folder + `.gitmodules` section, both marketplace JSONs, README install commands, AGENTS.md; bumped owner/author from "Recoupable" → "Recoup" and `developerName`; marketplace `name` field "recoupable-plugins" → "recoup-marketplace"; bumped plugin entry version to 0.2.0; submodule pointer bumped d91c4cf → c0e3d8d through three sequential PRs
+- mono: renamed `plugins/` folder → `marketplace/`, updated `.gitmodules` (section, path, URL), fixed internal git plumbing (.git/modules/plugins → .git/modules/marketplace and sub-submodule worktree paths), bumped marketplace submodule pointer ccaf610 → c0e3d8d
+**PRs:**
+- https://github.com/recoupable/recoup-catalog-deals/pull/1 (URL hygiene, merged)
+- https://github.com/recoupable/recoup-catalog-deals/pull/2 (version bump, merged)
+- https://github.com/recoupable/marketplace/pull/3 (submodule + Recoupable→Recoup rename, merged)
+- https://github.com/recoupable/marketplace/pull/4 (registry rename + version bump, merged)
+- This PR: mono superrepo folder rename + pointer bump
+**Notes:** Existing Cowork/Claude Code installs of the old `recoupable-plugins` marketplace will need to remove + re-add as `recoupable/marketplace` and reinstall the plugin (both marketplace identity and plugin name changed). All five aligned-naming touchpoints from the plugins repo's AGENTS.md now consistent on `recoup-catalog-deals` and `recoup-marketplace`. LICENSE inside recoup-catalog-deals still says "Recoupable Inc." — left intact pending confirmation that the legal entity name actually changed (vs. just the brand).
 
 ---
 
@@ -986,3 +1003,30 @@ chat (frontend) → api (backend) → Supabase (database)
 - mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
 **PRs:** pending (branch: feat/add-open-agents-submodule)
 **Notes:** Submodule pinned to current `open-agents` main HEAD.
+
+---
+
+## [2026-05-15] Rename catalog plugin to recoup-catalogs-plugin
+**Prompt:** Track upstream GitHub rename of recoup-catalog-deals → recoup-catalogs-plugin across the marketplace and plugin submodule
+**Status:** completed
+**Changes:**
+- `marketplace/recoup-catalogs-plugin` (plugin submodule): String-replaced `recoup-catalog-deals` → `recoup-catalogs-plugin` in 3 plugin manifests, README, hooks prompt, _helpers docstring, requirements header, and demo data-room README
+- `marketplace`: Renamed submodule via `git mv`, updated `.gitmodules` section name + URL, fixed both registry JSONs (`.agents/plugins/marketplace.json`, `.claude-plugin/marketplace.json`) and root README; advanced submodule pointer to plugin's new commit
+- `marketplace` git internals: Renamed `.git/modules/marketplace/modules/recoup-catalog-deals` → `recoup-catalogs-plugin`, updated gitlink, removed stale `[submodule "recoup-catalog-deals"]` section from `.git/modules/marketplace/config`, ran `git remote set-url origin` inside the submodule
+**PRs:**
+- plugin: https://github.com/recoupable/recoup-catalogs-plugin/pull/3
+- marketplace: bundled into existing PR #8 on branch `feat/add-recoup-research-plugin` (commit cc1c140)
+**Notes:** Plugin PR must merge before marketplace PR so the recorded submodule SHA exists on plugin's main. Untracked skill copies inside `recoup-content-plugin` and `recoup-research-plugin` submodules are unrelated WIP and were intentionally left out of this commit.
+
+---
+
+## [2026-05-15] recoup-content-plugin quick wins (0.2.0)
+**Prompt:** Make the content plugin better — propose ROI-ranked improvements and execute the top tier
+**Status:** completed
+**Changes:**
+- `marketplace/recoup-content-plugin` (plugin submodule): Added anchor command `commands/recoup-content-create.md`; created `references/short-video-manual.md` and `references/song-sourcing.md`; trimmed `skills/short-video/SKILL.md` from ~265 lines to ~85 (progressive disclosure into references); rewrote README — dropped "starter skeleton" framing, added Commands/Skills tables, Getting started example, honest layout + roadmap; bumped version 0.1.0 → 0.2.0 in all three manifests; removed dangling `agents` key from `.cursor-plugin/plugin.json`
+- `marketplace`: Bumped recoup-content-plugin version 0.1.0 → 0.2.0 in both registry JSONs and advanced submodule pointer
+**PRs:**
+- plugin: https://github.com/recoupable/recoup-content-plugin/pull/1
+- marketplace: bundled into existing PR #8 on branch `feat/add-recoup-research-plugin` (commit 26915c3)
+**Notes:** Behavior unchanged — pure surface-area + organization work. Plugin PR must merge before marketplace PR so the registry's submodule SHA exists on plugin's main. Roadmap items left for follow-ups: `/recoup-content-templates`, `/recoup-content-demo`, env + completion hooks.
