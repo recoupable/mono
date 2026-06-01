@@ -1,6 +1,41 @@
 # PROGRESS.md
 
-> Last updated: 2026-04-14
+> Last updated: 2026-05-21
+
+---
+
+## [2026-05-29] Sales deck testimonial extraction
+**Prompt:** Find saved customer conversation transcripts and extract testimonials/proof points for a sales deck.
+**Status:** completed
+**Changes:**
+- strategy: Read transcript and strategy docs to identify deck-ready customer/advisor quotes and case-study proof points; no source files changed.
+**PRs:** none
+**Notes:** Strongest sources found: `strategy/transcripts/bak-lunch-learn-2026-04-08.md`, `strategy/transcripts/sid-sweets-2026-04-10.md`, `strategy/transcripts/jules-sid-2026-04-10.md`, `strategy/customers.md`, `strategy/investor-memo.md`, `.local/customers/rostrum/rostrum-export-11-21/INSIGHTS.md`, and `.local/founder/transcripts/tomas-ward.md`; `.local` is ignored by indexed search tools and required a direct local scan.
+
+---
+
+## [2026-05-21] Marketing — book-shelf hero + multi-pass landing page cleanup
+
+**Prompt:** Multi-session iteration: bento upgrade for "In the box", then a book-shelf "skill packs" hero (Micro-inspired), then continue editing against the scratchpad review.
+
+**Status:** completed (local commits, push pending)
+
+**Changes:**
+- marketing: **bento rebuild** in `app/page.tsx` — replaced 6 identical text cards with a real asymmetric bento (Content as a wide dark feature card with 3×2 gradient tiles; Artist context with a mock profile chip; Catalog data with a 3-row royalty table; Research with a 50-dot constellation; Diligence with a 3-up pixel-font financial readout; Guardrails with a 4-row permission UI alternating auto/ask states)
+- marketing: **logo strip** — removed Seeker Music and replaced the old rasterized Atlantic Records SVG with a clean public-domain vector from Wikimedia; bumped Atlantic's max-h to `7/8` so the square logo balances the wordmarks
+- marketing: **announcement bar** — new `components/layout/AnnouncementBar.tsx` above the nav inside the existing fixed header, with an "OPEN SOURCE" pill on the left and a CSS marquee scrolling the 6 skill slugs + install line; respects `prefers-reduced-motion`, pauses on hover; uses `.animate-marquee` keyframes added to `app/globals.css`
+- marketing: **hero — book-shelf "skill packs"** — replaced text-only hero with an interactive book-shelf: 1 forward-facing featured book + 4 spines, each `<motion.button>` with `layout` animation so clicking a spine smoothly promotes it to the featured slot while the previous feature slides to its old position; install command card below updates per active pack (Diligence, A&R, Content, Operator, Fan); cycling pixel headline animation + HeroDemo component removed
+- marketing: **section reorder per scratchpad recommended page order** — pull quote moved up from between Architecture/How-it-works to right after Problem section; pricing slimmed from 3 cards to 2 (API + Services) with a "Beyond the free skills" eyebrow — Skills card removed because the hero now sells Skills with per-pack install commands
+- marketing: **pull quote rewrite** — dropped the orphan "five minutes" claim and hedge language; new copy: "Cut it down to minutes and it changes how we buy."
+- marketing: **copy fixes per scratchpad** — bento Catalog data "in one place your agent can read" → "structured and ready to query"; How it works step 2 named "Google Drive, Spotify for Artists, and Slack" instead of "tools your team already pays for"; Proof "shipped against a real roster before it shipped here" → "earned its keep on a real roster first"; final CTA gets eyebrow "Or install everything" so it positions as the alternative to the hero's pack picker
+- marketing: **footer identity** — updated to "An open source AI lab for the music industry. Skills, APIs, and custom builds."
+- marketing: **stat bar removed** entirely (user removed Fat Beats stat then asked to remove the whole bar); `stats` reveal ref removed
+- marketing: cleaned up unused imports (`Package`, `HeroDemo`) and reduced `priceC = useStagger(3)` → `useStagger(2)` to match the 2-card pricing
+- marketing: verified `pnpm build` passes
+
+**PRs:** PR #17 (branch `feat/agent-layer-positioning`) — multiple commits accumulating, awaiting push
+
+**Notes:** `marketing/scratchpad.md` is the source of truth for what was reviewed; most recommendations executed. The hero now firmly plants "Free skill packs for the music industry" as the company spine, the pull quote validates the problem instead of dangling between sections, pricing reads as "what comes after the free skills" rather than competing with the hero, and orphan jargon (sacred rules, 80% pass, A&R, Drive, ship, etc.) has been replaced with plain language throughout.
 
 ---
 

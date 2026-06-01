@@ -215,7 +215,6 @@ In sandbox environments, `pushAndCreatePRsViaAgent` pushes `PROGRESS.md` directl
 
 ## Branding
 
-- **Primary color**: `#345A5D`
 - **Support email**: `agent@recoupable.com`
 - **App URL**: `https://chat.recoupable.com`
 - **Website**: `https://recoupable.com`
