@@ -4,6 +4,21 @@
 
 ---
 
+## [2026-06-01] Marketing userjourney fixes — P0–P2 shipped
+**Prompt:** "Fix everything" from the userjourney.md audit backlog.
+**Status:** completed
+**Changes:**
+- marketing: open-tools shelf (`app/page.tsx` §7) now maps to REAL `recoupable/skills` folders with per-card GitHub links + one working `npx skills add recoupable/skills`; removed 5 fabricated 404 install commands and the IP-leak "engagements sharpen our skills" line
+- marketing: `/company/recoup-records` rebuilt from a 3-sentence stub into a real dogfooding proof page (each "runs on" card → a real skill; no fabricated metrics); `/records` 301→`/company/recoup-records`, stub deleted
+- marketing: ownership + no-train stated in hero microline and a new `/consulting` FAQ; new `/trust` governance page + footer link, linked from shelf
+- marketing: new `/partners` page (embed/OEM, API+MCP, co-built, usage/rev-share, who-pays-for-tokens); `/platform` CTA → `/partners` (was the consumer chat app); footer Partners link
+- marketing: Platform + Pricing promoted into header (`lib/nav.ts`); Build §6 got docs + partnerships CTAs and a plain-English MCP line; pull quote wired to `/audit`; no-code on-ramp added to shelf
+- marketing: X handle `recaboreal`→`recoupable` (`lib/config.ts`); STATUS.md + userjourney.md updated with the fix log
+**PRs:** https://github.com/recoupable/marketing/pull/20 (→ marketing/main; same branch as v1)
+**Notes:** `pnpm build` green; `/partners` + `/trust` prerender static; `/records` now a redirect. Deliberately NOT fabricated: attributed testimonial, catalog/royalty demo numbers, logo links (no per-logo URLs). Broader content-route consolidation (`/learn`÷`/resources`÷`/results`÷`/playbook`, `/platform`÷`/solutions`) left to avoid breaking inbound links. Branch `feat/research-consulting-site`.
+
+---
+
 ## [2026-06-01] Marketing repositioning v1 — shipped (research + consulting)
 **Prompt:** Ship a v1 of the research+consulting homepage reposition; create a new branch.
 **Status:** completed
