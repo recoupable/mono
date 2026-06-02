@@ -1,6 +1,33 @@
 # PROGRESS.md
 
-> Last updated: 2026-05-21
+> Last updated: 2026-06-01
+
+---
+
+## [2026-06-01] Marketing repositioning v1 — shipped (research + consulting)
+**Prompt:** Ship a v1 of the research+consulting homepage reposition; create a new branch.
+**Status:** completed
+**Changes:**
+- marketing: rewrote `app/page.tsx` to the locked storyboard (H-text hero, logos, Research/Build/Partner lanes, research split, problem/gap, dark build band, open-tools shelf reframed from "skill packs", consulting band, anon quote, Records proof, final CTA)
+- marketing: `lib/nav.ts` + `Header.tsx` → B+ nav (Research external + Consulting); removed Sign In/Sign Up; header CTA "Talk to us" → /consulting
+- marketing: `Footer.tsx` restructured (Work with us / Build / Company) + new tagline
+- marketing: `lib/config.ts` added `researchUrl` + updated tagline/default metadata; `next.config.ts` 301 /advisory→/consulting; removed stale advisory FAQ on /consulting
+- marketing: STATUS.md + plan.md updated to shipped/as-built
+**PRs:** https://github.com/recoupable/marketing/pull/20 (→ marketing/main)
+**Notes:** Built leaner than full storyboard — deferred to v1.1: recent-research dated cards, themed research rails, 3 work tiles; reconcile stale /blog + /resources vs external research.recoupable.com. `pnpm build` + `tsc --noEmit` clean. Branch `feat/research-consulting-site` (off origin/main). Dev "1 Issue" badge is pre-existing theme-hydration debug, not from this work.
+
+---
+
+## [2026-06-01] Marketing site repositioning — plan only (no code yet)
+**Prompt:** Persist session context; archive/replace scratchpad; in-depth plan before executing research+consulting homepage reposition
+**Status:** partial (planning complete, implementation not started)
+**Changes:**
+- marketing: `scratchpad-2026-04-landing-audit.md` archived prior landing audit; new `scratchpad.md` session hub
+- marketing: `content/brand/positioning-brief.md` — research/build/partner spine from May discovery calls
+- marketing: `docs/plans/2026-06-01-research-consulting-site.md` — phased implementation plan + cherry-pick matrix
+- marketing: `content/STATUS.md` — focus = repositioning, pointers to plan
+**PRs:** none
+**Notes:** Learnings consolidated in `marketing/scratchpad.md`; `marketing/plan.md` synced (Every reference, B+/H2/OS-B/v0.2 defaults, provisional §4 votes). Blocked on Sid confirm of defaults before `feat/research-consulting-site`.
 
 ---
 
