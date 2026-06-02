@@ -1,6 +1,104 @@
 # PROGRESS.md
 
-> Last updated: 2026-06-01
+> Last updated: 2026-06-02
+
+---
+
+## [2026-06-02] Replace Silkscreen bitmap font with site-standard `font-pixel`
+**Prompt:** "/audit — stop using this font!" (chunky Silkscreen bitmap headline).
+**Status:** completed
+**Changes:**
+- marketing: `app/audit/page.tsx` — h1 + 3 trust labels swapped from inline `var(--font-bitmap)` (Silkscreen) to the `font-pixel` class (Geist Pixel Square), matching `/consulting`/`/trust`. Dropped `font-bold` + inline `fontFamily`.
+- marketing: `components/blog/BlogCTA.tsx` — same swap on the CTA `h3`.
+- marketing: `app/layout.tsx` — removed now-dead `Silkscreen` import, its `--font-bitmap` font def, and its variable from the `<html>` class (font no longer loaded).
+**PRs:** none yet (local; not committed)
+**Notes:** Silkscreen (`--font-bitmap`) was the only outlier font — every other page already used `font-pixel`. Verified visually on :3000 `/audit` (HMR picked it up: headline now renders in Geist Pixel Square). `pnpm lint` 0 errors, `tsc --noEmit` clean. Remaining `Silkscreen`/`font-bitmap` hits are stale `.next/` build cache only.
+
+## [2026-06-02] Fix broken `pnpm lint` + internal `/consulting` research CTA
+**Prompt:** Fix both — the broken lint script and the `/consulting` CTA still pointing at the external research URL.
+**Status:** completed
+**Changes:**
+- marketing: added `.eslintrc.json` (`extends: next/core-web-vitals`, ignores `.next/`, `node_modules/`, `public/`, configs) — there was **no** ESLint config at all, the root cause of the broken script. Next 16 removed the `next lint` subcommand (it parses `lint` as a project dir), so switched `package.json` `lint` script from `next lint --fix` → `eslint . --fix`.
+- marketing: `app/consulting/page.tsx` — closing CTA "Read our research" now links internal `/research` (was `siteConfig.researchUrl`, external, `target=_blank`); swapped `ArrowUpRight`→`ArrowRight` and dropped the now-unused `ArrowUpRight` import.
+**PRs:** none yet (local; not committed)
+**Notes:** `pnpm lint` now exits 0 (1 pre-existing `<img>` warning in `app/page.tsx`, no errors). `tsc --noEmit` clean. `siteConfig` import retained — still used for `CONTACT` mailto.
+
+## [2026-06-02] Bring 5 off-design pages onto the design system
+**Prompt:** Fix (or remove) Trust & Governance, Vision, About, Partners, recoup-records so they match the design.
+**Status:** completed
+**Changes:**
+- marketing: `app/trust/page.tsx` — full rebuild off the `/consulting` language (pixel hero + eyebrow, pixel `h2`, 6 principle cards in a `rounded-2xl` shadow-as-border grid with pixel category labels, `--muted/40` closing band). Was a flat `font-bold` serif doc.
+- marketing: `app/partners/page.tsx` — full rebuild: pixel hero, section eyebrows + pixel `h2`, `rounded-2xl` card grids (audiences + models), FAQ-style `<details>` commercials, dark `dark-section-cta` closing. Was old `font-bold` + `font-bitmap` + `rounded-xl` system.
+- marketing: `app/company/recoup-records/page.tsx` — rebuild: `<main>` wrapper, pixel `h1`, `rounded-2xl` skill cards (kept verifiable GitHub skill links + mono slugs), kept editorial `font-display` italic pull-quote in a `--muted/40` band with pill CTAs. Was `<div>` + `text-4xl font-bold` h1 + `rounded-xl`.
+- marketing: `app/company/vision/page.tsx` — already on-brand (pixel); added a closing CTA row (Work with us → /consulting, See how we dogfood it → /company/recoup-records) so it no longer dead-ends.
+- marketing: `app/company/about/page.tsx` — left as-is; already on-brand (pixel headline + shadow-as-border contact card closes the page).
+**PRs:** none yet (local; not committed)
+**Notes:** Verified all 5 visually on :3000 (hero + cards + closing for each). `pnpm build` passes clean — all 5 prerender as static `○`. Repo `pnpm lint` is broken independent of these changes (`next lint --fix`: `--fix` unsupported in this Next; bare eslint can't find flat config). Inline `boxShadow` warnings are the established DESIGN.md shadow-as-border pattern used across all pages. Known follow-up (out of scope): `/consulting` closing CTA still links `siteConfig.researchUrl` (external) — should be internal `/research` post-consolidation.
+
+## [2026-06-02] Fix Paragraph callout rendering in `/research` essays
+**Prompt:** Research callout box looked broken/off; verify it across all research posts.
+**Status:** completed
+**Changes:**
+- marketing: `lib/paragraph/helpers.ts` — `CALLOUT_ICON_SVG` now carries explicit `width="20" height="20"` (bare inline SVG was defaulting to a 300×150 replaced-element box, inflating box height + shoving text right)
+- marketing: `app/globals.css` — moved the callout paragraph/list/heading margin reset into `@layer utilities` (the typography plugin's `prose-lg p` margins live in `utilities`; a reset in `components` lost on **layer order**, not specificity). Added `0.75rem` gap between stacked callout blocks
+**PRs:** none yet (local; not committed)
+**Notes:** Verified on :3000 (light + dark): single callout in `install-marketplace-claude-desktop` now hugs content, icon+text aligned. Other 3 Paragraph posts (`open-labels`, `sandbox-for-record-labels`, `recoup-in-2026`) have 0 callouts. No leftover gated `callout-button` icons; remaining `rel=preload` links are legit (public papyrus cover image + dev HMR client). Lesson: in Tailwind v4, `@layer` order is resolved before specificity — a `components` rule can never beat a `utilities` rule.
+
+---
+
+## [2026-06-02] Consolidate Research subdomain into marketing app (`/research`)
+**Prompt:** "@blog is a separate web app — should it be separate?"
+**Status:** completed
+**Changes:**
+- marketing: ported the Paragraph.com pipeline into `lib/paragraph/` (`types.ts`, `api.ts`, `helpers.ts`) + new `lib/research.ts` registry handling both pipelines (Paragraph-synced essays + in-repo MDX in `content/research/`)
+- marketing: new routes `app/research/page.tsx` (index, ISR 1h) + `app/research/[slug]/page.tsx` (resolves slug → pipeline, renders via shared `components/research/ResearchArticle.tsx`; cards via `ResearchPostCard.tsx`)
+- marketing: `lib/seo.ts` `buildPostMetadata`/`buildPostJsonLd` now take a `pathPrefix` (default "blog") so research canonicals resolve under `/research/`
+- marketing: repointed Research nav (`lib/nav.ts`) + footer to internal `/research`; reciprocal blog↔research cross-links; added `/research` + all essay slugs to `sitemap.ts`
+- blog: added `redirects()` to `next.config.mjs` — `research.recoupable.com/blog/:slug` → `recoupable.com/research/:slug` (301), `/` + `/blog` → `/research`
+- marketing: wrote `docs/research-cutover.md` (301 URL map + Search Console + DNS checklist)
+**PRs:** none yet (local; not committed)
+**Notes:** Decision — consolidate to a subfolder for SEO authority + design consistency, keep `/blog` and `/research` as distinct cross-linked sections. `pnpm build` green: `/research` + 5 `/research/[slug]` prerendered (4 Paragraph + 1 MDX). Verified on :3000 — all 200, single `<title>` suffix (no doubling), live Paragraph body fetches, crosslinks render. Authoring workflow unchanged (add a row to `PARAGRAPH_RESEARCH` for new essays). Next: deploy `blog/` so subdomain 301s start serving, then submit updated sitemap.
+
+---
+
+## [2026-06-02] Marketing userjourney v3 — full-site subagent re-audit
+**Prompt:** "Do another customer pass with subagents. Really dig everything, then update the journey.md."
+**Status:** completed
+**Changes:**
+- marketing: dispatched 5 persona subagents (catalog-fund buyer, rights owner, platform lead, label GM, cold-visitor+link-audit), each traversing the **entire** live site (curl rendered HTML + source copy + per-link status checks), judging v2→v3
+- marketing: rewrote `userjourney.md` as a v1→v2→v3 comparison (avg **7.3 → 8.1**); per-persona v3 reports written to `docs/userjourney/v3/*.md`
+**PRs:** none (audit only — no code changed)
+**Notes:** Scores: catalog buyer 5→6, rights owner 8→9, platform lead 8→8, label GM 8→9, cold visitor 7.5→8.5. All 15 live pages 200; 11 legacy routes clean 308; 5 externals 200; 0×404; 41 links audited / 4 problems. **NEW verified bugs surfaced (not yet fixed):** (1) blog post `<title>` still doubles ("… | Recoup | Recoup") — last round's title fix only reached static pages, blog posts use `buildPostMetadata` + frontmatter `seo.title`; also Recoup/Recoupable inconsistency; (2) `/pricing` Implementation tier reads "Custom" while `/consulting` already states "$500"; (3) `/company` is a soft-orphan and `/audit` is missing from sitemap. **Persisting (homepage untouched by design):** §9 pull-quote → `/audit` bait-and-switch, Partner lane → `/consulting`, `/trust` not in header nav, tiny/unlinked hero ownership line, unlinked logos, no visible diligence artifact + no catalog-diligence skill on the shelf. v3 P0 backlog in `userjourney.md`.
+
+---
+
+## [2026-06-02] Marketing full visual traversal — every page on-brand
+**Prompt:** "The consulting page copy is still terrible — you're not traversing the whole site. Read/screenshot every section of every page. The website should be perfect; no sections missed, unread, or unfixed."
+**Status:** completed
+**Changes:**
+- marketing: rebuilt `/consulting` to the homepage design system + company-first copy — removed personal credentials ("10+ Platinum Records", "Produced for Beyoncé", "$2.5M") and the unreadable `--muted` body text; new hero "We implement AI inside your music business", engagement models, audiences (incl. distributors/platforms), why-us, FAQ, on-brand CTAs
+- marketing: rewrote `/platform` copy + page → "The music layer for agents" (open skills / API / MCP / integrations / chat) with `npx skills add recoupable/skills` install callout
+- marketing: rewrote `/pricing` → three ways to work (Open Free / Chat $19 / Implementation Custom); removed self-serve SaaS tiers + annual toggle; FAQs aligned
+- marketing: rewrote `/developers` copy + page (skills/API/MCP/CLI/docs + install callout); redesigned `/company`, `/company/about`, `/company/vision` to new system; updated company copy to "research lab + implementation partner" (killed "autonomous businesses run by AI")
+- marketing: fixed site-wide low-contrast bug — replaced `text-[var(--muted)]` (a surface token) with `text-[var(--muted-foreground)]` across `/trust`, `/partners`, `/advisory`, `/advisory/book`, BookingForm (25 instances)
+- marketing: scrubbed `/audit` — new on-brand headline, removed personal-credential trust signals + "500+" claim + hardcoded $2.5k/$10k prices + `/advisory`/`/playbook` links; results now route to `/consulting`/`/platform`/`/pricing`
+- marketing: **deleted** 11 dead off-brand SaaS-era pages + their 5 copy files + 2 orphan components (`/solutions`, `/results`, `/resources`, `/learn`(+`/demos`), `/calculator`, `/playbook`(+`/download`), `/advisory`(+`/book`+BookingForm), ROICalculator, PlaybookForm) — all carried personal credentials ("Grammy", "platinum", "Beyoncé", "$2.5M", "US patent"). `next.config.ts` redirects preserve inbound links (→ `/platform`/`/consulting`/`/company/recoup-records`/`/blog`/`/developers`); updated `lib/copy/index.ts` registry + `sitemap.ts` (dropped redirected URLs, added `/consulting` `/pricing` `/partners` `/trust`)
+- marketing: fixed site-wide **doubled page-title** SEO bug — every page hardcoded `| Recoup` AND the layout template appends `%s | Recoup` (tabs read "… | Recoup | Recoup"); stripped the redundant suffix from all 13 live pages
+- marketing: fixed `BlogCTA` (renders on `/blog` + every post) — removed "shipped 10+ platinum records" credential, dead "Free playbook" promise, and `/advisory` link → now company-first copy + `/consulting` CTA
+**PRs:** none yet (work on `feat/research-consulting-site`)
+**Notes:** `pnpm build` green; route list now contains only intentional on-brand pages. Visually verified in browser (DOM snapshot + screenshot): /consulting, /platform, /pricing, /developers, /company/about, /company/vision, /company/recoup-records, /partners, /blog, /audit, /trust all on-brand + readable; confirmed `/playbook`→`/platform` and `/calculator`→`/consulting` redirects live post-deletion. `grep` for platinum/Grammy/Beyoncé/patent/$2.5M across live `.tsx`/`.ts` = 0 hits. Known leftover: orphan `/api/book` route (harmless, no caller); `siteConfig` emails `hi@`/`support@` vs branding `agent@` (consistent site-wide, out of scope). Catalog-buyer diligence sample (v2 P1) still not built.
+
+---
+
+## [2026-06-02] Marketing userjourney v2 re-audit
+**Prompt:** "Do the same customer exercise again and rewrite userjourney.md — see if we improved."
+**Status:** completed
+**Changes:**
+- marketing: re-ran the 5-persona homepage walkthrough against the post-fix site; rewrote `userjourney.md` as a v1→v2 comparison (avg score 5.0→7.3, every persona up)
+- marketing: per-persona v2 reports written to `docs/userjourney/v2/*.md`; STATUS.md updated
+- analysis only — NO site code changed this pass
+**PRs:** none (docs only; lives on `feat/research-consulting-site`)
+**Notes:** Wins: rights owner 4→8 (ownership/no-train/`/trust` closed the core objection), label GM 6→8, platform 6→8, cold visitor 6→7.5. Laggard: catalog buyer 3→5. New v2 P0 backlog (near-free): (1) re-point homepage Partner lane `app/page.tsx:183` `/consulting`→`/partners`, (2) fix §9 pull-quote CTA — it sends catalog-diligence intent to `/audit`, a generic AI-readiness lead quiz (content mismatch, verified), (3) put `/trust` in header nav + enlarge/link the hero ownership line. Bigger P1: give the catalog buyer a visible diligence/income sample (the one thing keeping the highest-value buyer at 5/10). `/resources` still a live "Coming soon" stub; route sprawl unresolved.
 
 ---
 
