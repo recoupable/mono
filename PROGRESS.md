@@ -1161,3 +1161,15 @@ chat (frontend) → api (backend) → Supabase (database)
 - mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
 **PRs:** pending (branch: feat/add-open-agents-submodule)
 **Notes:** Submodule pinned to current `open-agents` main HEAD.
+
+---
+
+## [2026-06-03] Add research metrics cache refresh layer
+**Prompt:** Implement and commit the abstraction-level fix for slow SongStats metrics.
+**Status:** completed
+**Changes:**
+- api: Added metrics cache reads, cold-miss `202 refresh_pending`, stale-while-revalidate behavior, Supabase cache helpers, and a Vercel Workflow refresh step.
+- database: Added `research_cache_entries` migration for provider-scoped cached research payloads and refresh metadata.
+- docs: Documented the provider-neutral metrics `202 refresh_pending` response.
+**PRs:** api: https://github.com/recoupable/api/pull/635; docs: https://github.com/recoupable/docs/pull/232; database: https://github.com/recoupable/database/pull/29
+**Notes:** Root commit pins api/docs/database submodules to the pushed feature-branch commits; API tests/lint/build and docs validation passed in the submodules.
