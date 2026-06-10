@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-06-10] Open first PR wave for chat#1791 (Apify-first play counts)
+**Prompt:** Use the issue-implementation skill to open the PRs required for chat#1791.
+**Status:** partial
+**Changes:**
+- database: PR #31 — drop dead spotify_tracks/spotify_albums/social_spotify_* (YAGNI cleanup, zero refs anywhere)
+- database: PR #32 — measurement store: song_identifiers, song_measurements (append-only), songstats_quota_ledger, songstats_backfill_queue; all FK songs.isrc, house-style RLS/grants
+- docs: PR #238 — contract: GET /research/playcounts, POST /research/snapshots (202 + cost estimate, 429 cap), GET /research/playcounts/deltas; additive data_source/captured_at provenance on track-stats + historic-stats; mint validate passes
+- chat: #1791 updated with PR links + blocked-by notes on api items
+**PRs:** https://github.com/recoupable/database/pull/31, https://github.com/recoupable/database/pull/32, https://github.com/recoupable/docs/pull/238
+**Notes:** api PRs (stats rerouting, stitched historic, backfill workflow, snapshots+deltas) are blocked on database#32 merge (need regenerated database.types.ts) and docs#238 (contract). Worktrees database-worktree + docs-worktree left in place until merge. gh keychain auth is flaky in sandboxed shells — workaround: `export GH_TOKEN=$(gh auth token)` before gh write calls.
+
 ## [2026-06-10] Open tracking issue: Apify-first play counts, Songstats → budgeted backfill
 **Prompt:** Use the issue-management skill to create an issue for the Apify/Songstats API restructure discussed in the Rostrum baseline session.
 **Status:** completed
