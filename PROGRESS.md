@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-06-10] Open api#657 — Apify-first /track/stats (first api slice of chat#1791)
+**Prompt:** Start the first api PR; regenerate types via package.json script; strict TDD red-green per issue-implementation skill.
+**Status:** partial
+**Changes:**
+- api: PR #657 (base test) — track/stats serves spotify from song_measurements (TTL 24h via SPOTIFY_PLAYCOUNT_TTL_HOURS), whole-album actor refresh writing mapped siblings (raw_ref=run id), degrade-to-stale on actor failure, Songstats fallback + data_source labels; 7 units all RED->GREEN (24 tests); database.types.ts regenerated post #31/#32 (tsc delta 0, 198 pre-existing)
+- chat: #1791 item updated with PR link
+**PRs:** https://github.com/recoupable/api/pull/657 (open)
+**Notes:** Preview verification pending: fallback path testable now (needs preview-scoped key via POST /api/agents/signup — prod key 401s on preview); apify path needs song_identifiers seed rows (store empty until snapshots endpoint lands). Worktree api-playcount-worktree active. 198 pre-existing tsc errors on test branch are in unrelated test files (trigger payload drift).
+
 ## [2026-06-10] Merge database#32 — measurement store live; api work unblocked
 **Prompt:** Apply review fixes (lean style, snapshots table, data_source rename, ledger account attribution) and merge.
 **Status:** completed
