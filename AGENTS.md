@@ -16,7 +16,7 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `skills` | External, Recoupable's public skills repo, platform usage + domain knowledge for AI agents | Markdown |
 | `open-agents` | External, reference app for background coding agents on Vercel (web + agent workflow + sandbox) | Next.js, Turbo, Vercel Workflow, Vercel Sandbox |
 | `admin` | Internal, admin dashboard for platform management | Next.js, React, Supabase |
-| `tasks` | Internal, background job workers | Trigger.dev v4 |
+| `tasks` | Internal, background job workers — **deprecating in favor of Vercel Workflows inside `api`; don't add new jobs here** | Trigger.dev v4 |
 | `database` | Internal, database migrations | Supabase CLI |
 | `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
 | `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
@@ -124,7 +124,7 @@ npx mintlify@latest dev          # Preview docs locally
 
 ### Data Flow
 - **chat** (frontend) -> **api** (backend) -> **Supabase** (database)
-- **tasks** handles async background jobs triggered by the API
+- **tasks** handles existing async background jobs (Trigger.dev), but is deprecating — new background/scheduled work uses Vercel Workflows inside **api** (cron route → workflow)
 - **MCP Server**: api provides MCP tools (like `send_email`) used by chat
 
 ### API Endpoints
