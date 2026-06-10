@@ -1,8 +1,42 @@
 # PROGRESS.md
 
-> Last updated: 2026-06-02
+> Last updated: 2026-06-10
 
 ---
+
+## [2026-06-10] Open tracking issue: Apify-first play counts, Songstats → budgeted backfill
+**Prompt:** Use the issue-management skill to create an issue for the Apify/Songstats API restructure discussed in the Rostrum baseline session.
+**Status:** completed
+**Changes:**
+- chat: opened tracking issue chat#1791 — measurement store + source routing behind `/api/research/track/stats` + `/historic-stats`, Songstats demoted to quota-budgeted historic backfill worker, new snapshot/deltas endpoints; merge order docs → database → api → skills
+**PRs:** none (issue only: https://github.com/recoupable/chat/issues/1791)
+**Notes:** Full spec lives in strategy/recoup-rostrum-baseline/recoup-api-playcount-integration-spec.md; Apify validation numbers in apify-playcount-test-results.md. Snapshot #2 of the Rostrum portfolio due ~2026-07-09 for first run-rate deltas.
+
+## [2026-06-04] Verify api#635 SongStats migration on preview; docs↔api reconciliation
+**Prompt:** Get caught up on chat#1777; test api#635 on its preview; compare requests/responses to docs; open a docs PR to fix the discrepancy.
+**Status:** completed
+**Changes:**
+- api: verified api#635 (SongStats migration) end-to-end on the branch preview — minted a preview-scoped key via `POST /api/agents/signup` (prod key 401s on preview; PRIVY_PROJECT_SECRET is split prod/preview). All 16 SongStats endpoints exercised; Chartmetric strip already done in HEAD `4fb8760b`. Posted endpoint matrix + docs-diff (with update-docs-vs-update-api recommendation column) as PR comments.
+- docs: opened docs#233 — rewrote `research.json` `/research/*` 200 schemas to the SongStats shape (envelopes for lookup/profile/metrics/audience/track; shared SongstatsActivity for career/insights/milestones; SongstatsCatalogItem for albums/tracks; similar drops `total`; search `type` enum → artists/tracks/labels; rank documented as 501). `mint openapi-check` passes.
+- chat: logged the docs↔impl discrepancy as a concise Open item on chat#1777 (links docs#233).
+**PRs:** https://github.com/recoupable/docs/pull/233 (open). Verified: https://github.com/recoupable/api/pull/635 (open, not yet merged).
+**Notes:** Cross-checked impl against the official SongStats SDK (Songstats/songstats-python-sdk) — every endpoint/identifier/auth matches; SongStats has no rank route (so 501 is correct). One remaining **api-side** fix: `/research/playlists` returns a metric descriptor `{source, metric, scope, scope_options}` instead of placements — needs the `/artists/top_playlists` resolution call. `career`/`insights` are slow (transient 504 → 200 on retry). Base host: impl uses `api.songstats.com`, SDK default is `data.songstats.com` (impl works live; confirm it's a supported alias).
+
+## [2026-06-03] Ship chat#1768 — drop legacy artist 404 caller; promote test→main
+**Prompt:** Review/test/merge chat#1768; then merge test→main and sync test with main.
+**Status:** completed
+**Changes:**
+- chat: #1768 removes the legacy `GET /api/chats/{chatId}/artist` 404 caller; artist now resolved from `GET /api/sessions/{sessionId}` via `lib/sessions/getSessionById.ts` (zod-validated) + `useArtistFromChat`. Deleted `useArtistFromRoom`/`lib/chats/getChatArtist.ts` + the `/chat/:id` conversations-cache fallback. Added shared `lib/api/safeJsonParse.ts` (DRY, no `utils/`).
+**PRs:** https://github.com/recoupable/chat/pull/1768 (→test, squash-merged), https://github.com/recoupable/chat/pull/1778 (test→main)
+**Notes:** Verified on preview via Chrome DevTools — Bieber→Alex Paul switch fires (`GET /api/sessions/{id}` → `GET /api/chats?artist_account_id=…`), zero `/api/chats/{id}/artist`. Switch requires session `artist_id` non-null AND artist in roster; null `artist_id` (~24% of sessions) or orphaned/un-rostered artists correctly no-op (not regressed). test↔main content identical after sync. Remaining #1767 items: model-selector fix, stop button (chat#1770/api#590), /api/chat deprecation.
+
+## [2026-06-03] Add `writing-issues` skill
+**Prompt:** Create a skill on writing and maintaining issues based on chat#1747 and chat#1767.
+**Status:** completed
+**Changes:**
+- skills: new `skills/writing-issues/SKILL.md` — Recoupable house style for tracking issues (section anatomy, Open→Done closure-note lifecycle, Why/Fix/Done-when open-item format, link/evidence rules, pre-post checklist). Reverse-engineered from chat#1747 + chat#1767.
+**PRs:** https://github.com/recoupable/skills/pull/34
+**Notes:** Issues are always repo-scoped — skill documents the "one home repo links out to sibling repos" pattern for cross-repo work. PR targets skills `main`.
 
 ## [2026-06-02] Replace Silkscreen bitmap font with site-standard `font-pixel`
 **Prompt:** "/audit — stop using this font!" (chunky Silkscreen bitmap headline).
@@ -1161,3 +1195,12 @@ chat (frontend) → api (backend) → Supabase (database)
 - mono: Added `open-agents` entry to AGENTS.md submodule table (External, reference app for background coding agents on Vercel)
 **PRs:** pending (branch: feat/add-open-agents-submodule)
 **Notes:** Submodule pinned to current `open-agents` main HEAD.
+
+## [2026-06-02] Update + verify chat#1765 (drop legacy chat transport)
+**Prompt:** Check issue chat#1767; finish/verify the first to-do PR (chat#1765) and bring it up to date
+**Status:** completed
+**Changes:**
+- chat: Merged origin/test into feat/drop-legacy-chat-transport (was 1 commit behind; test==main, 0 divergence) and pushed (7233350d..5bc60e28)
+- chat: Addressed PR review (cc6f384f) — removed dead `/chat/` branch in isActiveChatRoomPath (PR makes /chat/{id} a 404 so it could never match); split lib/chat/chatPaths.ts into one-fn-per-file (getChatPath/getChatUrl/isActiveChatRoomPath) + mirrored tests per SRP; simplified useVercelChat to `const { chatId } = useParams<{ chatId?: string }>()` (KISS). tsc/lint/tests pass.
+**PRs:** https://github.com/recoupable/chat/pull/1765 (MERGED to test 2026-06-03 as squash 1a62de34; re-verified on cc6f384f preview before merge — behavior-preserving)
+**Notes:** Verified end-to-end on preview (chat-m9b4m5ont): legacy /chat/{id} now 404s (branded not-found); new chat → session-scoped URL /sessions/{id}/chats/{id}; transport POSTs /api/chat/workflow with sessionId+chatId+bearer; assistant streamed OK. Reviewer P1 (dead /chat/{id} producers) is STALE — useCreateArtistTool/generateTxtFileEmail now use getChatPath/getChatUrl. Observed dead GET /api/chats/{id}/artist 404×3 — that's the separate chat#1768 item, not this PR.
