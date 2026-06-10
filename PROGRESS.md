@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-06-10] Merge database#32 — measurement store live; api work unblocked
+**Prompt:** Apply review fixes (lean style, snapshots table, data_source rename, ledger account attribution) and merge.
+**Status:** completed
+**Changes:**
+- database: #32 squash-merged to main (17f3a20) — 5 tables: song_identifiers, playcount_snapshots, song_measurements (append-only), songstats_quota_ledger, songstats_backfill_queue; all review comments addressed in 0d741cb with per-thread replies
+- chat: #1791 database item moved to Done; api items marked unblocked
+- mono: database-worktree removed; database submodule on main @ 17f3a20
+**PRs:** https://github.com/recoupable/database/pull/32 (merged)
+**Notes:** Full pre-api train done (cleanup #31 ✅, docs #238 ✅, database #32 ✅). Next: api PRs in order — regenerate database.types.ts first, then /track/stats Apify-first, stitched historic-stats, backfill workflow, snapshots+deltas endpoints. Contract on developers.recoupable.com is the spec.
+
 ## [2026-06-10] Ship docs#238 — play-count contract live on developers.recoupable.com
 **Prompt:** Naming review + cross-links, then merge the docs contract PR.
 **Status:** completed
