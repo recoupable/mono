@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-06-10] Ship docs#238 — play-count contract live on developers.recoupable.com
+**Prompt:** Naming review + cross-links, then merge the docs contract PR.
+**Status:** completed
+**Changes:**
+- docs: #238 squash-merged to main (a156fec) — playcounts/snapshots/track-playcount-deltas endpoints + provenance fields; renames from naming review (album_id→spotify_album_id; /playcounts/deltas→/track/playcount-deltas); circular snapshots↔deltas description links
+- chat: #1791 docs item moved to Done (closure note); local docs submodule back on main
+**PRs:** https://github.com/recoupable/docs/pull/238 (merged)
+**Notes:** All 3 pages verified 200 on prod. Contract is locked — api implementation must match it. database#32 still open (next in train).
+
 ## [2026-06-10] Merge database#31 (drop 14 dead tables); file chat#1792 dead-code follow-up
 **Prompt:** Audit for more unused tables; extend + merge the drop PR; track dead chat code as a new issue.
 **Status:** completed
