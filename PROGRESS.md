@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-06-10] Merge database#31 (drop 14 dead tables); file chat#1792 dead-code follow-up
+**Prompt:** Audit for more unused tables; extend + merge the drop PR; track dead chat code as a new issue.
+**Status:** completed
+**Changes:**
+- database: #31 extended from 4 to 14 zero-ref tables (full-inventory audit: git grep -w x 8 submodules + RPC body scan) and squash-merged to main 2026-06-10
+- chat: #1792 opened — delete 6-file dead funnel island (+ trim types/Agent.tsx to SOCIAL), then drop the 11 tables + 3 RPCs it pins
+- chat: #1791 cleanup item moved to Done (closure note); types regen + tsc deferred to first api PR
+**PRs:** https://github.com/recoupable/database/pull/31 (merged)
+**Notes:** funnel_analytics/campaigns/fans/agents/agent_status NOT dropped yet — pinned by dead chat code, see #1792. database#32 + docs#238 still open.
+
 ## [2026-06-10] Open first PR wave for chat#1791 (Apify-first play counts)
 **Prompt:** Use the issue-implementation skill to open the PRs required for chat#1791.
 **Status:** partial
