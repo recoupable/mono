@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-06-11] Merge database#33; open api#662 — write path (snapshots Workflow + backfill worker)
+**Prompt:** Merge the claim RPC and build the write path.
+**Status:** partial
+**Changes:**
+- database: #33 merged (claim_songstats_backfill_rows, FOR UPDATE SKIP LOCKED)
+- api: PR #662 (base test) — POST /research/snapshots (202 + cost estimate, per-org cap 429, playcount_snapshots job rows) + playcountSnapshotWorkflow (chunked durable capture, shared writeAlbumPlayCounts DRYs stats refresh) + songstatsBackfillWorkflow (budget = limit-reserve-30d ledger, claim RPC, hit recorded win/lose, permanent songstats measurements) + daily cron /api/internal/playcount-maintenance (shared validateCronRequest; also re-runs due monthly snapshot series); 22 tests RED->GREEN; tsc -2 vs baseline
+**PRs:** https://github.com/recoupable/api/pull/662 (open)
+**Notes:** Snapshots are UNCHARGED (no 402 in contract; cap-gated) — pricing decision surfaced on the PR. Supabase CLI keychain fix: token is go-keyring-base64 wrapped (see memory). Preview verification in progress.
+
 ## [2026-06-11] Merge api#660 — read path to test
 **Prompt:** Confirm flat 5-credit pricing; merge the read-path PR.
 **Status:** completed
