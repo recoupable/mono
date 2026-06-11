@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-06-11] Ship api#662 — write path to prod; #1791 api surface COMPLETE
+**Prompt:** Round-2 preview verification (catalog path, write->read integration, pricing live); merge + promote.
+**Status:** completed
+**Changes:**
+- api: #662 squash->test (35ebe415), promoted via #663 test->main (merge commit), test synced (trees identical) — snapshots endpoint + workflow, backfill worker, daily cron ALL LIVE
+- chat: #1791 write-path items -> Done; only the catalog-value-estimator skill item remains open
+- mono: api-writepath-worktree removed; api submodule on main
+**PRs:** https://github.com/recoupable/api/pull/662 (merged), https://github.com/recoupable/api/pull/663 (release)
+**Notes:** First prod cron fires 07:00 UTC daily — backfill drain live-check (The Spins pending in queue, budget 900). Snapshots uncharged by design (pricing decision recorded on PR). Entire #1791 train shipped in 2 days: docs#238, database#31/#32/#33, api#657/#660/#662 + docs#239 reconciliation.
+
 ## [2026-06-11] Merge database#33; open api#662 — write path (snapshots Workflow + backfill worker)
 **Prompt:** Merge the claim RPC and build the write path.
 **Status:** partial
