@@ -13,6 +13,17 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** Blocker still open: prod COMPOSIO_API_KEY invalid (HTTP 10401) — nothing connector-related testable until rotated. Next on #1793: OAuth app registration (X tier + LinkedIn w_member_social), then api whitelist PR. Patrick to decide artist availability (proposal: twitter yes, linkedin label-only).
 
+## [2026-06-11] Ship the chat#1794 fix to prod (database#34 + api#664/#665)
+**Prompt:** Merge the fix train and promote.
+**Status:** completed
+**Changes:**
+- database: #34 merged (per-song uniqueness; lookup-based constraint drop after the named drop failed — inline constraints get Postgres-generated names)
+- api: #664 squashed to test (f8059dcf), promoted via #665 (content delta = the fix only; older range commits were squash-promotion artifacts), test synced (trees identical)
+- chat: #1794 api+database items -> Done with closure note (18/18 both albums, head-commit preview)
+- mono: api-bootstrap-worktree removed; submodule pointers current
+**PRs:** https://github.com/recoupable/database/pull/34, https://github.com/recoupable/api/pull/664, https://github.com/recoupable/api/pull/665 (all merged)
+**Notes:** Remaining on #1794: portfolio re-snapshot (570 albums ~$1.71 — self-maps the catalog), docs coverage-note edit, estimate.py upgrade. Stale-preview trap + tsc union-ordering false positives both recorded in memory/gates.
+
 ## [2026-06-11] chat#1794 round 2 — second root cause (album uniqueness) found + fixed
 **Prompt:** Verify api#664 on preview; debug why playcounts stayed 1/18.
 **Status:** partial (PRs open)
