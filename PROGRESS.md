@@ -13,6 +13,16 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-11] 570-album snapshot post-mortem -> api#666 (Spotify 429 backoff)
+**Prompt:** Other session fired the portfolio snapshot + estimate.py upgrade; I took the stalled-snapshot handoff.
+**Status:** partial (PR open)
+**Changes:**
+- Diagnosis: all 6 actor chunks SUCCEEDED ($1.71 banked); 4/6 chunks' Spotify mapping degraded on unretried 429s -> 420/~4,000 measurements. Confirmed via Apify run list + burst profiling.
+- api: PR #666 — Retry-After backoff in getTracks (3 retries/batch); recovery = one re-snapshot after merge (mapped tracks skip Spotify)
+- Also corrected the misdated songstats verification seed in prod (06-04 -> 06-09 as-of; delta now ~303M/yr vs Songstats TTM 320M) + posted the >=28d window / same-source guards on #1794
+**PRs:** https://github.com/recoupable/api/pull/666 (open)
+**Notes:** estimate.py upgrade was shipped by the parallel session (validated; TTM gates correctly as insufficient_window until ~July). Coordination: do NOT re-fire the snapshot until #666 merges. Possible future: tracks_mapped/tracks_seen on snapshot rows for partial-mapping visibility.
+
 ## [2026-06-11] Ship the chat#1794 fix to prod (database#34 + api#664/#665)
 **Prompt:** Merge the fix train and promote.
 **Status:** completed
