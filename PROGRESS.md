@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-06-11] Ship api#657 — Apify-first /track/stats to prod
+**Prompt:** Address review rounds (SRP/KISS/OCP/zod), re-verify on preview, merge + promote test->main.
+**Status:** completed
+**Changes:**
+- api: #657 squash->test (8b209dad), promoted via release PR #658 test->main (merge commit), test synced with main
+- api: review rounds produced — untouched passthrough + getTrackStatsApifyFirst orchestrator, trackStatsPayloadSchema (zod looseObject, parse-once at boundary), typed label transform, appendStatToPayload inlined (KISS), grants-free lean migrations style, supabase/.temp gitignored
+- chat: #1791 /track/stats item moved to Done; 4 minor track-stats docs gaps noted for the historic-stats docs reconciliation
+**PRs:** https://github.com/recoupable/api/pull/657 (merged), https://github.com/recoupable/api/pull/658 (release)
+**Notes:** Verification pattern that works: mint preview key via direct DB insert (hashApiKey pepper = PRIVY_PROJECT_SECRET), top credits_usage.remaining_credits. Songstats quota still 429 — store path is the only live source for Spotify counts right now. Next slice: /track/historic-stats stitched series (selectSongMeasurements already returns the full series).
+
 ## [2026-06-10] Open api#657 — Apify-first /track/stats (first api slice of chat#1791)
 **Prompt:** Start the first api PR; regenerate types via package.json script; strict TDD red-green per issue-implementation skill.
 **Status:** partial
