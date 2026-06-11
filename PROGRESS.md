@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-06-11] Merge api#660 — read path to test
+**Prompt:** Confirm flat 5-credit pricing; merge the read-path PR.
+**Status:** completed
+**Changes:**
+- api: #660 squash-merged to test (stitched historic, playcounts, deltas); awaiting test->main promotion
+- chat: #1791 historic item -> Done; snapshots item rescoped to write path only; unit economics section added earlier (Songstats hit ~$0.09 vs $0.05/call revenue — store paths are the only profitable ones)
+- mono: api-readpath-worktree removed
+**PRs:** https://github.com/recoupable/api/pull/660 (merged to test)
+**Notes:** Remaining on #1791: promote test->main when ready; write path (database claim-RPC -> snapshots Workflow + cron backfill worker); catalog-value-estimator skill update.
+
 ## [2026-06-11] Ship docs#239 — playcount docs reconciliation
 **Prompt:** Align docs with live api behavior for the playcount family; address review (KISS descriptions, declared 429s, 3.1 nullability, required 402 fields); merge.
 **Status:** completed (squash-merged 3da8e3f)
