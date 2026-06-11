@@ -4,9 +4,9 @@
 
 ---
 
-## [2026-06-11] Open docs#239 — playcount docs reconciliation
-**Prompt:** Align docs with live api behavior for the playcount family.
-**Status:** completed (PR open)
+## [2026-06-11] Ship docs#239 — playcount docs reconciliation
+**Prompt:** Align docs with live api behavior for the playcount family; address review (KISS descriptions, declared 429s, 3.1 nullability, required 402 fields); merge.
+**Status:** completed (squash-merged 3da8e3f)
 **Changes:**
 - docs: PR #239 — track-stats sourcing model + captured_at scoping + minimal envelope + 429 passthrough; historic-stats store-only spotify + enqueue; playcounts nullability inversion FIXED (isrc always present, spotify_track_id nullable) + always-null label/copyright honesty + mapped-only coverage; 402 documented on all 4 endpoints w/ real insufficient_credits body
 **PRs:** https://github.com/recoupable/docs/pull/239 (open)
