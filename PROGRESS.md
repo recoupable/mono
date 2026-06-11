@@ -11,7 +11,7 @@
 - database: #33 merged (claim_songstats_backfill_rows, FOR UPDATE SKIP LOCKED)
 - api: PR #662 (base test) — POST /research/snapshots (202 + cost estimate, per-org cap 429, playcount_snapshots job rows) + playcountSnapshotWorkflow (chunked durable capture, shared writeAlbumPlayCounts DRYs stats refresh) + songstatsBackfillWorkflow (budget = limit-reserve-30d ledger, claim RPC, hit recorded win/lose, permanent songstats measurements) + daily cron /api/internal/playcount-maintenance (shared validateCronRequest; also re-runs due monthly snapshot series); 22 tests RED->GREEN; tsc -2 vs baseline
 **PRs:** https://github.com/recoupable/api/pull/662 (open)
-**Notes:** Snapshots are UNCHARGED (no 402 in contract; cap-gated) — pricing decision surfaced on the PR. Supabase CLI keychain fix: token is go-keyring-base64 wrapped (see memory). Preview verification in progress.
+**Notes:** Snapshots UNCHARGED (no 402 in contract; cap-gated) — pricing decision surfaced on PR. Preview VERIFIED (results on PR): snapshot workflow end-to-end (202 -> queued -> done, lineaged measurement, $0.003 actor run), claim RPC SKIP LOCKED semantics live (no double-claim), budget math (900 = 1000-100-0). NOT live-run: cron trigger + songstats call (CRON_SECRET + SONGSTATS_API_KEY are sensitive vars — unreadable; first prod cron run 07:00 UTC is the final check, The Spins pending in queue). Gate lesson: compare tsc error LISTS not counts + run next build type phase (mock masked a wrong call signature; Vercel build caught it). All CI green after flaky-test rerun.
 
 ## [2026-06-11] Merge api#660 — read path to test
 **Prompt:** Confirm flat 5-credit pricing; merge the read-path PR.
