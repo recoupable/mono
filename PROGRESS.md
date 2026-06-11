@@ -13,6 +13,16 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-12] CLOSE chat#1794 — all fixed, customer-confirmed; docs#241 merged
+**Prompt:** Remove stray files from docs PR; merge docs#241; close out.
+**Status:** completed
+**Changes:**
+- docs: #241 squash-merged (5649e84) — self-mapping note live; stray files (laequis-card.png, linkedin-activity.json — swept by git add -A from another session's scratch) amended out before merge + removed from disk
+- chat: #1794 CLOSED — all items Done (3 root causes fixed, 100% portfolio coverage, customer-confirmed)
+- mono: docs submodule on main
+**PRs:** https://github.com/recoupable/docs/pull/241 (merged)
+**Notes:** Lesson: never git add -A in shared submodule dirs — add explicit paths (two stray files reached an open PR). Next arc: chat#1795 (campaign page).
+
 ## [2026-06-12] Customer confirms working; docs#241 opened; campaign-page issue filed
 **Prompt:** Customer confirmed all working; file the campaign-page issue.
 **Status:** completed
