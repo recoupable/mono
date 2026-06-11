@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-06-11] Open skills#41 — catalog-value-estimator on the new playcount surface
+**Prompt:** Work the last #1791 item: skill update.
+**Status:** partial (PR open)
+**Changes:**
+- skills: PR #41 — SKILL.md step 2 gains the snapshot-first portfolio path (POST /snapshots -> /playcounts -> playcount-deltas); history-depth limit rewritten for the stitched store series; recoup-api.md adds the 3 new endpoints + provenance + 402 + the 679-track calibration note; scripts untouched (transparent rerouting); all 3 validation gates pass
+- chat: #1791 skill item linked to the PR
+**PRs:** https://github.com/recoupable/skills/pull/41 (open)
+**Notes:** Once #41 merges, every #1791 item is Done — close the issue with a final summary comment.
+
 ## [2026-06-11] Ship api#662 — write path to prod; #1791 api surface COMPLETE
 **Prompt:** Round-2 preview verification (catalog path, write->read integration, pricing live); merge + promote.
 **Status:** completed
