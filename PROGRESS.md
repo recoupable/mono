@@ -4,6 +4,14 @@
 
 ---
 
+## [2026-06-11] Open docs#239 — playcount docs reconciliation
+**Prompt:** Align docs with live api behavior for the playcount family.
+**Status:** completed (PR open)
+**Changes:**
+- docs: PR #239 — track-stats sourcing model + captured_at scoping + minimal envelope + 429 passthrough; historic-stats store-only spotify + enqueue; playcounts nullability inversion FIXED (isrc always present, spotify_track_id nullable) + always-null label/copyright honesty + mapped-only coverage; 402 documented on all 4 endpoints w/ real insufficient_credits body
+**PRs:** https://github.com/recoupable/docs/pull/239 (open)
+**Notes:** playcount-deltas matched the contract exactly — zero changes. 402 body shape read from buildInsufficientCreditsResponse (checkoutUrl etc).
+
 ## [2026-06-11] Open api#660 — play-count read path (historic stitch, playcounts, deltas)
 **Prompt:** Two-PR split of remaining api work; build the read path first with all #657 lessons baked in.
 **Status:** partial
