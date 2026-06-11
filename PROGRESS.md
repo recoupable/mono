@@ -4,6 +4,17 @@
 
 ---
 
+## [2026-06-11] chat#1794 round 2 — second root cause (album uniqueness) found + fixed
+**Prompt:** Verify api#664 on preview; debug why playcounts stayed 1/18.
+**Status:** partial (PRs open)
+**Changes:**
+- Live debugging: self-mapping WORKS (REBIRTH 18/18 via workflow; transient first-run degrade healed by next capture, as designed) — real bug is schema: song_identifiers unique (platform,type,value) caps albums at ONE song
+- database: PR #34 — uniqueness moves to (song,platform,type,value); reverse lookup keeps non-unique index
+- api: #664 gains album-row-for-every-captured-track (idempotent, heals pre-mapped tracks) + onConflict updated; merge order database#34 -> api#664
+- memory: tsc gate refined (normalize to file:line:code — TS union ordering is nondeterministic, full-text diffs false-positive)
+**PRs:** https://github.com/recoupable/database/pull/34 (open), https://github.com/recoupable/api/pull/664 (open, updated)
+**Notes:** After both merge: re-snapshot K.I.D.S. to verify 18/18, then re-snapshot the 570-album portfolio (#1794 item 2). Probe side effects in prod (all correct data): 18 K.I.D.S. + 18 REBIRTH track mappings, 38 identifier rows, ~36 measurements.
+
 ## [2026-06-11] File chat#1794 (customer bug: 1/18 playcounts) + open api#664 fix
 **Prompt:** Customer found playcounts serving 1/18 tracks; file issue, fix via issue-implementation skill.
 **Status:** partial (PR open)
