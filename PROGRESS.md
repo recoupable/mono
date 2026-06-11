@@ -9,8 +9,8 @@
 **Status:** partial (PR open)
 **Changes:**
 - chat: #1793 rewritten per issue-management skill — dated decision callout (generic catalog dropped: X needs BYO OAuth app since 2026-02, LinkedIn managed app shared/rate-limited; YAGNI), scope = 2 env vars + 2 slugs in 4 constants; was api#659, transferred to home repo
-- docs: PR #240 — social.json connectors ops declared no security so Mintlify playground hid auth inputs; added per-op apiKeyAuth/bearerAuth to all 5 connectors operations (accounts.json pattern)
-**PRs:** https://github.com/recoupable/docs/pull/240 (open)
+- docs: PR #240 MERGED (squash 284113e) — social.json connectors ops declared no security so Mintlify playground hid auth inputs; added per-op apiKeyAuth/bearerAuth to all 5 connectors operations (accounts.json pattern); also nav refactor (Tools & Reference tab -> Connectors; List Models moved to Chats group, empty AI group removed)
+**PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** Blocker still open: prod COMPOSIO_API_KEY invalid (HTTP 10401) — nothing connector-related testable until rotated. Next on #1793: OAuth app registration (X tier + LinkedIn w_member_social), then api whitelist PR. Patrick to decide artist availability (proposal: twitter yes, linkedin label-only).
 
 ## [2026-06-11] chat#1794 round 2 — second root cause (album uniqueness) found + fixed
