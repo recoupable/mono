@@ -13,6 +13,16 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-12] Portfolio re-snapshot COMPLETE (100% coverage) — "slow drain" was a misread
+**Prompt:** Customer session reported days-long drain; investigate, file follow-up, run coverage check.
+**Status:** completed
+**Changes:**
+- Evidence: 570-album job 72db1849 finished in ~3 MIN (4,533 rows, 20:47-20:49 UTC); mapping coverage 4,667/4,667 payload track ids = 100.0%; store now 10,020 songs / 9,526 identifiers / 6,487 measurements
+- The proposed worker-batching perf issue NOT filed — premise disproven by timing evidence (pipeline already chunks/batches/bulk-upserts); latent getTracks restart-on-retry hardening noted on #1794 instead (YAGNI until it bites)
+- chat: #1794 data item -> Done with evidence; coverage check vs full raw payload supersedes the repair-kit check
+**PRs:** none (evidence-only round)
+**Notes:** #1794 remaining: docs coverage-note edit only (estimate.py shipped by parallel session). Customer response should correct the drain misread — likely they watched the dead pre-fix jobs. Portfolio TTM auto-enables ~July 9 as windows mature.
+
 ## [2026-06-12] Ship api#666 to prod (release #667) — capture path hardened
 **Prompt:** Merge #666, promote test->main, sync.
 **Status:** completed
