@@ -13,6 +13,15 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-12] Ship api#666 to prod (release #667) — capture path hardened
+**Prompt:** Merge #666, promote test->main, sync.
+**Status:** completed
+**Changes:**
+- api: #666 squash->test, promoted via #667 (merge commit), test synced (trees identical) — backoff + step split/RetryableError + ISRC dedupe all live
+- chat: #1794 data item marked unblocked
+**PRs:** https://github.com/recoupable/api/pull/666, https://github.com/recoupable/api/pull/667 (merged)
+**Notes:** Ready for the full 570-album re-snapshot (~$1.71) on user go — completes #1794's data item; then the docs coverage-note edit closes the issue (estimate.py item already shipped by the parallel session).
+
 ## [2026-06-12] api#666 testing found root cause #3: in-batch ISRC duplicates
 **Prompt:** Test #666 on preview at portfolio scale.
 **Status:** partial (PR ready for review)
