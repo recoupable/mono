@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-06-11] Open api#660 — play-count read path (historic stitch, playcounts, deltas)
+**Prompt:** Two-PR split of remaining api work; build the read path first with all #657 lessons baked in.
+**Status:** partial
+**Changes:**
+- api: PR #660 (base test) — stitched /track/historic-stats (store-only spotify history, per-point provenance, enqueue on missing backfill), GET /research/playcounts?spotify_album_id, GET /research/track/playcount-deltas; OCP orchestrators over untouched passthroughs; parse-once historicStatsPayloadSchema; selectSongMeasurements + selectSongIdentifiers gain songs[]; 36 tests RED->GREEN; formatted before push (no CI surprise)
+- chat: #1791 items updated with PR link / partial-shipped note
+**PRs:** https://github.com/recoupable/api/pull/660 (open)
+**Notes:** Preview-verified with REAL data (results table on PR): mixed songstats+apify stitch, queue row side effect, 7-day delta w/ run-rate 119.6M/yr, playcounts for K.I.D.S. Deluxe; all 400/404/401 paths exact. Seeded real measurements: June-9 file-snapshot capture + June-4 Songstats baseline reading for The Spins. Write-path PR next: needs database claim-RPC (FOR UPDATE SKIP LOCKED) first, then snapshots Workflow + cron backfill worker.
+
 ## [2026-06-11] Ship api#657 — Apify-first /track/stats to prod
 **Prompt:** Address review rounds (SRP/KISS/OCP/zod), re-verify on preview, merge + promote test->main.
 **Status:** completed
