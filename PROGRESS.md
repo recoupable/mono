@@ -13,6 +13,15 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-12] Implement chat#1795 — one-click catalog valuation campaign page (marketing#21)
+**Prompt:** Implement #1795 via issue-implementation skill; TDD red-green mandated.
+**Status:** partial (PR open, verified)
+**Changes:**
+- marketing: PR #21 — /valuation page: search -> pick -> one CTA -> band. lib/valuation (computeCatalogValuation from methodology.md constants over the lifetime-average run-rate proxy; startCatalogSnapshot via auth-free spotify proxy + key-gated POST /snapshots; getCatalogPlaycounts w/ 404=uncaptured; per-IP limiter 3/hr). Probe-then-full polling keeps read spend ~5cr until the final aggregate. Added minimal vitest to marketing (repo had none) — 8 tests RED->GREEN; pnpm build green.
+- RECOUP_API_KEY already present in marketing Preview+Production env (30d old) — no env work.
+**PRs:** https://github.com/recoupable/marketing/pull/21 (open, preview-verified)
+**Notes:** Live verification: Mac Miller -> 49 releases -> 344 tracks -> 31.29B streams -> $54.5M/$79.4M/$111.7M band; limiter 429 on run 4; observed cost ~$2.67/run for a 50-album artist (flagged for sign-off on the PR). Sanity: coherent vs the $64.2M Rostrum-owned baseline.
+
 ## [2026-06-12] CLOSE chat#1794 — all fixed, customer-confirmed; docs#241 merged
 **Prompt:** Remove stray files from docs PR; merge docs#241; close out.
 **Status:** completed
