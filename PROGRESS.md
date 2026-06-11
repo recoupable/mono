@@ -8,7 +8,9 @@
 **Prompt:** Confirm flat 5-credit pricing; merge the read-path PR.
 **Status:** completed
 **Changes:**
-- api: #660 squash-merged to test (stitched historic, playcounts, deltas); awaiting test->main promotion
+- api: #660 squash-merged to test (stitched historic, playcounts, deltas); promoted to main via #661 (merge commit), test synced (trees identical) — READ PATH LIVE IN PROD
+- database: #33 opened — claim_songstats_backfill_rows RPC (FOR UPDATE SKIP LOCKED), prerequisite for the write path
+- api: write-path worktree ready on post-#660 test; discovery: api already runs Workflow DevKit (withWorkflow + 2 prod workflows to mirror) — no new infra risk
 - chat: #1791 historic item -> Done; snapshots item rescoped to write path only; unit economics section added earlier (Songstats hit ~$0.09 vs $0.05/call revenue — store paths are the only profitable ones)
 - mono: api-readpath-worktree removed
 **PRs:** https://github.com/recoupable/api/pull/660 (merged to test)
