@@ -13,6 +13,15 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-12] api#666 testing found root cause #3: in-batch ISRC duplicates
+**Prompt:** Test #666 on preview at portfolio scale.
+**Status:** partial (PR ready for review)
+**Changes:**
+- api: #666 gained fd2bf1ba — upsertSongs deduped by ISRC (reissues put the same recording on multiple albums per chunk; DO UPDATE forbids in-batch duplicate rows). THIS, not just 429s, killed the 570-run's mapping.
+- Verified at scale: 150-album batch 67/1220 before fix -> 1164/1220 (95%) after; identifiers 912->3218; spot-checked albums match raw payload; ~56 shortfall = tracks without ISRCs (expected leakage)
+**PRs:** https://github.com/recoupable/api/pull/666 (3 commits: backoff, step split + RetryableError, ISRC dedupe)
+**Notes:** Test spend ~$1.35 total across runs (banked as mappings). After merge: full 570 re-snapshot completes the portfolio. Lesson: single-album tests can never catch batch-shape bugs — portfolio-scale verification is mandatory for capture-path changes.
+
 ## [2026-06-11] 570-album snapshot post-mortem -> api#666 (Spotify 429 backoff)
 **Prompt:** Other session fired the portfolio snapshot + estimate.py upgrade; I took the stalled-snapshot handoff.
 **Status:** partial (PR open)
