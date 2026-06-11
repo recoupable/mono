@@ -4,6 +4,15 @@
 
 ---
 
+## [2026-06-11] File chat#1794 (customer bug: 1/18 playcounts) + open api#664 fix
+**Prompt:** Customer found playcounts serving 1/18 tracks; file issue, fix via issue-implementation skill.
+**Status:** partial (PR open)
+**Changes:**
+- chat: #1794 filed — snapshot pipeline never populates song_identifiers (only hand-seeded The Spins rows exist); records the #1791 Done-when miss ("all 18 tracks" verified as 1) honestly
+- api: PR #664 — writeAlbumPlayCounts self-maps: unmapped track ids -> Spotify GET /v1/tracks batch ISRC resolution -> upsert songs + identifiers -> measure ALL tracks; degrade-on-bootstrap-failure; shared path fixes snapshots AND stats refresh; 12 tests RED->GREEN; tsc list-diff 0 new; next build type phase pass
+**PRs:** https://github.com/recoupable/api/pull/664 (open)
+**Notes:** After merge: re-snapshot 570 albums (~$1.71) self-maps the portfolio (#1794 item 2); then docs coverage-note edit + estimate.py upgrade (blocked items in #1794). Lesson recorded: count the Done-when (18 means 18).
+
 ## [2026-06-11] CLOSE chat#1791 — Apify-first playcount architecture fully shipped
 **Prompt:** Merge skills#41 and close out the issue.
 **Status:** completed
