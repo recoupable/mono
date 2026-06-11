@@ -4,6 +4,16 @@
 
 ---
 
+## [2026-06-11] CLOSE chat#1791 — Apify-first playcount architecture fully shipped
+**Prompt:** Merge skills#41 and close out the issue.
+**Status:** completed
+**Changes:**
+- skills: #41 squash-merged (0948da8) — catalog-value-estimator on the new surface
+- chat: #1791 CLOSED as completed — all items Done, final summary comment posted (full train table: docs#238/239, database#31/32/33, api#657/660/662 + releases, skills#41)
+- mono: skills submodule on main
+**PRs:** https://github.com/recoupable/skills/pull/41 (merged)
+**Notes:** Two-day end-to-end ship. Remaining live check (non-blocking, reported on the closed issue): first prod cron 07:00 UTC fires the backfill drain (The Spins pending, budget 900). Open elsewhere: chat#1792 (dead funnel code -> 11 more table drops).
+
 ## [2026-06-11] Open skills#41 — catalog-value-estimator on the new playcount surface
 **Prompt:** Work the last #1791 item: skill update.
 **Status:** partial (PR open)
