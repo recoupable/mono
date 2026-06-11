@@ -6,12 +6,12 @@
 
 ## [2026-06-11] chat#1793 pivot to X+LinkedIn connectors + docs playground-auth PR
 **Prompt:** Rewrite #1793 (drop generic Composio plan, focus X/LinkedIn); add playground-auth item; ship the docs PR.
-**Status:** partial (PR open)
+**Status:** completed (issue closed as blocked)
 **Changes:**
 - chat: #1793 rewritten per issue-management skill — dated decision callout (generic catalog dropped: X needs BYO OAuth app since 2026-02, LinkedIn managed app shared/rate-limited; YAGNI), scope = 2 env vars + 2 slugs in 4 constants; was api#659, transferred to home repo
 - docs: PR #240 MERGED (squash 284113e) — social.json connectors ops declared no security so Mintlify playground hid auth inputs; added per-op apiKeyAuth/bearerAuth to all 5 connectors operations (accounts.json pattern); also nav refactor (Tools & Reference tab -> Connectors; List Models moved to Chats group, empty AI group removed)
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
-**Notes:** Blocker still open: prod COMPOSIO_API_KEY invalid (HTTP 10401) — nothing connector-related testable until rotated. Next on #1793: OAuth app registration (X tier + LinkedIn w_member_social), then api whitelist PR. Patrick to decide artist availability (proposal: twitter yes, linkedin label-only).
+**Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
 ## [2026-06-11] Ship the chat#1794 fix to prod (database#34 + api#664/#665)
 **Prompt:** Merge the fix train and promote.
