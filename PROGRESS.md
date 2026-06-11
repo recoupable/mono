@@ -13,6 +13,15 @@
 **PRs:** https://github.com/recoupable/docs/pull/240 (merged 2026-06-11)
 **Notes:** chat#1793 CLOSED 2026-06-11 (not planned; decision: Patrick) — blocked on obtaining a new Composio key. docs#240 shipped+verified on prod; all other items (key rotation, X/LinkedIn OAuth apps, api whitelist PR, artist availability decision) parked as ready-to-go backlog in the issue body. Reopen #1793 when a key is in hand.
 
+## [2026-06-12] Customer confirms working; docs#241 opened; campaign-page issue filed
+**Prompt:** Customer confirmed all working; file the campaign-page issue.
+**Status:** completed
+**Changes:**
+- docs: PR #241 — playcounts self-mapping note (last #1794 item), mint passes
+- chat: new tracking issue for the marketing one-click artist catalog-valuation campaign page (no new api surface — proxies the #1791 endpoints with a server-held key; valuation band mirrors the estimator methodology)
+**PRs:** https://github.com/recoupable/docs/pull/241 (open)
+**Notes:** #1794 closes once docs#241 merges. Campaign page rides the shipped architecture end to end.
+
 ## [2026-06-12] Portfolio re-snapshot COMPLETE (100% coverage) — "slow drain" was a misread
 **Prompt:** Customer session reported days-long drain; investigate, file follow-up, run coverage check.
 **Status:** completed
