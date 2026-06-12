@@ -1476,3 +1476,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - marketing: formatUsd/formatCompact extracted to lib/valuation (with tests); CatalogValuation split into ArtistSearch/ValuationResult/ArtistHeader/ValuationStats/MeasuredCatalog/MeasuredAlbumRow + types.ts + runValuationFlow.ts; all files 29-85 LOC (701b7a6)
 **PRs:** https://github.com/recoupable/marketing/pull/21 (replies r3403897472/660/823; verification #issuecomment on 701b7a6)
 **Notes:** Full Bad Bunny catalog landed on this run: 100/100 releases, 214 tracks, 112B deduped streams, band $313.3M/$456.2M/$641.7M. Band arc today: $541.6M (inflated+truncated) → $390.7M (deduped, half) → $456.2M (deduped, full). Still open: 402-masking fix.
+
+## [2026-06-12] marketing#21 review round 3 (SRP extractions)
+**Prompt:** Fix missed comment (nlsBandFromSpotifyGross) + 2 new (share, readResult)
+**Status:** completed
+**Changes:**
+- marketing: nlsBandFromSpotifyGross + constants -> lib/valuation/nlsBandFromSpotifyGross.ts; share -> lib/valuation/proportionalShare.ts; readResult -> components/valuation/readResult.ts; tests added (21 total) (1d9417e)
+**PRs:** https://github.com/recoupable/marketing/pull/21 (replies r3403939050/176/312)
+**Notes:** Pure refactor, no behavior change — verified via tests+build only (skipped a live Bad Bunny run; full reads now cost ~500 credits each at 100 albums). LESSON: when fetching review comments, page with ?per_page=100 and check reviews/{id}/comments — round-1 had 2 comments submitted seconds apart and the second was missed. Still open: 402-masking fix.
