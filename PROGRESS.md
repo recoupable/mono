@@ -1492,3 +1492,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - marketing: squash-merged to main as 7514130 (one-click catalog valuation page: search, snapshot+probe flow, dedupe, 200-release pagination, per-album/track values, shareable artist card); branch deleted; submodule synced to main
 **PRs:** https://github.com/recoupable/marketing/pull/21 (MERGED 2026-06-12T14:19Z)
 **Notes:** Production deploy via Vercel on main push. KNOWN OPEN ISSUE shipped as-is: 402/429 reads render as endless "capturing" (billing failures masked) — fix was offered but not requested before merge; account 848cd58d auto-recharge card still declined, so a credits runout WILL break the live page silently. Per-run read cost ~5cr/album (≤200 albums after pagination). Rate limit: per-IP hourly in lib/valuation/rateLimit.ts.
+
+## [2026-06-12] chat#1795 updated post-merge (issue-management skill)
+**Prompt:** Merge marketing#21, then update chat#1795 per the issue-management skill
+**Status:** completed
+**Changes:**
+- none (issue body rewrite: 3 planned items -> Done closure notes; added "What shipped" numbers; new Open follow-up for 402-masking + snapshot reuse; architecture decisions updated for pagination/dedupe/proportional shares)
+**PRs:** none (marketing#21 merged earlier this session as 7514130)
+**Notes:** Issue stays OPEN on the one follow-up. Prod verified: https://www.recoupable.com/valuation 200 + hero renders. The 402 follow-up is the live risk — auto-recharge card on 848cd58d still declined.
