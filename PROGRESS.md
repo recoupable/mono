@@ -1500,3 +1500,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - none (issue body rewrite: 3 planned items -> Done closure notes; added "What shipped" numbers; new Open follow-up for 402-masking + snapshot reuse; architecture decisions updated for pagination/dedupe/proportional shares)
 **PRs:** none (marketing#21 merged earlier this session as 7514130)
 **Notes:** Issue stays OPEN on the one follow-up. Prod verified: https://www.recoupable.com/valuation 200 + hero renders. The 402 follow-up is the live risk — auto-recharge card on 848cd58d still declined.
+
+## [2026-06-12] /valuation launch posts published (X + LinkedIn)
+**Prompt:** Announce the new valuation tool on X and LinkedIn, tagging @Xcelencia with fresh data
+**Status:** completed
+**Changes:**
+- none (social posts via Composio: X post 2065449798325407937 with valuation-card image; LinkedIn share urn:li:share:7471217462252978176 with same image)
+**PRs:** none
+**Notes:** Xcelencia is LA EQUIS on Spotify (id 7c34Wg8HcWO9BWhHLwiXsr) - verified via yesterday's snapshot albums. Live tool result used in both posts: $126K-$259K band, 52 releases, 79 tracks. Deliberately omitted total streams (deduped 50M vs yesterday's published 58.6M / artist's 60M milestone framing). Yesterday's X baseline post: 147 imp, 2 likes, artist replied. LinkedIn API can't read posts (write-only scope); image upload works via initializeUpload + unauthenticated presigned PUT. New copy rules in memory: no em dashes anywhere outward-facing; no hashtags on X only.
