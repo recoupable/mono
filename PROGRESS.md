@@ -1444,3 +1444,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - none (verification only; results posted as PR comment per convention)
 **PRs:** https://github.com/recoupable/marketing/pull/21 (comment: #issuecomment-4691637125)
 **Notes:** Band returned: $372.0M/$541.6M/$761.8M, 107B lifetime streams, 173 tracks, 50 releases. Capture itself took 25s; first attempt failed because account 848cd58d (sid-production-key) was at -29 credits with a declined auto-recharge card — playcounts reads 402'd and getCatalogPlaycounts masks 402 as "not captured yet" (infinite "capturing"). User topped up manually. Open follow-ups (not yet filed/fixed): surface 402/429 distinctly in marketing lib/valuation/getCatalogPlaycounts.ts; check snapshot state in result path; reuse snapshot on retry instead of re-spending the actor. Screenshot: pr21-bad-bunny-valuation.png (mono root).
+
+## [2026-06-12] marketing#21 shareable results card (artist header + catalog breakdown)
+**Prompt:** Make /valuation results screenshot-shareable: artist name + PFP, plus all albums/tracks measured with artwork
+**Status:** completed
+**Changes:**
+- marketing: startCatalogSnapshot returns album metadata (name/image/releaseDate) from the existing albums lookup; getCatalogPlaycounts keeps per-album track detail; result route exposes `albums`; CatalogValuation renders artist header (PFP + name + followers) and "What we measured" list (artwork, year, streams, expandable per-track counts) — commit 33ebcc8 on feat/catalog-valuation-campaign
+**PRs:** https://github.com/recoupable/marketing/pull/21 (verification comment: #issuecomment-4691715269)
+**Notes:** Zero extra vendor calls/credits (metadata already in hand). Verified live with Bad Bunny on preview. Still open from earlier incident: 402/429 vs "capturing" distinction in getCatalogPlaycounts, snapshot-state check, snapshot reuse on retry.
