@@ -1436,3 +1436,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - chat: Addressed PR review (cc6f384f) — removed dead `/chat/` branch in isActiveChatRoomPath (PR makes /chat/{id} a 404 so it could never match); split lib/chat/chatPaths.ts into one-fn-per-file (getChatPath/getChatUrl/isActiveChatRoomPath) + mirrored tests per SRP; simplified useVercelChat to `const { chatId } = useParams<{ chatId?: string }>()` (KISS). tsc/lint/tests pass.
 **PRs:** https://github.com/recoupable/chat/pull/1765 (MERGED to test 2026-06-03 as squash 1a62de34; re-verified on cc6f384f preview before merge — behavior-preserving)
 **Notes:** Verified end-to-end on preview (chat-m9b4m5ont): legacy /chat/{id} now 404s (branded not-found); new chat → session-scoped URL /sessions/{id}/chats/{id}; transport POSTs /api/chat/workflow with sessionId+chatId+bearer; assistant streamed OK. Reviewer P1 (dead /chat/{id} producers) is STALE — useCreateArtistTool/generateTxtFileEmail now use getChatPath/getChatUrl. Observed dead GET /api/chats/{id}/artist 404×3 — that's the separate chat#1768 item, not this PR.
+
+## [2026-06-12] Verify marketing#21 with Bad Bunny + credits incident
+**Prompt:** Find the PR preview URL and test the /valuation flow with Bad Bunny
+**Status:** completed
+**Changes:**
+- none (verification only; results posted as PR comment per convention)
+**PRs:** https://github.com/recoupable/marketing/pull/21 (comment: #issuecomment-4691637125)
+**Notes:** Band returned: $372.0M/$541.6M/$761.8M, 107B lifetime streams, 173 tracks, 50 releases. Capture itself took 25s; first attempt failed because account 848cd58d (sid-production-key) was at -29 credits with a declined auto-recharge card — playcounts reads 402'd and getCatalogPlaycounts masks 402 as "not captured yet" (infinite "capturing"). User topped up manually. Open follow-ups (not yet filed/fixed): surface 402/429 distinctly in marketing lib/valuation/getCatalogPlaycounts.ts; check snapshot state in result path; reuse snapshot on retry instead of re-spending the actor. Screenshot: pr21-bad-bunny-valuation.png (mono root).
