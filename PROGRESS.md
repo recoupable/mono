@@ -1460,3 +1460,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - marketing: album rows show proportional share of central estimate + streams (ae035eb); state/search/run flow extracted to components/valuation/useCatalogValuation.ts per review
 **PRs:** https://github.com/recoupable/marketing/pull/21 (verification: #issuecomment-4691810988; SRP reply: #discussion_r3403717818)
 **Notes:** 50-release cap CONFIRMED as truncation (MAX_ALBUMS=50, no pagination; Bad Bunny pre-2018 catalog missing) — user deciding between full pagination vs higher cap vs disclosure; cost scales 5cr/album/read. NEW FINDING posted to PR: cross-release double-counting (DÁKITI/Callaita counted in album + single rows; ~107B headline inflated) — fix is ISRC dedupe in getCatalogPlaycounts. 402-masking fix still open.
+
+## [2026-06-12] marketing#21 ISRC dedupe + 200-cap pagination + per-track values
+**Prompt:** Fix double-counting, paginate to 200 cap, add per-song valuations
+**Status:** completed
+**Changes:**
+- marketing: getCatalogPlaycounts dedupes by ISRC (largest release claims shared tracks; empty re-releases drop from breakdown); startCatalogSnapshot paginates to MAX_ALBUMS=200; track rows show proportional value (dd94e64)
+**PRs:** https://github.com/recoupable/marketing/pull/21
+**Notes:** Verified live: Bad Bunny "50 of 100" releases (50-cap was hiding half the catalog), streams 107B→96B post-dedupe, band now $268.3M/$390.7M/$549.6M. New 50 releases capturing in background — rerun will value full 100. Still open: 402-masking fix.
