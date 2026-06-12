@@ -1452,3 +1452,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - marketing: startCatalogSnapshot returns album metadata (name/image/releaseDate) from the existing albums lookup; getCatalogPlaycounts keeps per-album track detail; result route exposes `albums`; CatalogValuation renders artist header (PFP + name + followers) and "What we measured" list (artwork, year, streams, expandable per-track counts) — commit 33ebcc8 on feat/catalog-valuation-campaign
 **PRs:** https://github.com/recoupable/marketing/pull/21 (verification comment: #issuecomment-4691715269)
 **Notes:** Zero extra vendor calls/credits (metadata already in hand). Verified live with Bad Bunny on preview. Still open from earlier incident: 402/429 vs "capturing" distinction in getCatalogPlaycounts, snapshot-state check, snapshot reuse on retry.
+
+## [2026-06-12] marketing#21 per-album valuations + SRP hook refactor
+**Prompt:** Add per-album valuation to the breakdown; fix PR review comment (SRP: extract state/hooks to a hook file); investigate 50-result cap
+**Status:** completed
+**Changes:**
+- marketing: album rows show proportional share of central estimate + streams (ae035eb); state/search/run flow extracted to components/valuation/useCatalogValuation.ts per review
+**PRs:** https://github.com/recoupable/marketing/pull/21 (verification: #issuecomment-4691810988; SRP reply: #discussion_r3403717818)
+**Notes:** 50-release cap CONFIRMED as truncation (MAX_ALBUMS=50, no pagination; Bad Bunny pre-2018 catalog missing) — user deciding between full pagination vs higher cap vs disclosure; cost scales 5cr/album/read. NEW FINDING posted to PR: cross-release double-counting (DÁKITI/Callaita counted in album + single rows; ~107B headline inflated) — fix is ISRC dedupe in getCatalogPlaycounts. 402-masking fix still open.
