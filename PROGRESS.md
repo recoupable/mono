@@ -1484,3 +1484,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - marketing: nlsBandFromSpotifyGross + constants -> lib/valuation/nlsBandFromSpotifyGross.ts; share -> lib/valuation/proportionalShare.ts; readResult -> components/valuation/readResult.ts; tests added (21 total) (1d9417e)
 **PRs:** https://github.com/recoupable/marketing/pull/21 (replies r3403939050/176/312)
 **Notes:** Pure refactor, no behavior change — verified via tests+build only (skipped a live Bad Bunny run; full reads now cost ~500 credits each at 100 albums). LESSON: when fetching review comments, page with ?per_page=100 and check reviews/{id}/comments — round-1 had 2 comments submitted seconds apart and the second was missed. Still open: 402-masking fix.
+
+## [2026-06-12] marketing#21 MERGED — /valuation live on production
+**Prompt:** Merge https://github.com/recoupable/marketing/pull/21
+**Status:** completed
+**Changes:**
+- marketing: squash-merged to main as 7514130 (one-click catalog valuation page: search, snapshot+probe flow, dedupe, 200-release pagination, per-album/track values, shareable artist card); branch deleted; submodule synced to main
+**PRs:** https://github.com/recoupable/marketing/pull/21 (MERGED 2026-06-12T14:19Z)
+**Notes:** Production deploy via Vercel on main push. KNOWN OPEN ISSUE shipped as-is: 402/429 reads render as endless "capturing" (billing failures masked) — fix was offered but not requested before merge; account 848cd58d auto-recharge card still declined, so a credits runout WILL break the live page silently. Per-run read cost ~5cr/album (≤200 albums after pagination). Rate limit: per-IP hourly in lib/valuation/rateLimit.ts.
