@@ -1468,3 +1468,11 @@ chat (frontend) → api (backend) → Supabase (database)
 - marketing: getCatalogPlaycounts dedupes by ISRC (largest release claims shared tracks; empty re-releases drop from breakdown); startCatalogSnapshot paginates to MAX_ALBUMS=200; track rows show proportional value (dd94e64)
 **PRs:** https://github.com/recoupable/marketing/pull/21
 **Notes:** Verified live: Bad Bunny "50 of 100" releases (50-cap was hiding half the catalog), streams 107B→96B post-dedupe, band now $268.3M/$390.7M/$549.6M. New 50 releases capturing in background — rerun will value full 100. Still open: 402-masking fix.
+
+## [2026-06-12] marketing#21 sub-100-LOC refactor (review round 2) + full-catalog verification
+**Prompt:** Fix new PR review comments (formatUsd/formatCompact to lib files; all files <100 LOC)
+**Status:** completed
+**Changes:**
+- marketing: formatUsd/formatCompact extracted to lib/valuation (with tests); CatalogValuation split into ArtistSearch/ValuationResult/ArtistHeader/ValuationStats/MeasuredCatalog/MeasuredAlbumRow + types.ts + runValuationFlow.ts; all files 29-85 LOC (701b7a6)
+**PRs:** https://github.com/recoupable/marketing/pull/21 (replies r3403897472/660/823; verification #issuecomment on 701b7a6)
+**Notes:** Full Bad Bunny catalog landed on this run: 100/100 releases, 214 tracks, 112B deduped streams, band $313.3M/$456.2M/$641.7M. Band arc today: $541.6M (inflated+truncated) → $390.7M (deduped, half) → $456.2M (deduped, full). Still open: 402-masking fix.
