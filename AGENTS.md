@@ -178,41 +178,6 @@ When making changes that span multiple submodules:
 3. Update docs when API endpoints change
 4. Database schema changes go in database migrations
 
-## PROGRESS File (MANDATORY — Read Before & Write After Every Task)
-
-`PROGRESS.md` is the monorepo's persistent memory. It lives at the root and gives the next agent instant context without re-deriving it from git history. **This is not optional.**
-
-### Before starting any work:
-1. Read `PROGRESS.md` to understand what has been done, what is in-flight, and what blockers exist
-2. Use this context to avoid duplicating work and to continue from the correct state
-
-### After completing any work (before taking a snapshot or exiting):
-1. Append a new entry to `PROGRESS.md` using this format:
-
-```text
-## [YYYY-MM-DD] <short task title>
-**Prompt:** <one-line summary of what was asked>
-**Status:** completed | partial | blocked
-**Changes:**
-- <submodule>: <what changed and why>
-**PRs:** <list of PR URLs, or "none">
-**Notes:** <anything the next agent run should know>
-```
-
-2. Commit `PROGRESS.md` changes in the same commit as your other changes, or in a separate commit if nothing else changed
-
-**If `PROGRESS.md` does not exist**, create it with an initial entry for the current task.
-
-### Style rules
-- Dates use ISO 8601: `YYYY-MM-DD`
-- One line per item — no prose paragraphs
-- Keep entries concise — recent completions, not a full changelog
-
-### How the file gets saved
-In sandbox environments, `pushAndCreatePRsViaAgent` pushes `PROGRESS.md` directly to `main` (no PR needed). You don't need to manually push — just edit it before the push step runs.
-
-> **Why this matters:** Every agent run starts cold. Without `PROGRESS.md`, work gets duplicated, PRs get re-opened, and context is lost. Reading and writing this file is as important as writing the code itself.
-
 ## Branding
 
 - **Support email**: `agent@recoupable.com`
