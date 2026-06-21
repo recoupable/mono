@@ -1,0 +1,469 @@
+From f68ad2efb3e132b34f7d78d432b63297dacb6fbc Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 21 Jun 2026 21:43:45 +0000
+Subject: [PATCH] fix: 13 UX/logic fixes from feature audit (Phase 3)
+
+Confirmed logistical/UX defects found during the chat-app feature audit:
+- CopyAction: toast on clipboard failure (was console-only)
+- useAutoCollapse: delay reasoning auto-collapse so it's readable
+- RenameModal: maxLength + live character counter
+- access page: mask access token by default with reveal toggle
+- ApiKey modal/list: clarify one-time key + confirm-before-delete + clearer mask
+- EmailShareInput: toast on invalid/duplicate share email
+- ExistingSharedEmailsList: confirm before removing a shared email
+- useSearchIsrc: validate ISRC format with feedback
+- HideMissingItemsToggle: tooltip defining completeness
+- CreateTaskButton: disable + helper text when no artist selected
+- usePWADownload: clean up document click listener (leak fix)
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01CKp57hBnGKB5vrvxszLm8Q
+---
+ app/access/page.tsx                           | 30 +++++++++--
+ components/Agents/EmailShareInput.tsx         |  4 +-
+ .../Agents/ExistingSharedEmailsList.tsx       | 52 ++++++++++++++-----
+ components/ApiKeyPage/ApiKeyList.tsx          | 49 +++++++++++++----
+ components/ApiKeyPage/ApiKeyModal.tsx         |  3 +-
+ components/Sidebar/Modals/RenameModal.tsx     | 10 +++-
+ components/TasksPage/CreateTaskButton.tsx     | 24 ++++++---
+ components/VercelChat/CopyAction.tsx          |  3 +-
+ .../tools/catalog/HideMissingItemsToggle.tsx  |  6 ++-
+ hooks/useAutoCollapse.ts                      | 10 ++--
+ hooks/usePWADownload.tsx                      |  9 ++--
+ hooks/useSearchIsrc.ts                        | 13 ++++-
+ 12 files changed, 165 insertions(+), 48 deletions(-)
+
+diff --git a/app/access/page.tsx b/app/access/page.tsx
+index afa92876..9ddfb148 100644
+--- a/app/access/page.tsx
++++ b/app/access/page.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { useEffect } from "react";
++import { useEffect, useState } from "react";
+ import { useQuery } from "@tanstack/react-query";
+ import { usePrivy } from "@privy-io/react-auth";
+ import {
+@@ -11,13 +11,19 @@ import {
+   CardTitle,
+ } from "@/components/ui/card";
+ import { Button } from "@/components/ui/button";
+-import { Copy, Check } from "lucide-react";
++import { Copy, Check, Eye, EyeOff } from "lucide-react";
+ import { toast } from "sonner";
+ import { useCopy } from "@/hooks/useCopy";
+ 
++const maskToken = (token: string) =>
++  token.length <= 18
++    ? "•".repeat(token.length)
++    : `${token.slice(0, 12)}${"•".repeat(12)}${token.slice(-6)}`;
++
+ export default function AccessPage() {
+   const { getAccessToken, ready, authenticated } = usePrivy();
+   const { copied, copy } = useCopy();
++  const [revealed, setRevealed] = useState(false);
+ 
+   const {
+     data: accessToken,
+@@ -92,10 +98,28 @@ export default function AccessPage() {
+             <>
+               <div className="rounded-lg border bg-muted p-4">
+                 <pre className="text-sm font-mono break-all whitespace-pre-wrap">
+-                  {accessToken}
++                  {revealed ? accessToken : maskToken(accessToken)}
+                 </pre>
+               </div>
+               <div className="flex gap-2">
++                <Button
++                  onClick={() => setRevealed((v) => !v)}
++                  variant="outline"
++                  className="flex items-center gap-2"
++                  aria-pressed={revealed}
++                >
++                  {revealed ? (
++                    <>
++                      <EyeOff className="h-4 w-4" />
++                      Hide
++                    </>
++                  ) : (
++                    <>
++                      <Eye className="h-4 w-4" />
++                      Reveal
++                    </>
++                  )}
++                </Button>
+                 <Button
+                   onClick={handleCopy}
+                   variant="outline"
+diff --git a/components/Agents/EmailShareInput.tsx b/components/Agents/EmailShareInput.tsx
+index 90196d4f..1eacf7b0 100644
+--- a/components/Agents/EmailShareInput.tsx
++++ b/components/Agents/EmailShareInput.tsx
+@@ -1,4 +1,5 @@
+ import { useState } from "react";
++import { toast } from "sonner";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ import { isValidEmail } from "@/lib/utils/isValidEmail";
+@@ -28,12 +29,13 @@ const EmailShareInput = ({ emails, existingSharedEmails = [], onEmailsChange, on
+     if (!trimmedEmail) return;
+ 
+     if (!isValidEmail(trimmedEmail)) {
+-      // You could add error handling here
++      toast.error("Please enter a valid email address");
+       return;
+     }
+ 
+     // Check if email already exists in either existing or new emails
+     if (emails.includes(trimmedEmail) || existingSharedEmails.includes(trimmedEmail)) {
++      toast.error("That email has already been added");
+       setInputValue("");
+       return;
+     }
+diff --git a/components/Agents/ExistingSharedEmailsList.tsx b/components/Agents/ExistingSharedEmailsList.tsx
+index 2dd37602..749cda3e 100644
+--- a/components/Agents/ExistingSharedEmailsList.tsx
++++ b/components/Agents/ExistingSharedEmailsList.tsx
+@@ -1,5 +1,6 @@
++import { useState } from "react";
+ import { Badge } from "@/components/ui/badge";
+-import { X, Users } from "lucide-react";
++import { X, Users, Check } from "lucide-react";
+ 
+ interface ExistingSharedEmailsListProps {
+   emails: string[];
+@@ -7,6 +8,8 @@ interface ExistingSharedEmailsListProps {
+ }
+ 
+ const ExistingSharedEmailsList = ({ emails, onRemoveEmail }: ExistingSharedEmailsListProps) => {
++  const [confirmingEmail, setConfirmingEmail] = useState<string | null>(null);
++
+   if (emails.length === 0) return null;
+ 
+   return (
+@@ -24,17 +27,42 @@ const ExistingSharedEmailsList = ({ emails, onRemoveEmail }: ExistingSharedEmail
+           >
+             {email}
+             <span className="text-xs opacity-70 mr-1">(shared)</span>
+-            {onRemoveEmail && (
+-              <button
+-                type="button"
+-                onClick={() => onRemoveEmail(email)}
+-                className="ml-1 hover:bg-red-100 rounded-full p-0.5 opacity-70 hover:opacity-100"
+-                aria-label={`Remove ${email} from shared list`}
+-                title="Remove from shared list"
+-              >
+-                <X className="h-3 w-3" />
+-              </button>
+-            )}
++            {onRemoveEmail &&
++              (confirmingEmail === email ? (
++                <span className="ml-1 flex items-center gap-1">
++                  <button
++                    type="button"
++                    onClick={() => {
++                      onRemoveEmail(email);
++                      setConfirmingEmail(null);
++                    }}
++                    className="rounded-full p-0.5 text-red-700 hover:bg-red-100"
++                    aria-label={`Confirm removing ${email}`}
++                    title="Confirm remove"
++                  >
++                    <Check className="h-3 w-3" />
++                  </button>
++                  <button
++                    type="button"
++                    onClick={() => setConfirmingEmail(null)}
++                    className="rounded-full p-0.5 opacity-70 hover:bg-black/5 hover:opacity-100"
++                    aria-label={`Cancel removing ${email}`}
++                    title="Cancel"
++                  >
++                    <X className="h-3 w-3" />
++                  </button>
++                </span>
++              ) : (
++                <button
++                  type="button"
++                  onClick={() => setConfirmingEmail(email)}
++                  className="ml-1 hover:bg-red-100 rounded-full p-0.5 opacity-70 hover:opacity-100"
++                  aria-label={`Remove ${email} from shared list`}
++                  title="Remove from shared list"
++                >
++                  <X className="h-3 w-3" />
++                </button>
++              ))}
+           </Badge>
+         ))}
+       </div>
+diff --git a/components/ApiKeyPage/ApiKeyList.tsx b/components/ApiKeyPage/ApiKeyList.tsx
+index c13b96a5..fd5e62dd 100644
+--- a/components/ApiKeyPage/ApiKeyList.tsx
++++ b/components/ApiKeyPage/ApiKeyList.tsx
+@@ -1,5 +1,6 @@
+ "use client";
+ 
++import { useState } from "react";
+ import { Button } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+ import { Trash2 } from "lucide-react";
+@@ -8,6 +9,7 @@ import { formatDate } from "@/lib/date/formatDate";
+ 
+ export function ApiKeyList() {
+   const { apiKeys, loadingKeys, deleteApiKey } = useApiKeyProvider();
++  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+ 
+   if (loadingKeys) {
+     return (
+@@ -43,19 +45,46 @@ export function ApiKeyList() {
+           <div key={key.id} className="rounded-lg border bg-card p-4">
+             <div className="flex items-center gap-3">
+               <Input
+-                value={`${key.name}: ***************`}
++                value={`${key.name}: •••• (hidden — shown only at creation)`}
+                 readOnly
++                aria-label={`API key ${key.name} (value hidden)`}
+                 className="flex-1 font-mono text-sm"
+               />
+-              <Button
+-                type="button"
+-                variant="outline"
+-                size="sm"
+-                onClick={() => deleteApiKey(key.id)}
+-                className="border-red-300 text-red-600 hover:bg-red-50"
+-              >
+-                <Trash2 className="h-4 w-4" />
+-              </Button>
++              {pendingDeleteId === key.id ? (
++                <div className="flex items-center gap-2">
++                  <Button
++                    type="button"
++                    variant="outline"
++                    size="sm"
++                    onClick={() => {
++                      deleteApiKey(key.id);
++                      setPendingDeleteId(null);
++                    }}
++                    className="border-red-300 bg-red-600 text-white hover:bg-red-700"
++                  >
++                    Confirm delete
++                  </Button>
++                  <Button
++                    type="button"
++                    variant="ghost"
++                    size="sm"
++                    onClick={() => setPendingDeleteId(null)}
++                  >
++                    Cancel
++                  </Button>
++                </div>
++              ) : (
++                <Button
++                  type="button"
++                  variant="outline"
++                  size="sm"
++                  onClick={() => setPendingDeleteId(key.id)}
++                  aria-label={`Delete API key ${key.name}`}
++                  className="border-red-300 text-red-600 hover:bg-red-50"
++                >
++                  <Trash2 className="h-4 w-4" />
++                </Button>
++              )}
+             </div>
+             <p className="mt-2 text-xs text-muted-foreground">
+               Created {formatDate(key.created_at)}
+diff --git a/components/ApiKeyPage/ApiKeyModal.tsx b/components/ApiKeyPage/ApiKeyModal.tsx
+index c6e47c74..37788a84 100644
+--- a/components/ApiKeyPage/ApiKeyModal.tsx
++++ b/components/ApiKeyPage/ApiKeyModal.tsx
+@@ -32,8 +32,7 @@ export function ApiKeyModal({ isOpen, onClose, apiKey }: ApiKeyModalProps) {
+         <DialogHeader>
+           <DialogTitle>API Key Created Successfully</DialogTitle>
+           <DialogDescription>
+-            {`Your API key has been generated. Please copy it now as you won't be able to see it
+-            again.`}
++            {`Your API key has been generated. This is the only time the full key will be shown — copy it now and store it somewhere safe. It can't be recovered later.`}
+           </DialogDescription>
+         </DialogHeader>
+ 
+diff --git a/components/Sidebar/Modals/RenameModal.tsx b/components/Sidebar/Modals/RenameModal.tsx
+index 841f871e..01cdf705 100644
+--- a/components/Sidebar/Modals/RenameModal.tsx
++++ b/components/Sidebar/Modals/RenameModal.tsx
+@@ -44,11 +44,17 @@ const RenameModal = ({
+               onChange={handleChange}
+               onBlur={handleBlur}
+               placeholder="Enter chat name"
++              maxLength={50}
+             />
+-            <div className="h-5 mt-2">
+-              {error && (
++            <div className="h-5 mt-2 flex items-center justify-between gap-2">
++              {error ? (
+                 <p className="text-red-500 text-sm animate-fadeIn">{error}</p>
++              ) : (
++                <span />
+               )}
++              <span className="text-xs text-muted-foreground shrink-0">
++                {name.length}/50
++              </span>
+             </div>
+           </div>
+           <div className="flex justify-end mt-6">
+diff --git a/components/TasksPage/CreateTaskButton.tsx b/components/TasksPage/CreateTaskButton.tsx
+index 1c3c6cc5..4d4e14f1 100644
+--- a/components/TasksPage/CreateTaskButton.tsx
++++ b/components/TasksPage/CreateTaskButton.tsx
+@@ -2,17 +2,27 @@
+ 
+ import { Button } from "@/components/ui/button";
+ import { useCreateTask } from "@/hooks/useCreateTask";
++import { useArtistProvider } from "@/providers/ArtistProvider";
+ 
+ export function CreateTaskButton() {
+   const { handleCreateTask, isCreating } = useCreateTask();
++  const { selectedArtist } = useArtistProvider();
++  const hasArtist = Boolean(selectedArtist?.account_id);
+ 
+   return (
+-    <Button
+-      onClick={() => handleCreateTask()}
+-      disabled={isCreating}
+-      className="w-full sm:w-auto"
+-    >
+-      {isCreating ? "Creating..." : "Create Task"}
+-    </Button>
++    <div className="flex flex-col items-start gap-1">
++      <Button
++        onClick={() => handleCreateTask()}
++        disabled={isCreating || !hasArtist}
++        className="w-full sm:w-auto"
++      >
++        {isCreating ? "Creating..." : "Create Task"}
++      </Button>
++      {!hasArtist && (
++        <p className="text-xs text-muted-foreground">
++          Select an artist first to create a task.
++        </p>
++      )}
++    </div>
+   );
+ }
+diff --git a/components/VercelChat/CopyAction.tsx b/components/VercelChat/CopyAction.tsx
+index e67a26d0..a651745a 100644
+--- a/components/VercelChat/CopyAction.tsx
++++ b/components/VercelChat/CopyAction.tsx
+@@ -2,6 +2,7 @@ import React, { useState } from "react";
+ import { Action } from "@/components/actions";
+ import { CopyIcon, Check } from "lucide-react";
+ import { motion, AnimatePresence } from "framer-motion";
++import { toast } from "sonner";
+ 
+ interface CopyActionProps {
+   text: string;
+@@ -20,7 +21,7 @@ const CopyAction: React.FC<CopyActionProps> = ({ text }) => {
+         setIsCopied(false);
+       }, 1500);
+     } catch {
+-      console.error("Failed to copy to clipboard");
++      toast.error("Couldn't copy to clipboard");
+     }
+   };
+ 
+diff --git a/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx b/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx
+index 3faad27b..31b2b701 100644
+--- a/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx
++++ b/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx
+@@ -18,7 +18,11 @@ export default function HideMissingItemsToggle({
+         {checked ? "Hiding items with missing info" : "Showing all items"}
+       </div>
+       <div className="flex items-center gap-2">
+-        <Label htmlFor="hide-incomplete" className="text-xs">
++        <Label
++          htmlFor="hide-incomplete"
++          className="text-xs"
++          title="An item is complete when it has a title, artist, album, ISRC, and notes."
++        >
+           Hide items with missing info
+         </Label>
+         <Switch
+diff --git a/hooks/useAutoCollapse.ts b/hooks/useAutoCollapse.ts
+index c9c2151f..4a0042db 100644
+--- a/hooks/useAutoCollapse.ts
++++ b/hooks/useAutoCollapse.ts
+@@ -29,11 +29,15 @@ export function useAutoCollapse({
+     }
+   }, [isStreaming, isOpen]);
+ 
+-  // Auto-close immediately when streaming ends (once only)
++  // Auto-close after a short delay when streaming ends (once only), so the
++  // reader has a moment to glance at the final reasoning before it collapses.
+   useEffect(() => {
+     if (defaultOpen && !isStreaming && isOpen && !hasAutoClosedRef.current && hasContent) {
+-      setIsOpen(false);
+-      hasAutoClosedRef.current = true;
++      const timer = setTimeout(() => {
++        setIsOpen(false);
++        hasAutoClosedRef.current = true;
++      }, 1200);
++      return () => clearTimeout(timer);
+     }
+   }, [isStreaming, isOpen, defaultOpen, hasContent]);
+ 
+diff --git a/hooks/usePWADownload.tsx b/hooks/usePWADownload.tsx
+index 70ad3aff..aa334028 100644
+--- a/hooks/usePWADownload.tsx
++++ b/hooks/usePWADownload.tsx
+@@ -38,12 +38,13 @@ const usePWADownload = () => {
+   };
+ 
+   useEffect(() => {
+-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+-    document.addEventListener("click", (e: any) => {
+-      if (e.target.id === "tap-close-download") {
++    const handleDocumentClick = (e: MouseEvent) => {
++      if ((e.target as HTMLElement | null)?.id === "tap-close-download") {
+         setShowModal(false);
+       }
+-    });
++    };
++    document.addEventListener("click", handleDocumentClick);
++    return () => document.removeEventListener("click", handleDocumentClick);
+   }, []);
+ 
+   return {
+diff --git a/hooks/useSearchIsrc.ts b/hooks/useSearchIsrc.ts
+index 0118d95c..54147811 100644
+--- a/hooks/useSearchIsrc.ts
++++ b/hooks/useSearchIsrc.ts
+@@ -1,6 +1,11 @@
+ import { useState } from "react";
++import { toast } from "sonner";
+ import useSongsByIsrc from "./useSongsByIsrc";
+ 
++// ISRC = 2-letter country + 3 alphanumeric registrant + 2-digit year + 5-digit
++// designation (12 chars). Accept hyphens/spaces/case from user input.
++const ISRC_PATTERN = /^[A-Za-z]{2}[A-Za-z0-9]{3}\d{7}$/;
++
+ const useSearchIsrc = () => {
+   const [searchIsrc, setSearchIsrc] = useState("");
+   const [activeIsrc, setActiveIsrc] = useState("");
+@@ -12,9 +17,13 @@ const useSearchIsrc = () => {
+ 
+   const handleSearch = (value?: string) => {
+     const searchValue = value ?? searchIsrc;
+-    if (searchValue.trim()) {
+-      setActiveIsrc(searchValue.trim());
++    const normalized = searchValue.replace(/[\s-]/g, "").trim();
++    if (!normalized) return;
++    if (!ISRC_PATTERN.test(normalized)) {
++      toast.error("Enter a valid ISRC, e.g. USRC17607839");
++      return;
+     }
++    setActiveIsrc(normalized.toUpperCase());
+   };
+ 
+   const handleClearSearch = () => {
+-- 
+2.43.0
+
