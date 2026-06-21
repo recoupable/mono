@@ -1,7 +1,7 @@
 From f68ad2efb3e132b34f7d78d432b63297dacb6fbc Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Sun, 21 Jun 2026 21:43:45 +0000
-Subject: [PATCH] fix: 13 UX/logic fixes from feature audit (Phase 3)
+Subject: [PATCH 1/2] fix: 13 UX/logic fixes from feature audit (Phase 3)
 
 Confirmed logistical/UX defects found during the chat-app feature audit:
 - CopyAction: toast on clipboard failure (was console-only)
@@ -464,6 +464,279 @@ index 0118d95c..54147811 100644
    };
  
    const handleClearSearch = () => {
+-- 
+2.43.0
+
+
+From 8a4ba789ca015741818d2f66c39d286e7d87f3c1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 21 Jun 2026 23:13:37 +0000
+Subject: [PATCH 2/2] fix: resolve remaining audit defects (Phase 3, round 2)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes 9 more confirmed UX/logic defects from the feature audit:
+- CHAT-06: dim + 'Uploading…' label for pending attachment previews
+- CHAT-07: inline 'Saving…' indicator in the message editor
+- NAV-08: bulk-delete error now names which chats failed and why
+- AGT-12: clearer network/HTTP error messages in fetchAgentTemplates
+- AGT-02: comment explaining why action tags are excluded from filters
+- CAT-05: one-time toast when artist filter falls back to full catalog
+- FAN-04: always-visible username/follower caption on touch devices
+- FARC-01: BaseBuilder address configurable via env (default unchanged)
+- ART-04: lenient http(s) URL validation for artist streaming/social fields
+
+Investigated and confirmed as false positives (no change): NAV-06 (list not
+virtualized), CONN-02 (page already filters to ALLOWED_CONNECTORS), NAV-11
+(query key already changes on org switch), AGT-05 (removals applied before submit).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01CKp57hBnGKB5vrvxszLm8Q
+---
+ app/.well-known/farcaster.json/route.ts       |  5 +++-
+ components/Agents/useAgentData.ts             |  5 +++-
+ components/Fans/FanAvatar.tsx                 |  7 +++++
+ .../Modals/DeleteConfirmationModal.tsx        | 13 ++++-----
+ components/VercelChat/message-editor.tsx      | 10 ++++++-
+ components/VercelChat/preview-attachment.tsx  | 12 +++++++--
+ hooks/useArtistCatalogSongs.ts                |  5 ++++
+ lib/agent-templates/fetchAgentTemplates.ts    | 17 ++++++++++--
+ lib/utils/setting.tsx                         | 27 +++++++++++++------
+ 9 files changed, 80 insertions(+), 21 deletions(-)
+
+diff --git a/app/.well-known/farcaster.json/route.ts b/app/.well-known/farcaster.json/route.ts
+index 2e8bb18a..1e39feb4 100644
+--- a/app/.well-known/farcaster.json/route.ts
++++ b/app/.well-known/farcaster.json/route.ts
+@@ -19,7 +19,10 @@ export async function GET() {
+       webhookUrl: `${URL}/api/webhook`,
+     },
+     baseBuilder: {
+-      allowedAddresses: ["0x72A31A5A9568CD9EC1814C9B68dF0059317Bff87"],
++      allowedAddresses: [
++        process.env.FARCASTER_BASE_BUILDER_ADDRESS ??
++          "0x72A31A5A9568CD9EC1814C9B68dF0059317Bff87",
++      ],
+     },
+   });
+ }
+diff --git a/components/Agents/useAgentData.ts b/components/Agents/useAgentData.ts
+index b148ab2a..9c04faf5 100644
+--- a/components/Agents/useAgentData.ts
++++ b/components/Agents/useAgentData.ts
+@@ -25,7 +25,10 @@ export function useAgentData() {
+   useEffect(() => {
+     if (!data) return;
+     setAgents(data);
+-    // Action tags that should NOT appear in top filters (now multi-word)
++    // Action tags describe what an agent *does* (its workflow/output type) rather
++    // than a browsable topic, so they're excluded from the top-level tag filters to
++    // keep that list focused on content categories. They're still surfaced on the
++    // agent cards themselves (see useAgentCard.ts) where the action context is useful.
+     const actionTags = [
+       "Deep Research",
+       "Send Report",
+diff --git a/components/Fans/FanAvatar.tsx b/components/Fans/FanAvatar.tsx
+index 6e2231cf..f175e5ac 100644
+--- a/components/Fans/FanAvatar.tsx
++++ b/components/Fans/FanAvatar.tsx
+@@ -55,6 +55,13 @@ const FanAvatar = ({ fan }: FanAvatarProps) => {
+             {formattedFollowerCount}
+           </div>
+         </div>
++
++        {/* Touch devices can't hover, so always show a compact caption on small
++            screens; the hover overlay above covers sm+ (pointer) viewports. */}
++        <div className="sm:hidden mt-1 text-[10px] leading-tight text-center text-muted-foreground">
++          <div className="truncate">{fan.username || "Anonymous"}</div>
++          <div>{formattedFollowerCount}</div>
++        </div>
+       </a>
+     </div>
+   );
+diff --git a/components/Sidebar/Modals/DeleteConfirmationModal.tsx b/components/Sidebar/Modals/DeleteConfirmationModal.tsx
+index 2c0c378a..2e7bd573 100644
+--- a/components/Sidebar/Modals/DeleteConfirmationModal.tsx
++++ b/components/Sidebar/Modals/DeleteConfirmationModal.tsx
+@@ -64,19 +64,20 @@ const DeleteConfirmationModal = ({
+         const chat = chatsToDelete[i];
+         setDeletingProgress({ current: i + 1, total: chatCount });
+ 
++        const chatLabel = chat.topic || "Chat";
++
+         try {
+           await deleteChat({ sessionId: chat.sessionId });
+         } catch (chatError) {
+-          console.error(
+-            `Error deleting chat ${chat.topic || "Chat"}:`,
+-            chatError,
+-          );
+-          failedChats.push(chat.topic || "Chat");
++          console.error(`Error deleting chat ${chatLabel}:`, chatError);
++          const reason =
++            chatError instanceof Error ? chatError.message : null;
++          failedChats.push(reason ? `${chatLabel} (${reason})` : chatLabel);
+         }
+       }
+ 
+       if (failedChats.length > 0) {
+-        setError(`Failed to delete: ${failedChats.join(", ")}`);
++        setError(`Failed to delete: ${failedChats.join("; ")}`);
+         setDeletingProgress(null);
+         await onDelete();
+         return;
+diff --git a/components/VercelChat/message-editor.tsx b/components/VercelChat/message-editor.tsx
+index 34867ecf..4309fb70 100644
+--- a/components/VercelChat/message-editor.tsx
++++ b/components/VercelChat/message-editor.tsx
+@@ -65,7 +65,15 @@ export function MessageEditor({ message, setMode }: EditingMessageProps) {
+         onChange={handleInput}
+       />
+ 
+-      <div className="flex flex-row gap-2 justify-end">
++      <div className="flex flex-row gap-2 justify-end items-center">
++        {isDeletingTrailingMessages && (
++          <span
++            data-testid="message-editor-saving-indicator"
++            className="text-xs text-muted-foreground mr-auto"
++          >
++            Saving…
++          </span>
++        )}
+         <Button
+           variant="outline"
+           size="sm"
+diff --git a/components/VercelChat/preview-attachment.tsx b/components/VercelChat/preview-attachment.tsx
+index c19f75fe..3979854c 100644
+--- a/components/VercelChat/preview-attachment.tsx
++++ b/components/VercelChat/preview-attachment.tsx
+@@ -3,6 +3,7 @@ import { Loader2, FileIcon, Music } from "lucide-react";
+ import { PDFIcon } from "./icons";
+ import { PhotoView } from "react-photo-view";
+ import "react-photo-view/dist/react-photo-view.css";
++import { cn } from "@/lib/utils";
+ 
+ export const PreviewAttachment = ({
+   attachment,
+@@ -15,7 +16,12 @@ export const PreviewAttachment = ({
+ 
+   return (
+     <div data-testid="input-attachment-preview" className="flex flex-col gap-2">
+-      <div className="w-16 h-16 bg-transparent rounded-xl relative flex flex-col items-center justify-center overflow-hidden">
++      <div
++        className={cn(
++          "w-16 h-16 bg-transparent rounded-xl relative flex flex-col items-center justify-center overflow-hidden transition-opacity",
++          isUploading && "opacity-50"
++        )}
++      >
+         {contentType ? (
+           <>
+             {contentType.startsWith("image") && (
+@@ -54,7 +60,9 @@ export const PreviewAttachment = ({
+           </div>
+         )}
+       </div>
+-      <div className="text-xs text-zinc-500 max-w-16 truncate">{name}</div>
++      <div className="text-xs text-zinc-500 max-w-16 truncate">
++        {isUploading ? "Uploading…" : name}
++      </div>
+     </div>
+   );
+ };
+diff --git a/hooks/useArtistCatalogSongs.ts b/hooks/useArtistCatalogSongs.ts
+index 8fbf06e5..b376f522 100644
+--- a/hooks/useArtistCatalogSongs.ts
++++ b/hooks/useArtistCatalogSongs.ts
+@@ -1,4 +1,5 @@
+ import { useState, useEffect } from "react";
++import { toast } from "sonner";
+ import { useArtistProvider } from "@/providers/ArtistProvider";
+ import useCatalogSongs from "./useCatalogSongs";
+ 
+@@ -36,7 +37,11 @@ const useArtistCatalogSongs = ({
+       shouldUseArtistFilter &&
+       queryResult.data?.pages?.[0]?.pagination.total_count === 0
+     ) {
++      // Falling back to the unfiltered catalog; let the user know why the
++      // results no longer match the selected artist (fires once per transition
++      // since this effect stops running after shouldUseArtistFilter flips off).
+       setShouldUseArtistFilter(false);
++      toast("No songs matched this artist — showing the full catalog.");
+     }
+   }, [queryResult.data, activeArtistName, shouldUseArtistFilter]);
+ 
+diff --git a/lib/agent-templates/fetchAgentTemplates.ts b/lib/agent-templates/fetchAgentTemplates.ts
+index b43e9f0b..bb07295d 100644
+--- a/lib/agent-templates/fetchAgentTemplates.ts
++++ b/lib/agent-templates/fetchAgentTemplates.ts
+@@ -4,8 +4,21 @@ import type { AccountWithDetails } from "@/lib/supabase/accounts/getAccountWithD
+ const fetchAgentTemplates = async (
+   userData: AccountWithDetails
+ ): Promise<AgentTemplateRow[]> => {
+-  const res = await fetch(`/api/agent-templates?userId=${userData?.id}`);
+-  if (!res.ok) throw new Error("Failed to fetch agent templates");
++  let res: Response;
++  try {
++    res = await fetch(`/api/agent-templates?userId=${userData?.id}`);
++  } catch (error) {
++    throw new Error(
++      `Failed to fetch agent templates: network error${
++        error instanceof Error ? ` (${error.message})` : ""
++      }`
++    );
++  }
++  if (!res.ok) {
++    throw new Error(
++      `Failed to fetch agent templates: ${res.status} ${res.statusText}`
++    );
++  }
+   return (await res.json()) as AgentTemplateRow[];
+ };
+ 
+diff --git a/lib/utils/setting.tsx b/lib/utils/setting.tsx
+index 50d177b9..a4523dcf 100644
+--- a/lib/utils/setting.tsx
++++ b/lib/utils/setting.tsx
+@@ -1,19 +1,30 @@
+ import JoiBase from "joi";
+ 
++// Lenient URL rule: optional and allows empty/blank, but if a non-empty
++// value is provided it must be a valid http(s) URI.
++const optionalUrl = JoiBase.string()
++  .uri({ scheme: [/https?/] })
++  .allow("", null)
++  .optional()
++  .messages({
++    "string.uri": "Please enter a valid http(s) URL.",
++    "string.uriCustomScheme": "Please enter a valid http(s) URL.",
++  });
++
+ export const validation = JoiBase.object({
+   name: JoiBase.string().messages({
+     "string.empty": `Please fill out this field.`,
+   }),
+-  spotifyUrl: JoiBase.allow(),
++  spotifyUrl: optionalUrl,
+   instruction: JoiBase.allow(),
+   label: JoiBase.allow(),
+-  appleUrl: JoiBase.allow(),
+-  tiktok: JoiBase.allow(),
+-  instagram: JoiBase.allow(),
+-  youtube: JoiBase.allow(),
+-  twitter: JoiBase.allow(),
+-  facebook: JoiBase.allow(),
+-  threads: JoiBase.allow(),
++  appleUrl: optionalUrl,
++  tiktok: optionalUrl,
++  instagram: optionalUrl,
++  youtube: optionalUrl,
++  twitter: optionalUrl,
++  facebook: optionalUrl,
++  threads: optionalUrl,
+ });
+ 
+ export const accountValidation = JoiBase.object({
 -- 
 2.43.0
 

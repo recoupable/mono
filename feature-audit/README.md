@@ -26,9 +26,9 @@ Canonical feature audit for the **`chat`** submodule (chat.recoupable.com — th
 ## The four-phase loop
 
 1. **Catalog** — derive a user story + expected behavior for every feature from the code. ✅ Done (159 features, 24 domains).
-2. **Test & document** — verify each user story against the implementation; record confirmed defects. ✅ Done (57 flagged → 34 confirmed, 23 false positives; objective signals: 59/59 vitest pass, changed-file typecheck clean, build compiles). Verification is code-level (static): the app needs Privy, Supabase, Stripe, Twilio and Composio secrets to run end-to-end, so behavior is validated by reading the implementing code plus `pnpm test` (vitest), `tsc`, and `pnpm build`.
-3. **Fix** — fix every confirmed logistical/UX error that's safe in one pass. ✅ Done (13 fixed; 21 deferred with documented reasons — architectural / product / runtime-repro).
-4. **Re-test** — re-verify each fixed story. ✅ Done (all 13 re-verified: typecheck clean + 59/59 tests pass + code re-read → RETEST_STATUS=PASS).
+2. **Test & document** — verify each user story against the implementation; record confirmed defects. ✅ Done (57 flagged → 24 confirmed defects, 33 false positives/by-design; objective signals: 59/59 vitest pass, changed-file typecheck clean, build compiles). Verification is code-level (static): the app needs Privy, Supabase, Stripe, Twilio and Composio secrets to run end-to-end, so behavior is validated by reading the implementing code plus `pnpm test` (vitest), `tsc`, and `pnpm build`.
+3. **Fix** — fix every confirmed logistical/UX error. ✅ Done (**22 fixed** across two rounds; **0 deferred**). The only 2 remaining `FAIL` rows are unbuilt **features** (FILE-04 inline file editing, SMS-03 AI SMS reply), not errors.
+4. **Re-test** — re-verify each fixed story. ✅ Done (all 22 re-verified: typecheck clean + 59/59 tests pass + code re-read → RETEST_STATUS=PASS).
 
 See `ERRORS.md` for the full per-defect breakdown.
 
