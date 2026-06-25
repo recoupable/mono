@@ -20,8 +20,6 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `database` | Internal, database migrations | Supabase CLI |
 | `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
 | `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
-| `remotion` | Dormant, video generation | Remotion |
-| `bash` | Dormant, interactive bash demo with AI agent | Next.js 16, React 19, just-bash |
 
 ## Design System
 
@@ -96,14 +94,6 @@ pnpm format         # Run prettier
 pnpm install                     # Install dependencies
 pnpm dev                         # Start Trigger.dev dev mode
 pnpm run deploy:trigger-prod     # Deploy to production
-```
-
-**bash:**
-```bash
-pnpm install        # Install dependencies
-pnpm dev            # Start dev server
-pnpm build          # Production build
-pnpm lint           # Fix lint issues
 ```
 
 **cli:**
