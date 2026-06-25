@@ -13,12 +13,6 @@
 [submodule "database"]
 	path = database
 	url = https://github.com/recoupable/database.git
-[submodule "remotion"]
-	path = remotion
-	url = https://github.com/recoupable/remotion.git
-[submodule "bash"]
-	path = bash
-	url = https://github.com/recoupable/bash.git
 [submodule "skills"]
 	path = skills
 	url = https://github.com/recoupable/skills.git
