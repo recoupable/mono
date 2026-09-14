@@ -43,7 +43,9 @@ records, credentials, and private comments about colleagues. Client material rem
 Do not fetch private source repositories, inboxes, meeting accounts, or missing originals from Mono.
 Future private-source imports require review outside Business before any branch is pushed. An excerpt
 is incomplete evidence; do not reconstruct omitted passages. Historical ingestion routines are reference
-only: no automatic Consulting-to-Business sync or unattended ingestion is deployed here.
+only. The separate private sync coordinator AI-reviews outbound files and polls released Business/Skills
+changes back into the private workspace. It updates these submodule references through signed sync PRs.
+No source-ingestion worker runs inside Mono.
 
 **Skills:** Mono's `skills/` is the single shared checkout of the public `recoupable/skills` repository.
 Business uses it through `../skills/`; do not create a nested `business/plugin/` checkout or copy skills
