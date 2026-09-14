@@ -20,6 +20,7 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `database` | Internal, database migrations | Supabase CLI |
 | `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
 | `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
+| `business` | Internal, private shared client, pipeline, meeting, and business context | Markdown |
 
 ## Design System
 
