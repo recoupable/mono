@@ -22,6 +22,45 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
 | `business` | Internal, private shared client, pipeline, meeting, and business context | Markdown |
 
+## Business Workspace
+
+`business/` is the private `recoupable/business` repository, shared by Sidney and Sweets. It preserves
+the consulting OS folder structure and contains reviewed business material plus the team's own work.
+It has independent Git history; it is not a clone or mirror of Sidney's private consulting repository.
+
+Use it for customer context, meeting records, consulting delivery, pipeline, and business operations.
+Before working on a client or deal, read `business/AGENTS.md` and that entity's `AGENTS.md`. Reference
+the canonical record there instead of duplicating customer context in another submodule.
+
+- **Client work:** `business/clients/`; prospective deals: `business/pipeline/`.
+- **Reusable context:** `business/knowledge/`, `business/library/`, and sourced insights in `business/signals/`.
+- **Content and product opportunities:** `business/content/` and `business/products/`.
+- **Back office:** `business/business/`; the practice dashboard is `business/business/metrics/dashboard.html`.
+
+**Sharing boundary:** ordinary personal details mentioned in legitimate customer/client meetings may
+remain. Exclude actual therapy-session transcripts, standalone personal/family/health records, unrelated employment
+records, credentials, and private comments about colleagues. Client material remains confidential.
+Do not fetch private source repositories, inboxes, meeting accounts, or missing originals from Mono.
+Future private-source imports require review outside Business before any branch is pushed. An excerpt
+is incomplete evidence; do not reconstruct omitted passages. Historical ingestion routines are reference
+only: no automatic Consulting-to-Business sync or unattended ingestion is deployed here.
+
+**Skills:** Mono's `skills/` is the single shared checkout of the public `recoupable/skills` repository.
+Business uses it through `../skills/`; do not create a nested `business/plugin/` checkout or copy skills
+into Business. Author skills at `skills/skills/<skill-name>/SKILL.md` from the Mono root, or
+`../skills/skills/<skill-name>/SKILL.md` from the Business root. Follow `skills/AGENTS.md` for publishing.
+For consulting capabilities, `<skill-name>` is the full `recoup-internal-consulting-<short-name>`
+in both the folder name and SKILL.md frontmatter. “Internal” describes their intended
+audience, not repository privacy. Keep client records and private business examples in Business. When
+running a shared skill for Business, use Business as the working directory and output destination.
+Publish skill changes in a Skills PR targeting `main` and update Mono's Skills reference after merge.
+Publish Business changes in a Business PR targeting `main` and update its Mono reference separately. Neither repository's commit publishes
+the other. Consulting's private plugin authoring workflow remains separate from this Mono setup.
+
+On a fresh Mono clone, initialize Business and shared Skills with
+`git submodule update --init -- business skills`. Commit Business content in its own repository;
+Mono records only the Business commit reference. Both use feature branches and PRs targeting `main`.
+
 ## Design System
 
 **Read `DESIGN.md` before building or modifying any UI across any submodule.**
@@ -153,7 +192,9 @@ This puts skills into `.agents/skills/` (and `.cursor/skills/`, `.claude/skills/
 
 ### Building a new skill
 
-Create a directory in the `skills/` submodule under `skills/` with a `SKILL.md`. See `skills/template/SKILL.md` for the format. Push to a feature branch, open a PR.
+Create `skills/skills/<skill-name>/SKILL.md` in the `skills/` submodule. Follow `skills/AGENTS.md`
+for the format, resolver entry, and validation. Push to a feature branch and open a PR. This is also
+the authoring location for agents working from Business; see the Business Workspace section above.
 
 ## Working Across Submodules
 
