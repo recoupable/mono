@@ -40,3 +40,6 @@
 [submodule "plugins"]
 	path = plugins
 	url = https://github.com/recoupable/plugins.git
+[submodule "business"]
+	path = business
+	url = https://github.com/recoupable/business.git
