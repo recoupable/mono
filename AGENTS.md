@@ -44,7 +44,7 @@ Do not fetch private source repositories, inboxes, meeting accounts, or missing 
 Future private-source imports require review outside Business before any branch is pushed. An excerpt
 is incomplete evidence; do not reconstruct omitted passages. Historical ingestion routines are reference
 only. The separate private sync coordinator AI-reviews outbound files and polls released Business/Skills
-changes back into the private workspace. It updates these submodule references through signed sync PRs.
+changes back into the private workspace. In Mono, its signed PRs are based on current main and change only the Business/Skills submodule references.
 No source-ingestion worker runs inside Mono.
 
 **Skills:** Mono's `skills/` is the single shared checkout of the public `recoupable/skills` repository.
@@ -55,8 +55,8 @@ For consulting capabilities, `<skill-name>` is the full `recoup-internal-consult
 in both the folder name and SKILL.md frontmatter. “Internal” describes their intended
 audience, not repository privacy. Keep client records and private business examples in Business. When
 running a shared skill for Business, use Business as the working directory and output destination.
-Publish skill changes in a Skills PR targeting `main` and update Mono's Skills reference after merge.
-Publish Business changes in a Business PR targeting `main` and update its Mono reference separately. Neither repository's commit publishes
+Publish skill changes in a Skills PR targeting `main` and let the coordinator update Mono's Skills reference after merge (or update it manually while sync is paused).
+Publish Business changes in a Business PR targeting `main` and let the coordinator update its Mono reference separately (or do so manually while sync is paused). Neither repository's commit publishes
 the other. Consulting's private plugin authoring workflow remains separate from this Mono setup.
 
 On a fresh Mono clone, initialize Business and shared Skills with
