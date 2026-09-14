@@ -38,7 +38,7 @@ the canonical record there instead of duplicating customer context in another su
 - **Back office:** `business/business/`; the practice dashboard is `business/business/metrics/dashboard.html`.
 
 **Sharing boundary:** ordinary personal details mentioned in legitimate customer/client meetings may
-remain. Exclude actual therapy-session transcripts, standalone personal records, unrelated employment
+remain. Exclude actual therapy-session transcripts, standalone personal/family/health records, unrelated employment
 records, credentials, and private comments about colleagues. Client material remains confidential.
 Do not fetch private source repositories, inboxes, meeting accounts, or missing originals from Mono.
 Future private-source imports require review outside Business before any branch is pushed. An excerpt
@@ -49,16 +49,17 @@ only: no automatic Consulting-to-Business sync or unattended ingestion is deploy
 Business uses it through `../skills/`; do not create a nested `business/plugin/` checkout or copy skills
 into Business. Author skills at `skills/skills/<skill-name>/SKILL.md` from the Mono root, or
 `../skills/skills/<skill-name>/SKILL.md` from the Business root. Follow `skills/AGENTS.md` for publishing.
-Consulting skills use `recoup-internal-consulting-<skill-name>`; “internal” describes their intended
+For consulting capabilities, `<skill-name>` is the full `recoup-internal-consulting-<short-name>`
+in both the folder name and SKILL.md frontmatter. “Internal” describes their intended
 audience, not repository privacy. Keep client records and private business examples in Business. When
 running a shared skill for Business, use Business as the working directory and output destination.
-Publish skill changes in a Skills PR and update Mono's Skills reference after merge. Publish Business
-changes in a Business PR and update its Mono reference separately. Neither repository's commit publishes
+Publish skill changes in a Skills PR targeting `main` and update Mono's Skills reference after merge.
+Publish Business changes in a Business PR targeting `main` and update its Mono reference separately. Neither repository's commit publishes
 the other. Consulting's private plugin authoring workflow remains separate from this Mono setup.
 
 On a fresh Mono clone, initialize Business and shared Skills with
 `git submodule update --init -- business skills`. Commit Business content in its own repository;
-Mono records only the Business commit reference. See the Git workflow below for feature branches and PRs.
+Mono records only the Business commit reference. Both use feature branches and PRs targeting `main`.
 
 ## Design System
 
