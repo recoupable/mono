@@ -1,0 +1,25 @@
+name: Workspace sync candidate
+
+on:
+  push:
+    branches: ['codex/sync-*']
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Validate proposed files
+        run: |
+          git diff --check HEAD^ HEAD
+
