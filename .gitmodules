@@ -43,3 +43,6 @@
 [submodule "business"]
 	path = business
 	url = https://github.com/recoupable/business.git
+[submodule "projects"]
+	path = projects
+	url = https://github.com/recoupable/projects.git

@@ -4,7 +4,7 @@ This file provides guidance to any AI agent working with code in this repository
 
 ## Monorepo Structure
 
-This is a git submodule-based monorepo for the Recoupable platform. Each submodule has its own context files with project-specific guidance.
+This is a git submodule-based workspace for the Recoupable platform, business operations and project builds. Each submodule has its own context files with project-specific guidance.
 
 | Submodule | Description | Key Tech |
 |-----------|-------------|----------|
@@ -21,6 +21,7 @@ This is a git submodule-based monorepo for the Recoupable platform. Each submodu
 | `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
 | `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
 | `business` | Internal, private shared client, pipeline, meeting, and business context | Markdown |
+| `projects` | Internal, private technical project workspaces and client repository links | Git submodules, Markdown |
 
 ## Business Workspace
 
@@ -32,14 +33,15 @@ Use it for customer context, meeting records, consulting delivery, pipeline, and
 Before working on a client or deal, read `business/AGENTS.md` and that entity's `AGENTS.md`. Reference
 the canonical record there instead of duplicating customer context in another submodule.
 
-- **Client work:** `business/clients/`; prospective deals: `business/pipeline/`.
+- **Customer relationships:** `business/clients/`; prospective deals: `business/pipeline/`.
+- **Technical project work:** `projects/<project>/`; follow `projects/AGENTS.md` and the project map.
 - **Reusable context:** `business/knowledge/`, `business/library/`, and sourced insights in `business/signals/`.
 - **Content and product opportunities:** `business/content/` and `business/products/`.
 - **Back office:** `business/business/`; the practice dashboard is `business/business/metrics/dashboard.html`.
 
 **Sharing boundary:** ordinary personal details mentioned in legitimate customer/client meetings may
 remain. Exclude actual therapy-session transcripts, standalone personal/family/health records, unrelated employment
-records, credentials, and private comments about colleagues. Client material remains confidential.
+records and credentials. Client material remains confidential.
 Do not fetch private source repositories, inboxes, meeting accounts, or missing originals from Mono.
 Future private-source imports require review outside Business before any branch is pushed. An excerpt
 is incomplete evidence; do not reconstruct omitted passages. Historical ingestion routines are reference
@@ -63,9 +65,31 @@ On a fresh Mono clone, initialize Business and shared Skills with
 `git submodule update --init -- business skills`. Commit Business content in its own repository;
 Mono records only the Business commit reference. Both use feature branches and PRs targeting `main`.
 
+## Projects Workspace
+
+`projects/` is the private `recoupable/projects` repository. It organizes technical builds in named
+project folders. Read `projects/AGENTS.md` and the selected project's
+instructions for its repository map and current setup status. Source repositories keep their owning
+GitHub organizations, permissions, histories and deployment workflows.
+
+Business holds the customer relationship: meetings, agreements, account status and commitments.
+Projects holds the implementation: applications, services, operating systems and technical guidance.
+Link between the canonical records; keep each fact in its owning repository. Projects uses its own
+repository permissions and is outside the private Consulting-to-Business publication process.
+
+Initialize Projects with `git submodule update --init -- projects`. Then read its project instructions
+before initializing only the required child repositories. A private project's source access must be
+granted separately; Mono access is not source-repository access. Mono is public, so keep customer
+code, records, credentials and detailed project inventories inside the private repositories.
+
+Work and merge in each owning repository first, update its reference in a Projects PR, then update
+Mono's `projects` reference in a Mono PR. The Business/Skills coordinator does not update Projects.
+Preserve active local checkouts and worktrees during setup. Project-specific branding and release
+branches override Recoup platform defaults; verify a child's default branch before opening its PR.
+
 ## Design System
 
-**Read `DESIGN.md` before building or modifying any UI across any submodule.**
+**Read `DESIGN.md` before building or modifying Recoup platform UI. Client projects follow their own design instructions.**
 
 It defines the shared visual language — colors, typography, spacing, components, depth, and motion — that all frontends (chat, marketing, admin) share. App-specific overrides are noted inline. Key points:
 
@@ -76,11 +100,11 @@ It defines the shared visual language — colors, typography, spacing, component
 
 ## Git Workflow
 
-**Common rules across all submodules:**
+**Repository workflow:**
 1. **NEVER push directly to `main`** - always use feature branches and PRs
 2. After code changes, commit with descriptive messages and push to feature branches
 3. Each submodule is an independent git repository
-4. **Always open a PR** after pushing changes — PRs target `main` in every submodule (the old `api`/`chat` `test`-branch staging flow is retired)
+4. **Always open a PR** after pushing changes. Recoup platform, Business and Projects PRs target `main`; project-owned repositories use their verified release branch. The old `api`/`chat` `test`-branch staging flow is retired.
 
 ### Worktree Workflow
 
@@ -112,7 +136,7 @@ git worktree prune
 - Isolated environment for each feature branch
 - Easy cleanup after PR merge
 
-**All submodules (including `api` and `chat`) take PRs against `main`.** The `test` branches in `api`/`chat` are retired as PR targets — do not open PRs against them or run the old test-sync ritual.
+**Recoup platform submodules (including `api` and `chat`), Business and Projects take PRs against `main`. Client-owned repositories follow their own branch rules.** The `test` branches in `api`/`chat` are retired as PR targets — do not open PRs against them or run the old test-sync ritual.
 
 ## Build Commands by Project
 

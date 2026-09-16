@@ -1,16 +1,21 @@
 # Recoup Monorepo
 
-A git submodule-based monorepo for the Recoup platform.
+A git submodule-based workspace for the Recoup platform, business operations and project builds.
 
 ## Quick Start
 
 ```bash
-# Clone with submodules
-git clone --recurse-submodules git@github.com:recoupable/mono.git
+# Clone the workspace, then initialize the repositories you need.
+git clone git@github.com:recoupable/mono.git
+cd mono
+git submodule update --init -- chat api skills
 
-# Or if already cloned, initialize submodules
-git submodule update --init --recursive
+# With access to the private company repositories:
+git submodule update --init -- business projects
 ```
+
+Read `projects/AGENTS.md` before initializing a client project's repositories. Each private source
+requires its own access; select only what the current task needs.
 
 ## Repository Structure
 
@@ -24,6 +29,8 @@ git submodule update --init --recursive
 | `remotion` | Video generation | Remotion |
 | `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
 | `skills` | AI agent skills monorepo | Markdown, Git submodules |
+| `business` | Private customer relationships, meetings, agreements and operations | Markdown |
+| `projects` | Private technical workspaces for products and client builds | Git submodules, Markdown |
 
 ## Using This Repo with an LLM
 
@@ -41,7 +48,7 @@ This monorepo is designed for LLM-assisted development. Each submodule contains 
 1. **Start with context**: Point your LLM to `AGENTS.md` (or `CLAUDE.md`) at the root for overall guidance
 2. **Work in submodules**: Each submodule is an independent git repo - cd into the relevant folder
 3. **Branch workflow**: Never push directly to `main`. Use feature branches and PRs
-4. **Special branches**: `api` and `chat` have a `test` branch - PRs should target `test`, not `main`
+4. **Release branches**: Recoup platform, Business and Projects PRs target `main`. Client project repositories follow their own verified release branches.
 
 ## Data Flow
 
