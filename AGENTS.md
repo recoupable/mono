@@ -19,9 +19,36 @@ This is a git submodule-based workspace for the Recoupable platform, business op
 | `tasks` | Internal, background job workers — **deprecating in favor of Vercel Workflows inside `api`; don't add new jobs here** | Trigger.dev v4 |
 | `database` | Internal, database migrations | Supabase CLI |
 | `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
-| `strategy` | Internal, strategy docs, PMF journal, roadmap, customer notes | Markdown |
-| `business` | Internal, private shared client, pipeline, meeting, and business context | Markdown |
+| `blog` | Blog repository | Read local instructions |
+| `plugins` | Plugin repository | Read local instructions |
+| `business` | Internal, private company strategy, product opportunities, customers and operations | Markdown |
 | `projects` | Internal, private technical project workspaces and client repository links | Git submodules, Markdown |
+
+## Find context and save work
+
+Read this file, then the owning repository's `AGENTS.md`; load the records relevant to the task.
+
+| Task | Read first / save location |
+| --- | --- |
+| Company direction, product strategy or PMF learning | `business/strategy/README.md` → current orientation and decision/learning records |
+| Product opportunity or customer demand | `business/products/AGENTS.md` → existing opportunity card and sources |
+| Customer relationship, meeting or agreement | `business/AGENTS.md` → client/deal instructions and canonical records |
+| Company positioning or market research | `business/positioning/` |
+| Finance, legal or company metrics | `business/business/` |
+| Recoup platform code and release status | Owning application submodule's instructions and progress record |
+| Client technical build | `projects/AGENTS.md` → selected project map and owning child repository |
+| Reusable agent capability | `skills/AGENTS.md` → `skills/skills/` |
+
+The standalone `strategy/` submodule is retired. Its migration map and history live privately at
+`business/strategy/migration-2026-09-16.md`. Existing local Strategy checkouts may remain for
+preservation; do not write new work there or load their old instructions as current company policy.
+Do not delete local checkouts or unpublished history as part of routine workspace cleanup.
+
+If a private repository is uninitialized or inaccessible, report the missing context and request the
+appropriate access; do not infer its contents from old strategy files or search personal checkouts.
+Keep private facts inside Business/Projects, not in this public repository. Link to the owning record
+instead of duplicating it. At handoff, update its dated status, evidence, next action and blockers so
+another session can resume. A historical report or candidate idea is not a current decision or release.
 
 ## Business Workspace
 
@@ -29,10 +56,12 @@ This is a git submodule-based workspace for the Recoupable platform, business op
 the consulting OS folder structure and contains reviewed business material plus the team's own work.
 It has independent Git history; it is not a clone or mirror of Sidney's private consulting repository.
 
-Use it for customer context, meeting records, consulting delivery, pipeline, and business operations.
+Use it for company strategy, product opportunities, customer context, meetings, consulting delivery,
+pipeline, and business operations.
 Before working on a client or deal, read `business/AGENTS.md` and that entity's `AGENTS.md`. Reference
 the canonical record there instead of duplicating customer context in another submodule.
 
+- **Company direction:** `business/strategy/`; start with its `README.md`.
 - **Customer relationships:** `business/clients/`; prospective deals: `business/pipeline/`.
 - **Technical project work:** `projects/<project>/`; follow `projects/AGENTS.md` and the project map.
 - **Reusable context:** `business/knowledge/`, `business/library/`, and sourced insights in `business/signals/`.

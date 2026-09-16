@@ -17,20 +17,33 @@ git submodule update --init -- business projects
 Read `projects/AGENTS.md` before initializing a client project's repositories. Each private source
 requires its own access; select only what the current task needs.
 
+## Find context
+
+Start with [AGENTS.md](AGENTS.md), which routes tasks to their owning repository and explains where
+to save results. Company direction is in `business/strategy/README.md`; customer records and product
+opportunities remain in Business's existing folders. The standalone `strategy` submodule is retired.
+After initializing Business, use `business/strategy/migration-2026-09-16.md` for historical paths.
+Existing local Strategy checkouts may remain as preserved history; do not create new work there.
+
 ## Repository Structure
 
-| Submodule | Description | Tech Stack |
-|-----------|-------------|------------|
-| `chat` | Main chat application | Next.js 16, React 19, Vercel AI SDK, Stagehand |
-| `api` | API service with payment middleware | Next.js 16, x402-next, Supabase |
-| `tasks` | Background job workers | Trigger.dev v4 |
-| `docs` | API documentation | Mintlify |
-| `database` | Database migrations | Supabase CLI |
-| `remotion` | Video generation | Remotion |
-| `bash` | Interactive bash demo with AI agent | Next.js 16, React 19, just-bash, AI SDK |
-| `skills` | AI agent skills monorepo | Markdown, Git submodules |
-| `business` | Private customer relationships, meetings, agreements and operations | Markdown |
-| `projects` | Private technical workspaces for products and client builds | Git submodules, Markdown |
+| Submodule | Purpose |
+| --- | --- |
+| `chat` | Artist and label web application |
+| `api` | Backend API and new background workflows |
+| `marketing` | Marketing website and landing pages |
+| `docs` | Public API documentation |
+| `cli` | Command-line interface |
+| `skills` | Public reusable agent skills |
+| `open-agents` | Reference application for background coding agents |
+| `admin` | Internal platform administration |
+| `tasks` | Existing Trigger.dev jobs; new jobs belong in API workflows |
+| `database` | Supabase migrations |
+| `gtm` | Internal go-to-market tooling |
+| `blog` | Blog repository |
+| `plugins` | Plugin repository; read its local instructions |
+| `business` | Private company strategy, product opportunities, customers and operations |
+| `projects` | Private technical project maps and client repository links |
 
 ## Using This Repo with an LLM
 
