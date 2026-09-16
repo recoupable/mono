@@ -85,7 +85,8 @@ code, records, credentials and detailed project inventories inside the private r
 Work and merge in each owning repository first, update its reference in a Projects PR, then update
 Mono's `projects` reference in a Mono PR. The Business/Skills coordinator does not update Projects.
 Preserve active local checkouts and worktrees during setup. Project-specific branding and release
-branches override Recoup platform defaults; verify a child's default branch before opening its PR.
+branches override Recoup platform defaults; verify a child's documented release or PR target branch
+before opening its PR. Its GitHub default branch may differ.
 
 ## Design System
 
