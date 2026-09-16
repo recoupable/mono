@@ -60,7 +60,8 @@ chat (frontend) → api (backend) → Supabase (database)
 
 ## Build Commands
 
-All projects use `pnpm`:
+Recoup application repositories use `pnpm`. For work under `projects/`, follow the selected project's
+own build and package-manager instructions. Common Recoup application commands:
 
 ```bash
 pnpm install   # Install dependencies
