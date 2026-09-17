@@ -1,3 +1,6 @@
 
 # Preserved local checkout of the retired private Strategy repository.
 /strategy/
+
+# Linked worktrees and their private local preservation records.
+/.worktrees/
