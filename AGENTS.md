@@ -138,33 +138,46 @@ It defines the shared visual language — colors, typography, spacing, component
 
 ### Worktree Workflow
 
-Use git worktrees to work on features in isolation without affecting your main working directory.
+**All linked worktrees must live under an ignored `.worktrees/` directory.** Keep Mono and Recoup
+platform, Business, and Projects worktrees at `mono/.worktrees/<repository>/<task>/`; use `mono` as
+the repository name for a worktree of this parent repository. Do not create new sibling folders such
+as `api-worktree`, or hide Git checkouts inside business task/output folders or temporary directories.
 
-**Creating a worktree for a new feature:**
+Project-owned workspaces with an established local convention keep their own `.worktrees/` root.
+In particular, Seeker/Heartbeats worktrees stay inside that workspace's
+`.worktrees/<repository>/<task>/`, not Mono's central directory. A standalone repository uses its own
+ignored `.worktrees/<task>/`. Ordinary output folders are not worktrees and are not moved by this rule.
+
+Create worktrees through the repository that owns the code. From the Mono root:
+
 ```bash
-# From the monorepo root, create a worktree for a submodule
-git worktree add <submodule>-worktree -b <branch-name> <submodule>
+# Verify the starting ref in the owning repository before creating a branch.
+git -C api worktree add ../.worktrees/api/<task> -b codex/<task> origin/main
 
-# Example: Create a worktree for api
-git worktree add api-worktree -b feature/my-feature api
+# A worktree of Mono itself:
+git worktree add .worktrees/mono/<task> -b codex/<task> origin/main
 ```
 
-**Removing the worktree after PR is merged:**
-```bash
-# Remove the worktree directory and prune
-git worktree remove <submodule>-worktree
-git worktree prune
+`git worktree add` at Mono's root creates a Mono worktree; a submodule path is not the submodule's
+starting branch. Use `git -C <repository>` for both creation and removal.
 
-# Example: Remove api worktree
-git worktree remove api-worktree
-git worktree prune
+Before relocating existing work, inventory registrations and preserve branch/commit, staged and
+unstaged changes, untracked/ignored files, environment links and nested submodules. Check for running
+processes and task paths. Use `git worktree move` for supported moves, then verify the registration
+and local links. Git refuses to move worktrees containing submodules: those require an explicit,
+verified migration that repairs both worktree registration and every nested repository pointer;
+do not use a blind filesystem rename. Never reset or clean a checkout to make it movable.
+
+Only remove a worktree after its work is merged or otherwise explicitly preserved, it is inactive,
+and its tracked, untracked and ignored local files have been checked:
+
+```bash
+git -C api worktree remove ../.worktrees/api/<task>
 ```
 
-**Benefits of worktrees:**
-- Work on multiple features simultaneously without stashing
-- Keep your main working directory clean
-- Isolated environment for each feature branch
-- Easy cleanup after PR merge
+Do not blanket-prune missing registrations. Check whether the checkout was moved or disconnected,
+recover it when possible, and preserve its commit and metadata before pruning truly missing paths.
+Private relocation inventories belong in ignored local storage, never this public repository.
 
 **Recoup platform submodules (including `api` and `chat`), Business and Projects take PRs against `main`. Client-owned repositories follow their own branch rules.** The `test` branches in `api`/`chat` are retired as PR targets — do not open PRs against them or run the old test-sync ritual.
 
