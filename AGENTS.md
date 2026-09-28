@@ -121,12 +121,12 @@ before opening its PR. Its GitHub default branch may differ.
 
 **Read `DESIGN.md` before building or modifying Recoup platform UI. Client projects follow their own design instructions.**
 
-It defines the shared visual language — colors, typography, spacing, components, depth, and motion — that all frontends (chat, marketing, admin) share. App-specific overrides are noted inline. Key points:
+It maps the shared **Recoup Sky** system used by marketing and the app, and points at the sources of truth:
+`marketing/DESIGN.md` for the system, each app's `app/globals.css` for tokens. Key points:
 
-- **Four-font system:** Geist Pixel Square (display headlines), Plus Jakarta Sans (UI), Geist Sans (body), Instrument Serif (editorial moments)
-- **Shadow-as-border:** Use `box-shadow` instead of CSS `border` on cards and containers
-- **Achromatic chrome:** UI stays black/white — color comes from content and status indicators
-- **Semantic CSS variables:** All colors defined as custom properties with light and dark values
+- **Colors:** white canvas, ink `#152E37`, brand blue `#007EBD`, dark green `#132B26`, lime `#D6FF62` for actions
+- **Type:** DM Sans for everything, IBM Plex Mono for labels
+- **When the doc and the code disagree, the code wins**; fix the doc in the same PR
 
 ## Git Workflow
 
