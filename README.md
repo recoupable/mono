@@ -17,6 +17,32 @@ git submodule update --init -- business projects
 Read `projects/AGENTS.md` before initializing a client project's repositories. Each private source
 requires its own access; select only what the current task needs.
 
+## Cloud Agent Sessions
+
+A Claude Code cloud environment that provisions this workspace needs GitHub access to every private
+repository it initializes. Attach them to the environment (or the session) before setup runs:
+
+- `recoupable/mono`, `recoupable/gtm`, `recoupable/business`, `recoupable/projects`
+- The client project repositories listed under "Cloud sessions" in `projects/AGENTS.md`
+
+Public submodules clone without an attachment. After the environment's setup script installs the
+helpers, finish provisioning from the Mono root:
+
+```bash
+python3 .local/environment-master/cloud/finish-setup.py
+```
+
+The command stops at the first submodule it cannot clone and names it. Attach that repository and
+rerun it; initialized submodules and installed dependencies are kept. Then run project commands
+with that repository's scoped environment:
+
+```bash
+python3 .local/environment-master/cloud/run.py <repository> -- <command>
+```
+
+Project-specific system dependencies, such as Python packages used by a client project's tests, are
+listed with that project's attachments in `projects/AGENTS.md`.
+
 ## Find context
 
 Start with [AGENTS.md](AGENTS.md), which routes tasks to their owning repository and explains where
