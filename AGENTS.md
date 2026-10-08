@@ -23,6 +23,7 @@ This is a git submodule-based workspace for the Recoupable platform, business op
 | `plugins` | Plugin repository | Read local instructions |
 | `business` | Internal, private company strategy, product opportunities, customers and operations | Markdown |
 | `projects` | Internal, private technical project workspaces and client repository links | Git submodules, Markdown |
+| `records` | Internal, private Recoup Records organization workspace and label operations | Markdown |
 
 ## Find context and save work
 
@@ -36,6 +37,7 @@ Read this file, then the owning repository's `AGENTS.md`; load the records relev
 | Company positioning or market research | `business/positioning/` |
 | Finance, legal or company metrics | `business/business/` |
 | Recoup platform code and release status | Owning application submodule's instructions and progress record |
+| Recoup Records label operations | `records/AGENTS.md` → operating plans, decisions and evidence references |
 | Client technical build | `projects/AGENTS.md` → selected project map and owning child repository |
 | Reusable agent capability | `skills/AGENTS.md` → `skills/skills/` |
 
@@ -46,9 +48,10 @@ Do not delete local checkouts or unpublished history as part of routine workspac
 
 If a private repository is uninitialized or inaccessible, report the missing context and request the
 appropriate access; do not infer its contents from old strategy files or search personal checkouts.
-Keep private facts inside Business/Projects, not in this public repository. Link to the owning record
-instead of duplicating it. At handoff, update its dated status, evidence, next action and blockers so
-another session can resume. A historical report or candidate idea is not a current decision or release.
+Keep private facts inside their owning Business, Projects or Records repository, not in public Mono.
+Link to the owning record instead of duplicating it. At handoff, update its dated status, evidence,
+next action and blockers so another session can resume. A historical report or candidate idea is not
+a current decision or release.
 
 ## Business Workspace
 
@@ -117,6 +120,24 @@ Preserve active local checkouts and worktrees during setup. Project-specific bra
 branches override Recoup platform defaults; verify a child's documented release or PR target branch
 before opening its PR. Its GitHub default branch may differ.
 
+## Records Workspace
+
+`records/` is the private organization repository used by Recoup Records. Read `records/AGENTS.md`
+before operating the label. Use it for label plans, operating instructions, decisions and evidence
+references. Keep contracts, statements, artist details and other private material out of public Mono.
+
+Work **on the platform** in its owning application repositories; work **in the label** in `records/`.
+Exercise the supported Recoup workflow for real operations, report product gaps as sanitized platform
+issues, and verify the original business task after the product fix. Keep product architecture and
+Context Engine planning in their existing product homes; link to them from Records instead of
+creating a second platform roadmap.
+
+With access to its private repository, initialize only Records using
+`git submodule update --init -- records`. Commit changes in Records on feature branches and open
+PRs against its `main`; after merge, update the `records` reference in a separate Mono PR against
+`main`. The Business/Skills coordinator does not update Records. A shared Git remote does not prove
+automatic synchronization with hosted Recoup sessions; verify the branch, commit and file readback.
+
 ## Design System
 
 **Read `DESIGN.md` before building or modifying Recoup platform UI. Client projects follow their own design instructions.**
@@ -139,7 +160,7 @@ It maps the shared **Recoup Sky** system used by marketing and the app, and poin
 ### Worktree Workflow
 
 **All linked worktrees must live under an ignored `.worktrees/` directory.** Keep Mono and Recoup
-platform, Business, and Projects worktrees at `mono/.worktrees/<repository>/<task>/`; use `mono` as
+platform, Business, Projects, and Records worktrees at `mono/.worktrees/<repository>/<task>/`; use `mono` as
 the repository name for a worktree of this parent repository. Do not create new sibling folders such
 as `api-worktree`, or hide Git checkouts inside business task/output folders or temporary directories.
 

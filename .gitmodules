@@ -43,3 +43,6 @@
 [submodule "projects"]
 	path = projects
 	url = https://github.com/recoupable/projects.git
+[submodule "records"]
+	path = records
+	url = https://github.com/recoupable/14524163-fd59-4d49-b58f-bd739b1bc0b5.git

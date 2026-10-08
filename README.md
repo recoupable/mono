@@ -12,6 +12,9 @@ git submodule update --init -- chat api skills
 
 # With access to the private company repositories:
 git submodule update --init -- business projects
+
+# With access to the private Recoup Records organization repository:
+git submodule update --init -- records
 ```
 
 Read `projects/AGENTS.md` before initializing a client project's repositories. Each private source
@@ -44,6 +47,12 @@ Existing local Strategy checkouts may remain as preserved history; do not create
 | `plugins` | Plugin repository; read its local instructions |
 | `business` | Private company strategy, product opportunities, customers and operations |
 | `projects` | Private technical project maps and client repository links |
+| `records` | Private Recoup Records organization workspace and label operations |
+
+Build the Recoup platform in its application submodules and operate Recoup Records in `records/`.
+Read `records/AGENTS.md` before label work. Its repository retains independent access and history;
+public Mono tracks only its URL and commit reference. Keep private operating material in Records
+or its approved private storage. Verify hosted Recoup session readback separately from local Git.
 
 ## Using This Repo with an LLM
 
