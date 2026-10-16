@@ -97,6 +97,15 @@ On a fresh Mono clone, initialize Business and shared Skills with
 `git submodule update --init -- business skills`. Commit Business content in its own repository;
 Mono records only the Business commit reference. Both use feature branches and PRs targeting `main`.
 
+## Go-to-Market Funnels
+
+The private funnel source of truth lives in `business/funnels/README.md`. Start there for
+funnel ideas, competitor references, research, building/live status, experiments and metrics;
+follow `business/funnels/AGENTS.md`. It links to existing content, podcast, newsletter,
+relationship and deal records rather than duplicating them. Record production verification
+separately from implementation or drafts. Keep all campaign data and private evidence in
+Business; this public repository holds navigation only.
+
 ## Projects Workspace
 
 `projects/` is the private `recoupable/projects` repository. It organizes technical builds in named
