@@ -74,9 +74,20 @@ the canonical record there instead of duplicating customer context in another su
 **Sharing boundary:** ordinary personal details mentioned in legitimate customer/client meetings may
 remain. Exclude actual therapy-session transcripts, standalone personal/family/health records, unrelated employment
 records and credentials. Client material remains confidential.
-Do not fetch private source repositories, inboxes, meeting accounts, or missing originals from Mono.
-Future private-source imports require review outside Business before any branch is pushed. An excerpt
-is incomplete evidence; do not reconstruct omitted passages. Historical ingestion routines are reference
+This boundary governs importing personal-source material into the shared Business repository.
+Do not use Mono or Business access to retrieve Sidney's personal consulting repositories, inboxes,
+meeting accounts, credentials, or missing originals to reconstruct or expand reviewed Business records.
+Access to a folder or a reference to an omitted source is not permission to import it. Any explicitly
+authorized personal-source import must be reviewed outside Business before the selected material is
+copied into Business or a branch containing it is pushed; excluded personal records and credentials
+must not be published. An excerpt is incomplete evidence; do not reconstruct omitted passages.
+
+This is not a ban on private project repositories. Explicitly authorized fetching, pulling, reading,
+and scoped ingestion from registered client or department repositories under `projects/` may proceed
+with existing source access and the owning project's instructions. Keep client data in its private
+project repositories and authorized services; project access does not authorize copying it into
+Business or public Mono. Source access also does not authorize unrelated mutations or publication.
+Historical ingestion routines are reference
 only. The separate private sync coordinator AI-reviews outbound files and polls released Business/Skills
 changes back into the private workspace. In Mono, its signed PRs are based on current main and change only the Business/Skills submodule references.
 No source-ingestion worker runs inside Mono.
