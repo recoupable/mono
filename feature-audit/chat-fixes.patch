@@ -1,0 +1,742 @@
+From f68ad2efb3e132b34f7d78d432b63297dacb6fbc Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 21 Jun 2026 21:43:45 +0000
+Subject: [PATCH 1/2] fix: 13 UX/logic fixes from feature audit (Phase 3)
+
+Confirmed logistical/UX defects found during the chat-app feature audit:
+- CopyAction: toast on clipboard failure (was console-only)
+- useAutoCollapse: delay reasoning auto-collapse so it's readable
+- RenameModal: maxLength + live character counter
+- access page: mask access token by default with reveal toggle
+- ApiKey modal/list: clarify one-time key + confirm-before-delete + clearer mask
+- EmailShareInput: toast on invalid/duplicate share email
+- ExistingSharedEmailsList: confirm before removing a shared email
+- useSearchIsrc: validate ISRC format with feedback
+- HideMissingItemsToggle: tooltip defining completeness
+- CreateTaskButton: disable + helper text when no artist selected
+- usePWADownload: clean up document click listener (leak fix)
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01CKp57hBnGKB5vrvxszLm8Q
+---
+ app/access/page.tsx                           | 30 +++++++++--
+ components/Agents/EmailShareInput.tsx         |  4 +-
+ .../Agents/ExistingSharedEmailsList.tsx       | 52 ++++++++++++++-----
+ components/ApiKeyPage/ApiKeyList.tsx          | 49 +++++++++++++----
+ components/ApiKeyPage/ApiKeyModal.tsx         |  3 +-
+ components/Sidebar/Modals/RenameModal.tsx     | 10 +++-
+ components/TasksPage/CreateTaskButton.tsx     | 24 ++++++---
+ components/VercelChat/CopyAction.tsx          |  3 +-
+ .../tools/catalog/HideMissingItemsToggle.tsx  |  6 ++-
+ hooks/useAutoCollapse.ts                      | 10 ++--
+ hooks/usePWADownload.tsx                      |  9 ++--
+ hooks/useSearchIsrc.ts                        | 13 ++++-
+ 12 files changed, 165 insertions(+), 48 deletions(-)
+
+diff --git a/app/access/page.tsx b/app/access/page.tsx
+index afa92876..9ddfb148 100644
+--- a/app/access/page.tsx
++++ b/app/access/page.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import { useEffect } from "react";
++import { useEffect, useState } from "react";
+ import { useQuery } from "@tanstack/react-query";
+ import { usePrivy } from "@privy-io/react-auth";
+ import {
+@@ -11,13 +11,19 @@ import {
+   CardTitle,
+ } from "@/components/ui/card";
+ import { Button } from "@/components/ui/button";
+-import { Copy, Check } from "lucide-react";
++import { Copy, Check, Eye, EyeOff } from "lucide-react";
+ import { toast } from "sonner";
+ import { useCopy } from "@/hooks/useCopy";
+ 
++const maskToken = (token: string) =>
++  token.length <= 18
++    ? "•".repeat(token.length)
++    : `${token.slice(0, 12)}${"•".repeat(12)}${token.slice(-6)}`;
++
+ export default function AccessPage() {
+   const { getAccessToken, ready, authenticated } = usePrivy();
+   const { copied, copy } = useCopy();
++  const [revealed, setRevealed] = useState(false);
+ 
+   const {
+     data: accessToken,
+@@ -92,10 +98,28 @@ export default function AccessPage() {
+             <>
+               <div className="rounded-lg border bg-muted p-4">
+                 <pre className="text-sm font-mono break-all whitespace-pre-wrap">
+-                  {accessToken}
++                  {revealed ? accessToken : maskToken(accessToken)}
+                 </pre>
+               </div>
+               <div className="flex gap-2">
++                <Button
++                  onClick={() => setRevealed((v) => !v)}
++                  variant="outline"
++                  className="flex items-center gap-2"
++                  aria-pressed={revealed}
++                >
++                  {revealed ? (
++                    <>
++                      <EyeOff className="h-4 w-4" />
++                      Hide
++                    </>
++                  ) : (
++                    <>
++                      <Eye className="h-4 w-4" />
++                      Reveal
++                    </>
++                  )}
++                </Button>
+                 <Button
+                   onClick={handleCopy}
+                   variant="outline"
+diff --git a/components/Agents/EmailShareInput.tsx b/components/Agents/EmailShareInput.tsx
+index 90196d4f..1eacf7b0 100644
+--- a/components/Agents/EmailShareInput.tsx
++++ b/components/Agents/EmailShareInput.tsx
+@@ -1,4 +1,5 @@
+ import { useState } from "react";
++import { toast } from "sonner";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ import { isValidEmail } from "@/lib/utils/isValidEmail";
+@@ -28,12 +29,13 @@ const EmailShareInput = ({ emails, existingSharedEmails = [], onEmailsChange, on
+     if (!trimmedEmail) return;
+ 
+     if (!isValidEmail(trimmedEmail)) {
+-      // You could add error handling here
++      toast.error("Please enter a valid email address");
+       return;
+     }
+ 
+     // Check if email already exists in either existing or new emails
+     if (emails.includes(trimmedEmail) || existingSharedEmails.includes(trimmedEmail)) {
++      toast.error("That email has already been added");
+       setInputValue("");
+       return;
+     }
+diff --git a/components/Agents/ExistingSharedEmailsList.tsx b/components/Agents/ExistingSharedEmailsList.tsx
+index 2dd37602..749cda3e 100644
+--- a/components/Agents/ExistingSharedEmailsList.tsx
++++ b/components/Agents/ExistingSharedEmailsList.tsx
+@@ -1,5 +1,6 @@
++import { useState } from "react";
+ import { Badge } from "@/components/ui/badge";
+-import { X, Users } from "lucide-react";
++import { X, Users, Check } from "lucide-react";
+ 
+ interface ExistingSharedEmailsListProps {
+   emails: string[];
+@@ -7,6 +8,8 @@ interface ExistingSharedEmailsListProps {
+ }
+ 
+ const ExistingSharedEmailsList = ({ emails, onRemoveEmail }: ExistingSharedEmailsListProps) => {
++  const [confirmingEmail, setConfirmingEmail] = useState<string | null>(null);
++
+   if (emails.length === 0) return null;
+ 
+   return (
+@@ -24,17 +27,42 @@ const ExistingSharedEmailsList = ({ emails, onRemoveEmail }: ExistingSharedEmail
+           >
+             {email}
+             <span className="text-xs opacity-70 mr-1">(shared)</span>
+-            {onRemoveEmail && (
+-              <button
+-                type="button"
+-                onClick={() => onRemoveEmail(email)}
+-                className="ml-1 hover:bg-red-100 rounded-full p-0.5 opacity-70 hover:opacity-100"
+-                aria-label={`Remove ${email} from shared list`}
+-                title="Remove from shared list"
+-              >
+-                <X className="h-3 w-3" />
+-              </button>
+-            )}
++            {onRemoveEmail &&
++              (confirmingEmail === email ? (
++                <span className="ml-1 flex items-center gap-1">
++                  <button
++                    type="button"
++                    onClick={() => {
++                      onRemoveEmail(email);
++                      setConfirmingEmail(null);
++                    }}
++                    className="rounded-full p-0.5 text-red-700 hover:bg-red-100"
++                    aria-label={`Confirm removing ${email}`}
++                    title="Confirm remove"
++                  >
++                    <Check className="h-3 w-3" />
++                  </button>
++                  <button
++                    type="button"
++                    onClick={() => setConfirmingEmail(null)}
++                    className="rounded-full p-0.5 opacity-70 hover:bg-black/5 hover:opacity-100"
++                    aria-label={`Cancel removing ${email}`}
++                    title="Cancel"
++                  >
++                    <X className="h-3 w-3" />
++                  </button>
++                </span>
++              ) : (
++                <button
++                  type="button"
++                  onClick={() => setConfirmingEmail(email)}
++                  className="ml-1 hover:bg-red-100 rounded-full p-0.5 opacity-70 hover:opacity-100"
++                  aria-label={`Remove ${email} from shared list`}
++                  title="Remove from shared list"
++                >
++                  <X className="h-3 w-3" />
++                </button>
++              ))}
+           </Badge>
+         ))}
+       </div>
+diff --git a/components/ApiKeyPage/ApiKeyList.tsx b/components/ApiKeyPage/ApiKeyList.tsx
+index c13b96a5..fd5e62dd 100644
+--- a/components/ApiKeyPage/ApiKeyList.tsx
++++ b/components/ApiKeyPage/ApiKeyList.tsx
+@@ -1,5 +1,6 @@
+ "use client";
+ 
++import { useState } from "react";
+ import { Button } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+ import { Trash2 } from "lucide-react";
+@@ -8,6 +9,7 @@ import { formatDate } from "@/lib/date/formatDate";
+ 
+ export function ApiKeyList() {
+   const { apiKeys, loadingKeys, deleteApiKey } = useApiKeyProvider();
++  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+ 
+   if (loadingKeys) {
+     return (
+@@ -43,19 +45,46 @@ export function ApiKeyList() {
+           <div key={key.id} className="rounded-lg border bg-card p-4">
+             <div className="flex items-center gap-3">
+               <Input
+-                value={`${key.name}: ***************`}
++                value={`${key.name}: •••• (hidden — shown only at creation)`}
+                 readOnly
++                aria-label={`API key ${key.name} (value hidden)`}
+                 className="flex-1 font-mono text-sm"
+               />
+-              <Button
+-                type="button"
+-                variant="outline"
+-                size="sm"
+-                onClick={() => deleteApiKey(key.id)}
+-                className="border-red-300 text-red-600 hover:bg-red-50"
+-              >
+-                <Trash2 className="h-4 w-4" />
+-              </Button>
++              {pendingDeleteId === key.id ? (
++                <div className="flex items-center gap-2">
++                  <Button
++                    type="button"
++                    variant="outline"
++                    size="sm"
++                    onClick={() => {
++                      deleteApiKey(key.id);
++                      setPendingDeleteId(null);
++                    }}
++                    className="border-red-300 bg-red-600 text-white hover:bg-red-700"
++                  >
++                    Confirm delete
++                  </Button>
++                  <Button
++                    type="button"
++                    variant="ghost"
++                    size="sm"
++                    onClick={() => setPendingDeleteId(null)}
++                  >
++                    Cancel
++                  </Button>
++                </div>
++              ) : (
++                <Button
++                  type="button"
++                  variant="outline"
++                  size="sm"
++                  onClick={() => setPendingDeleteId(key.id)}
++                  aria-label={`Delete API key ${key.name}`}
++                  className="border-red-300 text-red-600 hover:bg-red-50"
++                >
++                  <Trash2 className="h-4 w-4" />
++                </Button>
++              )}
+             </div>
+             <p className="mt-2 text-xs text-muted-foreground">
+               Created {formatDate(key.created_at)}
+diff --git a/components/ApiKeyPage/ApiKeyModal.tsx b/components/ApiKeyPage/ApiKeyModal.tsx
+index c6e47c74..37788a84 100644
+--- a/components/ApiKeyPage/ApiKeyModal.tsx
++++ b/components/ApiKeyPage/ApiKeyModal.tsx
+@@ -32,8 +32,7 @@ export function ApiKeyModal({ isOpen, onClose, apiKey }: ApiKeyModalProps) {
+         <DialogHeader>
+           <DialogTitle>API Key Created Successfully</DialogTitle>
+           <DialogDescription>
+-            {`Your API key has been generated. Please copy it now as you won't be able to see it
+-            again.`}
++            {`Your API key has been generated. This is the only time the full key will be shown — copy it now and store it somewhere safe. It can't be recovered later.`}
+           </DialogDescription>
+         </DialogHeader>
+ 
+diff --git a/components/Sidebar/Modals/RenameModal.tsx b/components/Sidebar/Modals/RenameModal.tsx
+index 841f871e..01cdf705 100644
+--- a/components/Sidebar/Modals/RenameModal.tsx
++++ b/components/Sidebar/Modals/RenameModal.tsx
+@@ -44,11 +44,17 @@ const RenameModal = ({
+               onChange={handleChange}
+               onBlur={handleBlur}
+               placeholder="Enter chat name"
++              maxLength={50}
+             />
+-            <div className="h-5 mt-2">
+-              {error && (
++            <div className="h-5 mt-2 flex items-center justify-between gap-2">
++              {error ? (
+                 <p className="text-red-500 text-sm animate-fadeIn">{error}</p>
++              ) : (
++                <span />
+               )}
++              <span className="text-xs text-muted-foreground shrink-0">
++                {name.length}/50
++              </span>
+             </div>
+           </div>
+           <div className="flex justify-end mt-6">
+diff --git a/components/TasksPage/CreateTaskButton.tsx b/components/TasksPage/CreateTaskButton.tsx
+index 1c3c6cc5..4d4e14f1 100644
+--- a/components/TasksPage/CreateTaskButton.tsx
++++ b/components/TasksPage/CreateTaskButton.tsx
+@@ -2,17 +2,27 @@
+ 
+ import { Button } from "@/components/ui/button";
+ import { useCreateTask } from "@/hooks/useCreateTask";
++import { useArtistProvider } from "@/providers/ArtistProvider";
+ 
+ export function CreateTaskButton() {
+   const { handleCreateTask, isCreating } = useCreateTask();
++  const { selectedArtist } = useArtistProvider();
++  const hasArtist = Boolean(selectedArtist?.account_id);
+ 
+   return (
+-    <Button
+-      onClick={() => handleCreateTask()}
+-      disabled={isCreating}
+-      className="w-full sm:w-auto"
+-    >
+-      {isCreating ? "Creating..." : "Create Task"}
+-    </Button>
++    <div className="flex flex-col items-start gap-1">
++      <Button
++        onClick={() => handleCreateTask()}
++        disabled={isCreating || !hasArtist}
++        className="w-full sm:w-auto"
++      >
++        {isCreating ? "Creating..." : "Create Task"}
++      </Button>
++      {!hasArtist && (
++        <p className="text-xs text-muted-foreground">
++          Select an artist first to create a task.
++        </p>
++      )}
++    </div>
+   );
+ }
+diff --git a/components/VercelChat/CopyAction.tsx b/components/VercelChat/CopyAction.tsx
+index e67a26d0..a651745a 100644
+--- a/components/VercelChat/CopyAction.tsx
++++ b/components/VercelChat/CopyAction.tsx
+@@ -2,6 +2,7 @@ import React, { useState } from "react";
+ import { Action } from "@/components/actions";
+ import { CopyIcon, Check } from "lucide-react";
+ import { motion, AnimatePresence } from "framer-motion";
++import { toast } from "sonner";
+ 
+ interface CopyActionProps {
+   text: string;
+@@ -20,7 +21,7 @@ const CopyAction: React.FC<CopyActionProps> = ({ text }) => {
+         setIsCopied(false);
+       }, 1500);
+     } catch {
+-      console.error("Failed to copy to clipboard");
++      toast.error("Couldn't copy to clipboard");
+     }
+   };
+ 
+diff --git a/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx b/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx
+index 3faad27b..31b2b701 100644
+--- a/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx
++++ b/components/VercelChat/tools/catalog/HideMissingItemsToggle.tsx
+@@ -18,7 +18,11 @@ export default function HideMissingItemsToggle({
+         {checked ? "Hiding items with missing info" : "Showing all items"}
+       </div>
+       <div className="flex items-center gap-2">
+-        <Label htmlFor="hide-incomplete" className="text-xs">
++        <Label
++          htmlFor="hide-incomplete"
++          className="text-xs"
++          title="An item is complete when it has a title, artist, album, ISRC, and notes."
++        >
+           Hide items with missing info
+         </Label>
+         <Switch
+diff --git a/hooks/useAutoCollapse.ts b/hooks/useAutoCollapse.ts
+index c9c2151f..4a0042db 100644
+--- a/hooks/useAutoCollapse.ts
++++ b/hooks/useAutoCollapse.ts
+@@ -29,11 +29,15 @@ export function useAutoCollapse({
+     }
+   }, [isStreaming, isOpen]);
+ 
+-  // Auto-close immediately when streaming ends (once only)
++  // Auto-close after a short delay when streaming ends (once only), so the
++  // reader has a moment to glance at the final reasoning before it collapses.
+   useEffect(() => {
+     if (defaultOpen && !isStreaming && isOpen && !hasAutoClosedRef.current && hasContent) {
+-      setIsOpen(false);
+-      hasAutoClosedRef.current = true;
++      const timer = setTimeout(() => {
++        setIsOpen(false);
++        hasAutoClosedRef.current = true;
++      }, 1200);
++      return () => clearTimeout(timer);
+     }
+   }, [isStreaming, isOpen, defaultOpen, hasContent]);
+ 
+diff --git a/hooks/usePWADownload.tsx b/hooks/usePWADownload.tsx
+index 70ad3aff..aa334028 100644
+--- a/hooks/usePWADownload.tsx
++++ b/hooks/usePWADownload.tsx
+@@ -38,12 +38,13 @@ const usePWADownload = () => {
+   };
+ 
+   useEffect(() => {
+-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+-    document.addEventListener("click", (e: any) => {
+-      if (e.target.id === "tap-close-download") {
++    const handleDocumentClick = (e: MouseEvent) => {
++      if ((e.target as HTMLElement | null)?.id === "tap-close-download") {
+         setShowModal(false);
+       }
+-    });
++    };
++    document.addEventListener("click", handleDocumentClick);
++    return () => document.removeEventListener("click", handleDocumentClick);
+   }, []);
+ 
+   return {
+diff --git a/hooks/useSearchIsrc.ts b/hooks/useSearchIsrc.ts
+index 0118d95c..54147811 100644
+--- a/hooks/useSearchIsrc.ts
++++ b/hooks/useSearchIsrc.ts
+@@ -1,6 +1,11 @@
+ import { useState } from "react";
++import { toast } from "sonner";
+ import useSongsByIsrc from "./useSongsByIsrc";
+ 
++// ISRC = 2-letter country + 3 alphanumeric registrant + 2-digit year + 5-digit
++// designation (12 chars). Accept hyphens/spaces/case from user input.
++const ISRC_PATTERN = /^[A-Za-z]{2}[A-Za-z0-9]{3}\d{7}$/;
++
+ const useSearchIsrc = () => {
+   const [searchIsrc, setSearchIsrc] = useState("");
+   const [activeIsrc, setActiveIsrc] = useState("");
+@@ -12,9 +17,13 @@ const useSearchIsrc = () => {
+ 
+   const handleSearch = (value?: string) => {
+     const searchValue = value ?? searchIsrc;
+-    if (searchValue.trim()) {
+-      setActiveIsrc(searchValue.trim());
++    const normalized = searchValue.replace(/[\s-]/g, "").trim();
++    if (!normalized) return;
++    if (!ISRC_PATTERN.test(normalized)) {
++      toast.error("Enter a valid ISRC, e.g. USRC17607839");
++      return;
+     }
++    setActiveIsrc(normalized.toUpperCase());
+   };
+ 
+   const handleClearSearch = () => {
+-- 
+2.43.0
+
+
+From 8a4ba789ca015741818d2f66c39d286e7d87f3c1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 21 Jun 2026 23:13:37 +0000
+Subject: [PATCH 2/2] fix: resolve remaining audit defects (Phase 3, round 2)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes 9 more confirmed UX/logic defects from the feature audit:
+- CHAT-06: dim + 'Uploading…' label for pending attachment previews
+- CHAT-07: inline 'Saving…' indicator in the message editor
+- NAV-08: bulk-delete error now names which chats failed and why
+- AGT-12: clearer network/HTTP error messages in fetchAgentTemplates
+- AGT-02: comment explaining why action tags are excluded from filters
+- CAT-05: one-time toast when artist filter falls back to full catalog
+- FAN-04: always-visible username/follower caption on touch devices
+- FARC-01: BaseBuilder address configurable via env (default unchanged)
+- ART-04: lenient http(s) URL validation for artist streaming/social fields
+
+Investigated and confirmed as false positives (no change): NAV-06 (list not
+virtualized), CONN-02 (page already filters to ALLOWED_CONNECTORS), NAV-11
+(query key already changes on org switch), AGT-05 (removals applied before submit).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01CKp57hBnGKB5vrvxszLm8Q
+---
+ app/.well-known/farcaster.json/route.ts       |  5 +++-
+ components/Agents/useAgentData.ts             |  5 +++-
+ components/Fans/FanAvatar.tsx                 |  7 +++++
+ .../Modals/DeleteConfirmationModal.tsx        | 13 ++++-----
+ components/VercelChat/message-editor.tsx      | 10 ++++++-
+ components/VercelChat/preview-attachment.tsx  | 12 +++++++--
+ hooks/useArtistCatalogSongs.ts                |  5 ++++
+ lib/agent-templates/fetchAgentTemplates.ts    | 17 ++++++++++--
+ lib/utils/setting.tsx                         | 27 +++++++++++++------
+ 9 files changed, 80 insertions(+), 21 deletions(-)
+
+diff --git a/app/.well-known/farcaster.json/route.ts b/app/.well-known/farcaster.json/route.ts
+index 2e8bb18a..1e39feb4 100644
+--- a/app/.well-known/farcaster.json/route.ts
++++ b/app/.well-known/farcaster.json/route.ts
+@@ -19,7 +19,10 @@ export async function GET() {
+       webhookUrl: `${URL}/api/webhook`,
+     },
+     baseBuilder: {
+-      allowedAddresses: ["0x72A31A5A9568CD9EC1814C9B68dF0059317Bff87"],
++      allowedAddresses: [
++        process.env.FARCASTER_BASE_BUILDER_ADDRESS ??
++          "0x72A31A5A9568CD9EC1814C9B68dF0059317Bff87",
++      ],
+     },
+   });
+ }
+diff --git a/components/Agents/useAgentData.ts b/components/Agents/useAgentData.ts
+index b148ab2a..9c04faf5 100644
+--- a/components/Agents/useAgentData.ts
++++ b/components/Agents/useAgentData.ts
+@@ -25,7 +25,10 @@ export function useAgentData() {
+   useEffect(() => {
+     if (!data) return;
+     setAgents(data);
+-    // Action tags that should NOT appear in top filters (now multi-word)
++    // Action tags describe what an agent *does* (its workflow/output type) rather
++    // than a browsable topic, so they're excluded from the top-level tag filters to
++    // keep that list focused on content categories. They're still surfaced on the
++    // agent cards themselves (see useAgentCard.ts) where the action context is useful.
+     const actionTags = [
+       "Deep Research",
+       "Send Report",
+diff --git a/components/Fans/FanAvatar.tsx b/components/Fans/FanAvatar.tsx
+index 6e2231cf..f175e5ac 100644
+--- a/components/Fans/FanAvatar.tsx
++++ b/components/Fans/FanAvatar.tsx
+@@ -55,6 +55,13 @@ const FanAvatar = ({ fan }: FanAvatarProps) => {
+             {formattedFollowerCount}
+           </div>
+         </div>
++
++        {/* Touch devices can't hover, so always show a compact caption on small
++            screens; the hover overlay above covers sm+ (pointer) viewports. */}
++        <div className="sm:hidden mt-1 text-[10px] leading-tight text-center text-muted-foreground">
++          <div className="truncate">{fan.username || "Anonymous"}</div>
++          <div>{formattedFollowerCount}</div>
++        </div>
+       </a>
+     </div>
+   );
+diff --git a/components/Sidebar/Modals/DeleteConfirmationModal.tsx b/components/Sidebar/Modals/DeleteConfirmationModal.tsx
+index 2c0c378a..2e7bd573 100644
+--- a/components/Sidebar/Modals/DeleteConfirmationModal.tsx
++++ b/components/Sidebar/Modals/DeleteConfirmationModal.tsx
+@@ -64,19 +64,20 @@ const DeleteConfirmationModal = ({
+         const chat = chatsToDelete[i];
+         setDeletingProgress({ current: i + 1, total: chatCount });
+ 
++        const chatLabel = chat.topic || "Chat";
++
+         try {
+           await deleteChat({ sessionId: chat.sessionId });
+         } catch (chatError) {
+-          console.error(
+-            `Error deleting chat ${chat.topic || "Chat"}:`,
+-            chatError,
+-          );
+-          failedChats.push(chat.topic || "Chat");
++          console.error(`Error deleting chat ${chatLabel}:`, chatError);
++          const reason =
++            chatError instanceof Error ? chatError.message : null;
++          failedChats.push(reason ? `${chatLabel} (${reason})` : chatLabel);
+         }
+       }
+ 
+       if (failedChats.length > 0) {
+-        setError(`Failed to delete: ${failedChats.join(", ")}`);
++        setError(`Failed to delete: ${failedChats.join("; ")}`);
+         setDeletingProgress(null);
+         await onDelete();
+         return;
+diff --git a/components/VercelChat/message-editor.tsx b/components/VercelChat/message-editor.tsx
+index 34867ecf..4309fb70 100644
+--- a/components/VercelChat/message-editor.tsx
++++ b/components/VercelChat/message-editor.tsx
+@@ -65,7 +65,15 @@ export function MessageEditor({ message, setMode }: EditingMessageProps) {
+         onChange={handleInput}
+       />
+ 
+-      <div className="flex flex-row gap-2 justify-end">
++      <div className="flex flex-row gap-2 justify-end items-center">
++        {isDeletingTrailingMessages && (
++          <span
++            data-testid="message-editor-saving-indicator"
++            className="text-xs text-muted-foreground mr-auto"
++          >
++            Saving…
++          </span>
++        )}
+         <Button
+           variant="outline"
+           size="sm"
+diff --git a/components/VercelChat/preview-attachment.tsx b/components/VercelChat/preview-attachment.tsx
+index c19f75fe..3979854c 100644
+--- a/components/VercelChat/preview-attachment.tsx
++++ b/components/VercelChat/preview-attachment.tsx
+@@ -3,6 +3,7 @@ import { Loader2, FileIcon, Music } from "lucide-react";
+ import { PDFIcon } from "./icons";
+ import { PhotoView } from "react-photo-view";
+ import "react-photo-view/dist/react-photo-view.css";
++import { cn } from "@/lib/utils";
+ 
+ export const PreviewAttachment = ({
+   attachment,
+@@ -15,7 +16,12 @@ export const PreviewAttachment = ({
+ 
+   return (
+     <div data-testid="input-attachment-preview" className="flex flex-col gap-2">
+-      <div className="w-16 h-16 bg-transparent rounded-xl relative flex flex-col items-center justify-center overflow-hidden">
++      <div
++        className={cn(
++          "w-16 h-16 bg-transparent rounded-xl relative flex flex-col items-center justify-center overflow-hidden transition-opacity",
++          isUploading && "opacity-50"
++        )}
++      >
+         {contentType ? (
+           <>
+             {contentType.startsWith("image") && (
+@@ -54,7 +60,9 @@ export const PreviewAttachment = ({
+           </div>
+         )}
+       </div>
+-      <div className="text-xs text-zinc-500 max-w-16 truncate">{name}</div>
++      <div className="text-xs text-zinc-500 max-w-16 truncate">
++        {isUploading ? "Uploading…" : name}
++      </div>
+     </div>
+   );
+ };
+diff --git a/hooks/useArtistCatalogSongs.ts b/hooks/useArtistCatalogSongs.ts
+index 8fbf06e5..b376f522 100644
+--- a/hooks/useArtistCatalogSongs.ts
++++ b/hooks/useArtistCatalogSongs.ts
+@@ -1,4 +1,5 @@
+ import { useState, useEffect } from "react";
++import { toast } from "sonner";
+ import { useArtistProvider } from "@/providers/ArtistProvider";
+ import useCatalogSongs from "./useCatalogSongs";
+ 
+@@ -36,7 +37,11 @@ const useArtistCatalogSongs = ({
+       shouldUseArtistFilter &&
+       queryResult.data?.pages?.[0]?.pagination.total_count === 0
+     ) {
++      // Falling back to the unfiltered catalog; let the user know why the
++      // results no longer match the selected artist (fires once per transition
++      // since this effect stops running after shouldUseArtistFilter flips off).
+       setShouldUseArtistFilter(false);
++      toast("No songs matched this artist — showing the full catalog.");
+     }
+   }, [queryResult.data, activeArtistName, shouldUseArtistFilter]);
+ 
+diff --git a/lib/agent-templates/fetchAgentTemplates.ts b/lib/agent-templates/fetchAgentTemplates.ts
+index b43e9f0b..bb07295d 100644
+--- a/lib/agent-templates/fetchAgentTemplates.ts
++++ b/lib/agent-templates/fetchAgentTemplates.ts
+@@ -4,8 +4,21 @@ import type { AccountWithDetails } from "@/lib/supabase/accounts/getAccountWithD
+ const fetchAgentTemplates = async (
+   userData: AccountWithDetails
+ ): Promise<AgentTemplateRow[]> => {
+-  const res = await fetch(`/api/agent-templates?userId=${userData?.id}`);
+-  if (!res.ok) throw new Error("Failed to fetch agent templates");
++  let res: Response;
++  try {
++    res = await fetch(`/api/agent-templates?userId=${userData?.id}`);
++  } catch (error) {
++    throw new Error(
++      `Failed to fetch agent templates: network error${
++        error instanceof Error ? ` (${error.message})` : ""
++      }`
++    );
++  }
++  if (!res.ok) {
++    throw new Error(
++      `Failed to fetch agent templates: ${res.status} ${res.statusText}`
++    );
++  }
+   return (await res.json()) as AgentTemplateRow[];
+ };
+ 
+diff --git a/lib/utils/setting.tsx b/lib/utils/setting.tsx
+index 50d177b9..a4523dcf 100644
+--- a/lib/utils/setting.tsx
++++ b/lib/utils/setting.tsx
+@@ -1,19 +1,30 @@
+ import JoiBase from "joi";
+ 
++// Lenient URL rule: optional and allows empty/blank, but if a non-empty
++// value is provided it must be a valid http(s) URI.
++const optionalUrl = JoiBase.string()
++  .uri({ scheme: [/https?/] })
++  .allow("", null)
++  .optional()
++  .messages({
++    "string.uri": "Please enter a valid http(s) URL.",
++    "string.uriCustomScheme": "Please enter a valid http(s) URL.",
++  });
++
+ export const validation = JoiBase.object({
+   name: JoiBase.string().messages({
+     "string.empty": `Please fill out this field.`,
+   }),
+-  spotifyUrl: JoiBase.allow(),
++  spotifyUrl: optionalUrl,
+   instruction: JoiBase.allow(),
+   label: JoiBase.allow(),
+-  appleUrl: JoiBase.allow(),
+-  tiktok: JoiBase.allow(),
+-  instagram: JoiBase.allow(),
+-  youtube: JoiBase.allow(),
+-  twitter: JoiBase.allow(),
+-  facebook: JoiBase.allow(),
+-  threads: JoiBase.allow(),
++  appleUrl: optionalUrl,
++  tiktok: optionalUrl,
++  instagram: optionalUrl,
++  youtube: optionalUrl,
++  twitter: optionalUrl,
++  facebook: optionalUrl,
++  threads: optionalUrl,
+ });
+ 
+ export const accountValidation = JoiBase.object({
+-- 
+2.43.0
+
