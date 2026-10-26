@@ -11,7 +11,7 @@ This is a git submodule-based workspace for the Recoupable platform, business op
 | `chat` | External, web app, AI chat interface for artists and labels | Next.js 16, React 19, Vercel AI SDK, Stagehand |
 | `api` | External, backend API with payment middleware | Next.js 16, x402-next, Supabase |
 | `marketing` | External, marketing website and landing pages | Next.js, React, Tailwind CSS |
-| `docs` | External, API documentation | Mintlify |
+| `docs` | External, API documentation at docs.recoupable.dev (Mintlify-era repo archived as `recoupable/docs-legacy`) | Next.js 16, MDX, OpenAPI |
 | `cli` | External, CLI for the Recoupable platform | Commander.js, tsup, Node 22 |
 | `skills` | External, Recoupable's public skills repo, platform usage + domain knowledge for AI agents | Markdown |
 | `open-agents` | External, reference app for background coding agents on Vercel (web + agent workflow + sandbox) | Next.js, Turbo, Vercel Workflow, Vercel Sandbox |
@@ -231,7 +231,8 @@ pnpm format         # Run prettier
 
 **docs:**
 ```bash
-npx mintlify@latest dev          # Preview docs locally
+pnpm install && pnpm dev         # Preview docs locally
+pnpm docs:build                  # Regenerate manifest/navigation after editing content/docs/source
 ```
 
 ## Cross-Project Architecture
