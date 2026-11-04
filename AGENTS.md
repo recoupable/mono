@@ -19,7 +19,6 @@ This is a git submodule-based workspace for the Recoupable platform, business op
 | `tasks` | Internal, background job workers — **deprecating in favor of Vercel Workflows inside `api`; don't add new jobs here** | Trigger.dev v4 |
 | `database` | Internal, database migrations | Supabase CLI |
 | `gtm` | Internal, go-to-market tooling and CRM sync | TypeScript, tsx |
-| `blog` | Blog repository | Read local instructions |
 | `plugins` | Plugin repository | Read local instructions |
 | `business` | Internal, private company strategy, product opportunities, customers and operations | Markdown |
 | `projects` | Internal, private technical project workspaces and client repository links | Git submodules, Markdown |

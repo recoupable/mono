@@ -43,7 +43,6 @@ Existing local Strategy checkouts may remain as preserved history; do not create
 | `tasks` | Existing Trigger.dev jobs; new jobs belong in API workflows |
 | `database` | Supabase migrations |
 | `gtm` | Internal go-to-market tooling |
-| `blog` | Blog repository |
 | `plugins` | Plugin repository; read its local instructions |
 | `business` | Private company strategy, product opportunities, customers and operations |
 | `projects` | Private technical project maps and client repository links |
