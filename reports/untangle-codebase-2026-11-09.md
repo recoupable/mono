@@ -43,7 +43,8 @@ adapter were removed with that adapter.
 - Marketing's valuation types similarly move out of components; named tool
   definitions remove array-position coupling from OpenAPI generation.
 - Docs' reference resolution, example generation and curl construction no longer
-  import the filesystem reader. Their function bodies remain unchanged.
+  import the filesystem reader. Reference and example helper bodies remain unchanged; the curl security
+  renderer also received the evidenced review correction described below.
 
 ### Repeated policies change in one place
 
@@ -58,7 +59,7 @@ adapter were removed with that adapter.
   execution. Provider parsing/order lives below SVG presentation, while grouping
   and rendering stay with consumers. Existing USD precision behavior is shared.
 - Skills' two routing gates duplicated slug parsing and inventory. Commit
-  `faa5469` had to change both when user-named skills were added. The extracted
+  [`faa5469`](https://github.com/recoupable/skills/commit/faa5469c9004131d0407e8df969bb6930330adbd) had to change both when user-named skills were added. The extracted
   module preserves table-row-only parsing, dotted names and explicit path inputs.
 
 ### Remove verified surplus, not heuristic guesses
@@ -78,10 +79,10 @@ adapter were removed with that adapter.
 | API | 2,334 tests passed before retiring the unused adapter; 239 active Sites/Higgsfield tests passed afterward. Lint and response-contract typecheck pass. Full project typecheck has exactly the same 214 diagnostics as pristine main. |
 | Chat | 56 targeted existing tests, typecheck and instruction-path check pass; 18/18 changed runtime modules emit identical JS. |
 | Marketing | 40 tests, typecheck and production build pass; 5/5 valuation runtime modules unchanged; new registry-order regression fails old code and passes new code. |
-| Admin | 25 actual-adapter tests pass on old and new implementations; typecheck and production build pass. Test harness uses Node 24. |
+| Admin | 25 original parity tests pass on old/new implementations; 27-test review suite passes with robust malformed-error handling. Typecheck/build and focused follow-up lint pass. Test harness uses Node 24. |
 | CLI | 94 tests / 14 files and build pass; independent reviewer repeated 17 transport tests. |
-| Docs | 154 tests / 46 files, typecheck, lint and build pass; 538 pages generated; independent reviewer repeated 32 migration/playground tests. |
-| Skills | Five required gates pass: 129 skills, 144 copies in 51 vendored groups, 8 manifests. Eight focused routing tests, 116 catalog tests, 3 ownership tests, 15 package tests and 1 Claude package test pass. Distribution packages build. |
+| Docs | 168 tests / 49 files, typecheck, lint and build pass; 538 pages generated. Original extraction independently reviewed; five curl regressions failed before the review correction. |
+| Skills | Five required gates pass: 129 skills, 144 copies in 51 vendored groups, 8 manifests. Nine focused routing tests, 117 catalog tests, 3 ownership tests, 15 package tests and 1 Claude package test pass. Distribution packages build. |
 | Open-agents | Lint/format and all 4 package typechecks pass; 558 tests pass. Eight failures across five files reproduce on pristine main; missing `db:check` also predates this work. Draft retained. |
 
 Counts are per command and may overlap; do not sum them into a fabricated suite
@@ -98,6 +99,32 @@ Those tests were not weakened or deleted. This pass does not claim full CI green
 Independent reviews found no actionable regressions in the changed areas.
 Verification used local tests, synthetic fetches/build configuration and source
 comparison; authenticated production workflows were not exercised.
+
+## Automated review follow-up
+
+- Docs now represents all schemes in the selected first security requirement
+  (AND), retaining first-alternative selection (OR). Actual guest claim emits its
+  cookie and Bearer header; guest read emits a cookie. Query/header/cookie placement
+  and quoting are tested. This fixes previously incorrect generated examples;
+  endpoint authorization itself is unchanged. Focused reference/example behavior
+  tests cover escapes, sibling overrides, unions, nullable forms and depth limits.
+- Admin now narrows error JSON from unknown before selecting an error field.
+  Null/primitive/array error payloads return the HTTP fallback rather than an
+  incidental property-access crash. Valid error priority and conversion of zero,
+  false, empty strings and object values remain covered.
+- Skills preserves both direct-script and package-module invocation. Negative
+  fixtures assert the intended diagnostic and reject tracebacks, not merely an
+  exit status that a crash could also produce. The cited history commit was
+  confirmed through GitHub; the bot's absent-commit claim was not reproduced.
+- Marketing's reordered-tool test now asserts every existing search/read parameter,
+  including optional pagination fields.
+- App's claimed missing Markdown bullet was not reproduced: the committed line
+  already contains the correct sibling-list marker.
+- API's 180-line declarative schema and 407-line dispatcher remain cohesive owners.
+  Splitting only for an automated 100-line heuristic would add indirection without
+  an evidenced independent-change boundary. Subdomain dispatch is already delegated;
+  schema and execution bodies are unchanged. The Admin data-driven regression
+  matrix is similarly retained as one coherent contract suite.
 
 ## Coverage and retained boundaries
 
@@ -146,3 +173,11 @@ This report PR deliberately does not point Mono at unmerged feature commits.
 Full local pre-edit decisions, import inventories, baseline comparisons and test
 logs are preserved under the ignored `.worktrees/untangle-2026-11-09/` task evidence
 directory. Each changed repository remains in its own clean linked worktree.
+
+
+## Review delivery
+
+The requested review-channel read was denied by the active Slack channel policy.
+No alternative credential or transport was used to bypass that restriction. The
+Mono PR is the review index, delivered in the originating conversation. Production
+merge/deploy approval remains outstanding.
